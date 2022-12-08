@@ -2,27 +2,61 @@
 
 project (Ray_tracing_renderer)
 
-set(CMAKE_PREFIX_PATH "D:/QT/6.2.4/msvc2019_64")
+set(CMAKE_PREFIX_PATH "D:/QT/6.2.4/msvc2019_64;")
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC ON) 
+ 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-modules")
 
 find_package(Qt6 COMPONENTS Core)
+find_package(Qt6 COMPONENTS Gui)
 find_package(Qt6 COMPONENTS Widgets)
+find_package(Qt6 COMPONENTS OpenGL)
+find_package(Qt6 COMPONENTS OpenGLWidgets)
+find_package(assimp MODULE REQUIRED)
 
-file(GLOB_RECURSE src_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
+
+file(GLOB_RECURSE src_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE inc_files ${CMAKE_CURRENT_SOURCE_DIR}/src/include/*.h)
-file(GLOB_RECURSE ui_files ${CMAKE_CURRENT_SOURCE_DIR}/src/ui/*.ui)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include)
+# file(GLOB_RECURSE ui_files ${CMAKE_CURRENT_SOURCE_DIR}/ui/*.ui)
 
-add_executable(${PROJECT_NAME} ${inc_files} ${src_files} ${ui_FILES})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include ${ASSIMP_INCLUDE_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Core)
+qt_add_resources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/shader/shader.qrc
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/theme/dark/darkstyle.qrc
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/theme/light/lightstyle.qrc
+)
 
+add_executable(${PROJECT_NAME} ${inc_files} ${src_files} ${SOURCES})
 
+message(STATUS ${ASSIMP_LIBRARY_RELEASE})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core
+    Qt::Gui
+    Qt::OpenGL
+    Qt::OpenGLWidgets
+    Qt::Widgets
+    optimized 	${ASSIMP_LIBRARY_RELEASE}
+	debug		${ASSIMP_LIBRARY_DEBUG}
+)
+
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+      # COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+      COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll 	${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll
+      #COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll  ${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mt.dll
+      COMMAND_EXPAND_LISTS
+     )
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+      # COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+      #COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll 	${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll
+      COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll  ${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mt.dll
+      COMMAND_EXPAND_LISTS
+     )
+endif()
