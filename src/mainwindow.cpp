@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "Mainwindow.h"
 #include <QFile>
 
 MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindow)
@@ -20,7 +20,7 @@ void MainWindow::setStyle(int style)
         f = new QFile(":/qdarkstyle/light/lightstyle.qss");
 
     if (!f->exists()) {
-        printf("Unable to set stylesheet, file not found\n");
+        qDebug() << "Unable to set stylesheet, file not found\n" ;
     }
     else {
         f->open(QFile::ReadOnly | QFile::Text);

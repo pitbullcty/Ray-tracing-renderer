@@ -1,4 +1,4 @@
-#include "ui_mainwindow.h"
+#include "ui_Mainwindow.h"
 
 
 class MainWindow : public QMainWindow
