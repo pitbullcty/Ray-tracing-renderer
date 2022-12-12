@@ -6,6 +6,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
+#include "Mesh.h"
 
 
 class OpenGLWidget: public QOpenGLWidget, public QOpenGLExtraFunctions

@@ -8,7 +8,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget* parent = 0);
     ~MainWindow();
-    void setStyle(int style=1);
+    void setStyle(int style=0);
 
 private:
     Ui::MainWindow* ui;

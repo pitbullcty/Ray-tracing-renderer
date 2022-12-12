@@ -1,5 +1,5 @@
 /********************************************************************************
-** Form generated from reading UI file 'Mainwindow.ui'
+** Form generated from reading UI file 'mainwindow.ui'
 **
 ** Created by: Qt User Interface Compiler version 6.2.4
 **
@@ -21,6 +21,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QToolBar>
+#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "OpenGLWidget.h"
 
@@ -31,14 +32,17 @@ class Ui_MainWindow
 public:
     QWidget *widget;
     QGridLayout *gridLayout;
-    QHBoxLayout *horizontalLayout;
     QTabWidget *tabWidget;
     QWidget *tab;
     QWidget *tab_2;
+    QVBoxLayout *verticalLayout;
     OpenGLWidget *openGLWidget;
+    QListWidget *listWidget_2;
     QListWidget *listWidget;
+    QHBoxLayout *horizontalLayout_2;
     QMenuBar *menubar;
     QMenu *menu;
+    QMenu *menu_2;
     QStatusBar *statusbar;
     QToolBar *toolBar;
 
@@ -51,8 +55,6 @@ public:
         widget->setObjectName(QString::fromUtf8("widget"));
         gridLayout = new QGridLayout(widget);
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         tabWidget = new QTabWidget(widget);
         tabWidget->setObjectName(QString::fromUtf8("tabWidget"));
         QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
@@ -68,26 +70,44 @@ public:
         tab_2->setObjectName(QString::fromUtf8("tab_2"));
         tabWidget->addTab(tab_2, QString());
 
-        horizontalLayout->addWidget(tabWidget);
+        gridLayout->addWidget(tabWidget, 0, 0, 1, 1);
 
+        verticalLayout = new QVBoxLayout();
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         openGLWidget = new OpenGLWidget(widget);
         openGLWidget->setObjectName(QString::fromUtf8("openGLWidget"));
 
-        horizontalLayout->addWidget(openGLWidget);
+        verticalLayout->addWidget(openGLWidget);
+
+        listWidget_2 = new QListWidget(widget);
+        listWidget_2->setObjectName(QString::fromUtf8("listWidget_2"));
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Maximum);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(listWidget_2->sizePolicy().hasHeightForWidth());
+        listWidget_2->setSizePolicy(sizePolicy1);
+        listWidget_2->setMaximumSize(QSize(16777215, 150));
+
+        verticalLayout->addWidget(listWidget_2);
+
+
+        gridLayout->addLayout(verticalLayout, 0, 1, 1, 1);
 
         listWidget = new QListWidget(widget);
         listWidget->setObjectName(QString::fromUtf8("listWidget"));
-        QSizePolicy sizePolicy1(QSizePolicy::Maximum, QSizePolicy::Preferred);
-        sizePolicy1.setHorizontalStretch(0);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(listWidget->sizePolicy().hasHeightForWidth());
-        listWidget->setSizePolicy(sizePolicy1);
+        QSizePolicy sizePolicy2(QSizePolicy::Maximum, QSizePolicy::Preferred);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(listWidget->sizePolicy().hasHeightForWidth());
+        listWidget->setSizePolicy(sizePolicy2);
         listWidget->setMaximumSize(QSize(150, 16777215));
 
-        horizontalLayout->addWidget(listWidget);
+        gridLayout->addWidget(listWidget, 0, 2, 1, 1);
 
+        horizontalLayout_2 = new QHBoxLayout();
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
 
-        gridLayout->addLayout(horizontalLayout, 0, 0, 1, 1);
+        gridLayout->addLayout(horizontalLayout_2, 1, 0, 1, 1);
 
         MainWindow->setCentralWidget(widget);
         menubar = new QMenuBar(MainWindow);
@@ -95,6 +115,8 @@ public:
         menubar->setGeometry(QRect(0, 0, 887, 22));
         menu = new QMenu(menubar);
         menu->setObjectName(QString::fromUtf8("menu"));
+        menu_2 = new QMenu(menubar);
+        menu_2->setObjectName(QString::fromUtf8("menu_2"));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName(QString::fromUtf8("statusbar"));
@@ -104,6 +126,7 @@ public:
         MainWindow->addToolBar(Qt::TopToolBarArea, toolBar);
 
         menubar->addAction(menu->menuAction());
+        menubar->addAction(menu_2->menuAction());
 
         retranslateUi(MainWindow);
 
@@ -119,6 +142,7 @@ public:
         tabWidget->setTabText(tabWidget->indexOf(tab), QCoreApplication::translate("MainWindow", "Tab 1", nullptr));
         tabWidget->setTabText(tabWidget->indexOf(tab_2), QCoreApplication::translate("MainWindow", "Tab 2", nullptr));
         menu->setTitle(QCoreApplication::translate("MainWindow", "\346\226\207\344\273\266", nullptr));
+        menu_2->setTitle(QCoreApplication::translate("MainWindow", "\345\270\256\345\212\251", nullptr));
         toolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar", nullptr));
     } // retranslateUi
 

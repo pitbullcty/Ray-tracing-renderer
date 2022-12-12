@@ -17,7 +17,8 @@ OpenGLWidget::~OpenGLWidget()
 void OpenGLWidget::initializeGL()
 {
     
-    this->initializeOpenGLFunctions();        //初始化opengl函数
+    this->initializeOpenGLFunctions(); 
+    //初始化opengl函数
     if (!shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/test.vert")) {     //添加并编译顶点着色器
         qDebug() << "ERROR:" << shaderProgram.log();    //如果编译出错,打印报错信息
     }
@@ -45,7 +46,7 @@ void OpenGLWidget::initializeGL()
 
 void OpenGLWidget::resizeGL(int w, int h)
 {
-    qDebug() << w << h;
+    
     this->glViewport(0, 0, w, h);                //定义视口区域
 }
 
