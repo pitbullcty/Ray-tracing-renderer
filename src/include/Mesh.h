@@ -1,4 +1,4 @@
-#ifndef __MESH__
+ï»¿#ifndef __MESH__
 #define __MESH__
 
 #include <QString>
@@ -6,42 +6,35 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <QOpenGLTexture>
+#include <QSharedPointer>
 
 /*
-* ¶¥µãÀà
+* é¡¶ç‚¹ç±»
 */
 struct Vertex
 {
-	QVector3D pos; //×ø±ê
-	QVector3D normal; //·¨Ïß
-	QVector2D texCoords; //²ÄÖÊ×ø±ê
-	Vertex(QVector3D _pos, QVector3D _normal, QVector2D _texCoords) :pos(_pos),normal(_normal),texCoords(_texCoords) {};
-	Vertex() {};
+	QVector3D pos; //åæ ‡
+	QVector3D normal; //æ³•çº¿
+	QVector2D texCoords; //æè´¨åæ ‡
 };
 
 /*
-* ²ÄÖÊÀà
+* æè´¨ç±»
 */
 struct Texture {
-	QOpenGLTexture texture; //²ÄÖÊ
-	QString type; //²ÄÖÊÀàĞÍ
-	QString path;  //²ÄÖÊÂ·¾¶
-	Texture() :texture(QOpenGLTexture::Target2D) {
-		texture.create();
-		texture.setWrapMode(QOpenGLTexture::DirectionS, QOpenGLTexture::Repeat);
-		texture.setWrapMode(QOpenGLTexture::DirectionT, QOpenGLTexture::Repeat); //Ö¸¶¨ÎÆÀíÖáºÍ»·ÈÆ·½Ê½
-		texture.setMinMagFilters(QOpenGLTexture::LinearMipMapLinear, QOpenGLTexture::Linear); //ÉèÖÃÎÆÀí¹ıÂË·½Ê½
-	}
+	QSharedPointer<QOpenGLTexture> texture;
+	QString type; //æè´¨ç±»å‹
+	QString path;  //æè´¨è·¯å¾„
 };
 
 
 /*
-* Íø¸ñÀà
+* ç½‘æ ¼ç±»
 */
 struct Mesh {
-	QVector<Vertex> vertices;               //¶¥µãÊı¾İ
-	QVector<int> indices;          //Ë÷ÒıÊı×é
-	QVector<Texture> textures;             //ÎÆÀíÊı¾İ
+	QVector<Vertex> vertices;               //é¡¶ç‚¹æ•°æ®
+	QVector<int> indices;          //ç´¢å¼•æ•°ç»„
+	QVector<Texture> textures;             //çº¹ç†æ•°æ®
 	Mesh(QVector<Vertex> _vertices, QVector<int> _indices, QVector<Texture> _textures) :vertices(_vertices), indices(_indices), textures(_textures) {};
 };
 

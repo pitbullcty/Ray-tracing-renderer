@@ -9,10 +9,12 @@ OpenGLWidget::OpenGLWidget(QWidget* parent)
          0.5f, -0.5f, 0.0f,
          0.0f,  0.5f, 0.0f
     };
+
 }
 
 OpenGLWidget::~OpenGLWidget()
-{}
+{
+}
 
 void OpenGLWidget::initializeGL()
 {
@@ -40,7 +42,7 @@ void OpenGLWidget::initializeGL()
 
     shaderProgram.setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(GLfloat) * 3);
     shaderProgram.enableAttributeArray(0);
-
+   
     //    VAO.release();      //解绑VAO，安全使用
 }
 
