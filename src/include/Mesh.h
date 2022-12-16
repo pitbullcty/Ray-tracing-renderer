@@ -33,9 +33,9 @@ struct Texture {
 */
 struct Mesh {
 	QVector<Vertex> vertices;               //顶点数据
-	QVector<int> indices;          //索引数组
+	QVector<unsigned int> indices;          //索引数组
 	QVector<Texture> textures;             //纹理数据
-	Mesh(QVector<Vertex> _vertices, QVector<int> _indices, QVector<Texture> _textures) :vertices(_vertices), indices(_indices), textures(_textures) {};
+	Mesh(const QVector<Vertex>& _vertices, const QVector<unsigned int>& _indices, const QVector<Texture>& _textures) :vertices(_vertices), indices(_indices), textures(_textures) {};
 };
 
 

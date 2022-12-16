@@ -1,4 +1,4 @@
-#include "Mainwindow.h"
+ï»¿#include "Mainwindow.h"
 #include <QFile>
 
 MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindow)
@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindo
 	ui->setupUi(this);
 }
 
-MainWindow::~MainWindow()//Îö¹¹º¯Êı£¬¹Øµô£Õ£É½çÃæ
+MainWindow::~MainWindow()//ææ„å‡½æ•°ï¼Œå…³æ‰ï¼µï¼©ç•Œé¢
 {
 	delete ui;
 }
