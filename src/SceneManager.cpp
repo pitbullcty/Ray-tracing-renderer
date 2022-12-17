@@ -30,9 +30,14 @@ void SceneManager::addModel(QString name, Model model)
 	models.insert(name, model);
 }
 
+void SceneManager::clearModel()
+{
+    destoryTexture();
+    models.clear();
+}
+
 void SceneManager::renderModels()
 {
-    shaderProgram->bind();
     for (auto it = models.begin(); it != models.end();it++) {
         for (auto& mesh : it.value().getMeshes()) {
             renderMesh(mesh);
@@ -41,7 +46,6 @@ void SceneManager::renderModels()
 	}
 
 }
-
 
 void SceneManager::renderMesh(Mesh mesh)
 {
@@ -91,17 +95,19 @@ void SceneManager::renderTexture(Mesh mesh)
     }
     // 绘制网格
     QOpenGLVertexArrayObject::Binder binder(&VAO);
-    functions->glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
+    functions->glDrawElements(GL_TRIANGLES, (unsigned int)mesh.indices.size(), GL_UNSIGNED_INT, 0);
 }
 
 void SceneManager::destoryTexture()
 {
     for (auto it = models.begin(); it != models.end(); it++) {
-        for (auto& mesh : it.value().getMeshes()) {
-            for (auto& tex : mesh.textures) {
-                tex.texture->destroy();
-            }
-        }
+        it->destroyTextures();
     }
+}
+
+
+QSharedPointer<Camera> SceneManager::getCamera()
+{
+    return camera;
 }
 

@@ -36,6 +36,11 @@ struct Mesh {
 	QVector<unsigned int> indices;          //索引数组
 	QVector<Texture> textures;             //纹理数据
 	Mesh(const QVector<Vertex>& _vertices, const QVector<unsigned int>& _indices, const QVector<Texture>& _textures) :vertices(_vertices), indices(_indices), textures(_textures) {};
+	void destoryTextures() {
+		for (auto& texture : textures) {
+			texture.texture->destroy();
+		}
+	}
 };
 
 

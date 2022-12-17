@@ -9,6 +9,7 @@ public:
 	Model() = default;
 	~Model() = default;
 	QVector<Mesh> getMeshes();
+	void destroyTextures();
 
 private:
 	QVector<Mesh> meshes; //纹理

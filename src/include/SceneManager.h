@@ -13,8 +13,10 @@
 class SceneManager {
 public:
 	void addModel(QString name, Model model); //添加模型
+	void clearModel(); //删除模型
 	void renderModels();
 	void destoryTexture();
+	QSharedPointer<Camera> getCamera();
 
 	static void destory(SceneManager* sceneManager);
 	
