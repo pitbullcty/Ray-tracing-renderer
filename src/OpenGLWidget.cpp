@@ -1,6 +1,7 @@
 ﻿#include "OpenGLWidget.h"
 
 
+
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
     , modelLoader(ModelLoader::GetInstance())
@@ -8,6 +9,7 @@ OpenGLWidget::OpenGLWidget(QWidget* parent)
     ,deltaTime(0.0f),lastFrame(0.0f)
 {
     setFocusPolicy(Qt::ClickFocus);
+    
 }
 
 OpenGLWidget::~OpenGLWidget()
@@ -36,7 +38,8 @@ void OpenGLWidget::initializeGL()
     QString path = "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj";
     QString _path = path.right(path.size() - path.lastIndexOf('/') - 1);
     QString name = _path.left(_path.lastIndexOf('.'));
-    sceneManager->addModel(name, modelLoader->loadModel(path));
+    Model m = modelLoader->loadModel(path);
+    sceneManager->addModel(name,m);
     
 }
 
@@ -44,6 +47,9 @@ void OpenGLWidget::resizeGL(int w, int h)
 {
     
     this->glViewport(0, 0, w, h);                //定义视口区域
+    QMatrix4x4 projection;
+    projection.perspective(sceneManager->getCamera()->getZoom(), width() / (float)height(), 0.1f, 500.0f);
+    shaderProgram.setUniformValue("projection", projection);
 }
 
 void OpenGLWidget::paintGL()

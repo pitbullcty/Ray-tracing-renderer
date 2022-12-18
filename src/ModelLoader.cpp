@@ -2,6 +2,14 @@
 
 QSharedPointer<ModelLoader> ModelLoader::instance = nullptr;
 
+static QVector3D assimp2QVector(const aiVector3D& vector) {
+    return QVector3D(vector.x, vector.y, vector.z);
+}
+
+static aiVector3D QVector2assimp(const QVector3D& vector) {
+    return aiVector3D(vector.x(), vector.y(), vector.z());
+}
+
 QSharedPointer<ModelLoader>& ModelLoader::GetInstance()
 {
 	if (instance.isNull())
@@ -43,9 +51,16 @@ Model ModelLoader::loadModel(QString path) {
     qDebug() << "纹理：" << scene->mNumTextures;
     qDebug() << "动画：" << scene->mNumAnimations;
     processNode(scene->mRootNode, scene);
-    Model m(meshes);
+    for (auto& nodeCenter : nodeCenters) {
+        center += nodeCenter;
+    }
+    Model m(meshes, center/nodeCenters.size());
     meshes.clear();
     textures_loaded.clear();
+    nodeCenters.clear();
+    center.setX(0);
+    center.setY(0);
+    center.setZ(0);
     return m;
 }
 
@@ -54,11 +69,18 @@ Model ModelLoader::loadModel(QString path) {
 */
 void ModelLoader::processNode(aiNode* node, const aiScene* scene)
 {
-    // 处理节点所有的网格（如果有的话）
+    // 处理节点所有的网格（如果有的话
+    QVector3D nodeCenter(0, 0, 0);
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes.push_back(processMesh(mesh, scene));
+        Mesh temp = processMesh(mesh, scene);
+        nodeCenter += temp.center;
+        meshes.push_back(temp);
+    }
+    if (node->mNumMeshes != 0) {
+        nodeCenter /= node->mNumMeshes;
+        nodeCenters.push_back(nodeCenter);
     }
     // 递归处理子节点重复这一过程
     for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -73,6 +95,7 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
     QVector<Vertex> vertices;
     QVector<unsigned int> indices;
     QVector<Texture> textures; //存放
+    aiVector3D meshCenter(0, 0, 0);
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
@@ -113,11 +136,16 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
+        aiVector3D faceCenter(0, 0, 0); //面中心
         // 将所有面的索引数据添加到索引数组中
         for (unsigned int j = 0; j < face.mNumIndices; j++) {
             indices.push_back(face.mIndices[j]);
+            faceCenter = faceCenter + mesh->mVertices[face.mIndices[j]];
         }
+        faceCenter /= face.mNumIndices;
+        meshCenter += faceCenter;
     }
+    meshCenter /= mesh->mNumFaces;
 
     // 处理材质
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -142,7 +170,9 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
     for (auto& texture : heightMaps)
         textures.push_back(texture);
 
-    return Mesh(vertices, indices, textures);
+    QVector3D center = assimp2QVector(meshCenter);
+
+    return Mesh(vertices, indices, textures, center);
 
 }
 

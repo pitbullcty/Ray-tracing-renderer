@@ -55,6 +55,11 @@ void Camera::removeKey(Qt::Key key)
     keys.remove(key);
 }
 
+void Camera::setPos(QVector3D _pos)
+{
+    pos = _pos;
+}
+
 void Camera::processKeyboard(float deltaTime)
 {
     for (auto& key : keys) {

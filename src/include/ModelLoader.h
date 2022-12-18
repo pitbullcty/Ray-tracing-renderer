@@ -18,6 +18,8 @@ private:
 	QString path; //模型路径
 	QVector<Texture> textures_loaded;  //本次模型已加载材质
 	QVector<Mesh> meshes; //纹理
+	QVector<QVector3D> nodeCenters; //各结点中心
+	QVector3D center; //材质中心
 
 	static QSharedPointer<ModelLoader> instance;
 	~ModelLoader() = default;

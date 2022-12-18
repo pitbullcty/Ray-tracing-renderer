@@ -5,6 +5,11 @@ QVector<Mesh> Model::getMeshes()
     return meshes;
 }
 
+QVector3D Model::getCenter()
+{
+    return center;
+}
+
 void Model::destroyTextures()
 {
     for (auto& mesh : meshes) {
@@ -12,4 +17,4 @@ void Model::destroyTextures()
     }
 }
 
-Model::Model(const QVector<Mesh>& _meshes) :meshes(_meshes) {};
+Model::Model(const QVector<Mesh>& _meshes, QVector3D _center) :meshes(_meshes),center(_center) {};
