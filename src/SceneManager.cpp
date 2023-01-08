@@ -26,10 +26,11 @@ SceneManager::SceneManager(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, 
 	skybox = Skybox::GetInstance();
 	VBO.create();
 	EBO.create();
+	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 }
 
 
-void SceneManager::addModel(QString name, Model model)
+void SceneManager::addModel(const QString& name, const Model& model)
 {
 	models.insert(name, model);
 }
@@ -44,16 +45,13 @@ void SceneManager::renderModels()
 {
 	shaderProgram["model"]->bind();
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	QMatrix4x4 model;
-	model.translate(0.0f, 0.0f, 0.0f);
-	model.scale(1.0f, 1.0f, 1.0f);
-	shaderProgram["model"]->setUniformValue("model", model);
-	QMatrix4x4 projection;
-	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 	shaderProgram["model"]->setUniformValue("projection", projection);
 	shaderProgram["model"]->setUniformValue("view", getCamera()->getView());
 	for (auto it = models.begin(); it != models.end(); it++) {
-		for (auto& mesh : it.value().getMeshes()) {
+		Model model = it.value();
+		model.transform.setOriginPos({ 1.0f,1.0f,1.0f });
+		shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
+		for (auto& mesh :model.getMeshes()) {
 			renderMesh(mesh);
 			renderTexture(mesh);
 		}
@@ -61,7 +59,7 @@ void SceneManager::renderModels()
 	shaderProgram["model"]->release();
 }
 
-void SceneManager::renderMesh(Mesh mesh)
+void SceneManager::renderMesh(const Mesh& mesh)
 {
 	QOpenGLVertexArrayObject::Binder binder(&VAO);
 
@@ -83,7 +81,7 @@ void SceneManager::renderMesh(Mesh mesh)
 
 }
 
-void SceneManager::renderTexture(Mesh mesh)
+void SceneManager::renderTexture(const Mesh& mesh)
 {
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
@@ -108,6 +106,8 @@ void SceneManager::renderTexture(Mesh mesh)
 	// 绘制网格
 	QOpenGLVertexArrayObject::Binder binder(&VAO);
 	functions->glDrawElements(GL_TRIANGLES, (unsigned int)mesh.indices.size(), GL_UNSIGNED_INT, 0);
+	VBO.release();
+	EBO.release();
 }
 
 
@@ -125,7 +125,7 @@ void SceneManager::initSkybox()
 	functions->glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap); //生成立方体截图
 	QString keys[6] = { "+x","-x","+y","-y","+z","-z"};
 	int i = 0;
-	for (auto key:keys)
+	for (auto& key:keys)
 	{
 		QImage tex(skybox->path[key]);
 		tex = tex.convertToFormat(QImage::Format_RGB888);
@@ -146,8 +146,6 @@ void SceneManager::initSkybox()
 void SceneManager::renderSkybox()
 {
 	shaderProgram["skybox"]->bind();
-	QMatrix4x4 projection;
-	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 	shaderProgram["skybox"]->setUniformValue("projection", projection);
 	shaderProgram["skybox"]->setUniformValue("view",camera->getView());
 	functions->glActiveTexture(GL_TEXTURE0);
@@ -167,6 +165,8 @@ void SceneManager::renderCube(QOpenGLShaderProgram* shaderProgram)
 	shaderProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float) * 3);
 
 	functions->glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	VBO.release();
 }
 
 QSharedPointer<Camera> SceneManager::getCamera()

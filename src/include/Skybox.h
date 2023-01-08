@@ -17,14 +17,7 @@ public:
 
 private:
 	static QSharedPointer<Skybox> instance;
-	Skybox(QMap<QString, QString> _path = {
-		{"+x", ":/skybox/px.png"},
-		{"-x", ":/skybox/nx.png"},
-		{"+y", ":/skybox/py.png"},
-		{"-y", ":/skybox/ny.png"},
-		{"+z", ":/skybox/pz.png"},
-		{"-z", ":/skybox/nz.png"},
-		});
+	Skybox();
 	~Skybox() = default;
 };
 

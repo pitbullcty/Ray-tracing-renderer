@@ -13,7 +13,7 @@
 //使用单例模式
 class SceneManager {
 public:
-	void addModel(QString name, Model model); //添加模型
+	void addModel(const QString& name, const Model& model); //添加模型
 	void clearModel(); //删除模型
 	void renderModels();
 	void destoryTexture();
@@ -37,16 +37,18 @@ private:
 	unsigned int envCubemap;
 
 	int width;
-	int height; //viewpoint
+	int height; //窗口相关参数
+
+	QMatrix4x4 projection; //投影矩阵
 
 	QMap<QString, Model> models; //模型
 	QSharedPointer<Camera> camera; //摄像机
-	QSharedPointer<Skybox> skybox;
+	QSharedPointer<Skybox> skybox; //天空盒
 
 	SceneManager(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLFunctions* _functions, int width, int height);
 	~SceneManager() = default;
-	void renderMesh(Mesh mesh);
-	void renderTexture(Mesh mesh);
+	void renderMesh(const Mesh& mesh);
+	void renderTexture(const Mesh& mesh);
 	void renderCube(QOpenGLShaderProgram* shaderProgram);
 
 };

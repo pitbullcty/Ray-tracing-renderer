@@ -12,7 +12,7 @@ class ModelLoader {
 public:
 	static QSharedPointer<ModelLoader>& GetInstance();
 	static void destory(ModelLoader* modelLoader);
-	Model loadModel(QString path);
+	Model loadModel(const QString& path);
 
 private:
 	QString path; //模型路径

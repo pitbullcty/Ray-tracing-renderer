@@ -15,9 +15,16 @@ void Skybox::destory(Skybox* skybox)
 	delete skybox;
 }
 
-Skybox::Skybox(QMap<QString, QString> _path)
+Skybox::Skybox()
 {
-    path = _path;
+    path = {
+        {"+x", ":/skybox/px.png"},
+        {"-x", ":/skybox/nx.png"},
+        {"+y", ":/skybox/py.png"},
+        {"-y", ":/skybox/ny.png"},
+        {"+z", ":/skybox/pz.png"},
+        {"-z", ":/skybox/nz.png"},
+    };
 
 	vertices = {
         // back face

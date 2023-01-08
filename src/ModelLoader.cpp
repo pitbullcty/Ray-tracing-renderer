@@ -37,7 +37,7 @@ static QSharedPointer<QOpenGLTexture> textureFromFile(const QString& path)
 }
 
 
-Model ModelLoader::loadModel(QString path) {
+Model ModelLoader::loadModel(const QString& path) {
     this->path = path;
     Assimp::Importer import;
     const aiScene* scene = import.ReadFile(path.toStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals); //读入场景,基于y轴翻转纹理坐标,换所有的模型的原始几何形状为三角形
@@ -58,9 +58,7 @@ Model ModelLoader::loadModel(QString path) {
     meshes.clear();
     textures_loaded.clear();
     nodeCenters.clear();
-    center.setX(0);
-    center.setY(0);
-    center.setZ(0);
+    center = QVector3D();
     return m;
 }
 

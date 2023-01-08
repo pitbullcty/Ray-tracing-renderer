@@ -17,7 +17,7 @@ void Camera::destory(Camera* camera) {
 	delete camera;
 }
 
-Camera::Camera(QVector3D pos, QVector3D up):pos(pos), worldUP(up),direction(-pos.normalized()),up(up),right(QVector3D::crossProduct(direction, worldUP).normalized()),
+Camera::Camera(const QVector3D& pos, const QVector3D& up):pos(pos), worldUP(up),direction(-pos.normalized()),up(up),right(QVector3D::crossProduct(direction, worldUP).normalized()),
 yaw(-90.0f),pitch(0.0f),speed(10.0f),sensitivity(0.1f),zoom(30.0f) //初始化值
 {
 }
@@ -55,7 +55,7 @@ void Camera::removeKey(Qt::Key key)
     keys.remove(key);
 }
 
-void Camera::setPos(QVector3D _pos)
+void Camera::setPos(const QVector3D& _pos)
 {
     pos = _pos;
 }

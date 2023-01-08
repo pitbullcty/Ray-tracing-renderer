@@ -17,7 +17,7 @@ public:
     float getZoom();
     void addKey(Qt::Key key);
     void removeKey(Qt::Key key);
-    void setPos(QVector3D _pos);
+    void setPos(const QVector3D& _pos);
     void processKeyboard(float deltaTime);
     void processKeyboard(Qt::Key key, float deltaTime);
     void processMouseMovement(float xoffset, float yoffset);
@@ -43,7 +43,7 @@ private:
     float speed;    //控制移动速度
 
 	~Camera() = default;
-    Camera(QVector3D pos = QVector3D(0.0f, 0.0f, 3.0f),QVector3D up=QVector3D(0.0f,1.0f,0.0f));
+    Camera(const QVector3D& pos = QVector3D(0.0f, 0.0f, 3.0f), const QVector3D& up=QVector3D(0.0f,1.0f,0.0f));
 
 };
 
