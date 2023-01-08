@@ -2,7 +2,6 @@
 #define __CAMERA__
 
 #include <QSharedPointer>
-#include <QWidget>
 #include <QVector3D>
 #include <QMatrix4x4>
 

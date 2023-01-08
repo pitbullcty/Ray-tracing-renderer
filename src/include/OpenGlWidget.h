@@ -8,6 +8,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QKeyEvent>
 #include <QTime>
+#include <QTimer>
 #include "SceneManager.h"
 #include "ModelLoader.h"
 
@@ -32,7 +33,10 @@ protected:
     void wheelEvent(QWheelEvent* event) override;
     
 private:
-    QOpenGLShaderProgram shaderProgram;
+
+    QOpenGLShaderProgram modelShaderProgram;
+    QOpenGLShaderProgram skyboxShaderProgram;
+
     QSharedPointer<SceneManager> sceneManager;
     QSharedPointer<ModelLoader> modelLoader;
 
@@ -42,7 +46,8 @@ private:
     float deltaTime; //渲染每帧间隔时间
     float lastFrame; //上一帧时间
 
-    void renderModels();
+    void initShaders();
+    void initSceneManager();
     
    
 };

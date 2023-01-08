@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/skybox">
+        <file>nx.png</file>
+        <file>ny.png</file>
+        <file>nz.png</file>
+        <file>px.png</file>
+        <file>py.png</file>
+        <file>pz.png</file>
+    </qresource>
+</RCC>

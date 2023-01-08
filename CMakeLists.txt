@@ -30,6 +30,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include ${ASSIMP_INCLUDE_DIR
 qt_add_resources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/shader/shader.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/theme/dark/darkstyle.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/theme/light/lightstyle.qrc
+      ${CMAKE_CURRENT_SOURCE_DIR}/resources/skybox/cubemap/Standard-Cube-Map1/skybox.qrc
 )
 
 add_executable(${PROJECT_NAME} ${inc_files} ${src_files} ${SOURCES})

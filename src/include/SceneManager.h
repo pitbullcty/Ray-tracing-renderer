@@ -3,6 +3,7 @@
 
 #include"Model.h"
 #include "Camera.h"
+#include "Skybox.h"
 #include <QMap>
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
@@ -16,28 +17,37 @@ public:
 	void clearModel(); //删除模型
 	void renderModels();
 	void destoryTexture();
+	void initSkybox();
+	void renderSkybox();
 	QSharedPointer<Camera> getCamera();
 
 	static void destory(SceneManager* sceneManager);
 	
-	static QSharedPointer<SceneManager>& GetInstance(QOpenGLShaderProgram* _shaderProgram, QOpenGLFunctions* _functions);
+	static QSharedPointer<SceneManager>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLFunctions* _functions
+	, int width, int height);
 
 private:
 	static QSharedPointer<SceneManager> instance;
 
 	//OpenGl上下文相关
-	QOpenGLShaderProgram* shaderProgram;
+	QMap<QString, QOpenGLShaderProgram*> shaderProgram;
 	QOpenGLFunctions* functions;
 	QOpenGLBuffer VBO,EBO;
 	QOpenGLVertexArrayObject VAO;
+	unsigned int envCubemap;
+
+	int width;
+	int height; //viewpoint
 
 	QMap<QString, Model> models; //模型
 	QSharedPointer<Camera> camera; //摄像机
+	QSharedPointer<Skybox> skybox;
 
-	SceneManager(QOpenGLShaderProgram* _shaderProgram, QOpenGLFunctions* _functions);
+	SceneManager(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLFunctions* _functions, int width, int height);
 	~SceneManager() = default;
 	void renderMesh(Mesh mesh);
 	void renderTexture(Mesh mesh);
+	void renderCube(QOpenGLShaderProgram* shaderProgram);
 
 };
 

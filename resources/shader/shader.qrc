@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>model.vert</file>
         <file>model.frag</file>
+        <file>skybox.frag</file>
+        <file>skybox.vert</file>
     </qresource>
 </RCC>
