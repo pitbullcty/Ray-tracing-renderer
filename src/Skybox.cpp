@@ -15,13 +15,10 @@ void Skybox::destory(Skybox* skybox)
 	delete skybox;
 }
 
-Skybox::Skybox(QVector<QString> _path)
+Skybox::Skybox(QMap<QString, QString> _path)
 {
-  
-    for (int i = 0; i < _path.size(); i++) {
-        skyboxes.push_back(QImage(_path[i]).convertToFormat(QImage::Format_RGB888));
-    }
-    
+    path = _path;
+
 	vertices = {
         // back face
        -1.0f, -1.0f, -1.0f,   // bottom-left

@@ -123,13 +123,16 @@ void SceneManager::initSkybox()
 	shaderProgram["skybox"]->bind();
 	functions->glGenTextures(1, &envCubemap);
 	functions->glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap); //生成立方体截图
-
-	for (unsigned int i = 0; i < 6; i++)
+	QString keys[6] = { "+x","-x","+y","-y","+z","-z"};
+	int i = 0;
+	for (auto key:keys)
 	{
-		unsigned char* data = skybox->skyboxes[i].bits();
+		QImage tex(skybox->path[key]);
+		tex = tex.convertToFormat(QImage::Format_RGB888);
 		functions->glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-			0, GL_RGB, skybox->skyboxes[i].width(), skybox->skyboxes[i].height(), 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			0, GL_RGB, tex.width(), tex.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, tex.bits()
 		);
+		i++;
 	}
 	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

@@ -32,8 +32,6 @@ void OpenGLWidget::initializeGL()
     Model m = modelLoader->loadModel(path);
     sceneManager->addModel(name,m);
     sceneManager->initSkybox();
-   
-
 }
 
 void OpenGLWidget::resizeGL(int w, int h)
@@ -58,7 +56,6 @@ void OpenGLWidget::paintGL()
  
     deltaTime = time - lastFrame;
    
-    qDebug() << 1.0f / deltaTime;
     lastFrame = time; //计算渲染时间
     update();
 }
@@ -75,13 +72,13 @@ void OpenGLWidget::initShaders()
         qDebug() << "ERROR:" << modelShaderProgram.log();    //如果链接出错,打印报错信息
     }
     if (!skyboxShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/skybox.vert")) {     //添加并编译顶点着色器
-        qDebug() << "ERROR:" << modelShaderProgram.log();    //如果编译出错,打印报错信息
+        qDebug() << "ERROR:" << skyboxShaderProgram.log();    //如果编译出错,打印报错信息
     }
     if (!skyboxShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/skybox.frag")) {   //添加并编译片段着色器
-        qDebug() << "ERROR:" << modelShaderProgram.log();    //如果编译出错,打印报错信息
+        qDebug() << "ERROR:" << skyboxShaderProgram.log();    //如果编译出错,打印报错信息
     }
     if (!skyboxShaderProgram.link()) {                      //链接着色器
-        qDebug() << "ERROR:" << modelShaderProgram.log();    //如果链接出错,打印报错信息
+        qDebug() << "ERROR:" << skyboxShaderProgram.log();    //如果链接出错,打印报错信息
     }
 }
 

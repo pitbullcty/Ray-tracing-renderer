@@ -13,17 +13,17 @@ public:
 	static QSharedPointer<Skybox>& GetInstance();
 	static void destory(Skybox* skybox);
     QVector<float> vertices;
-	QVector<QImage> skyboxes;
+	QMap<QString, QString> path;
 
 private:
 	static QSharedPointer<Skybox> instance;
-	Skybox(QVector<QString> _path = {
-		":/skybox/px.png",
-		":/skybox/nx.png",
-		":/skybox/py.png",
-		":/skybox/ny.png",
-		":/skybox/pz.png",
-		":/skybox/nz.png"
+	Skybox(QMap<QString, QString> _path = {
+		{"+x", ":/skybox/px.png"},
+		{"-x", ":/skybox/nx.png"},
+		{"+y", ":/skybox/py.png"},
+		{"-y", ":/skybox/ny.png"},
+		{"+z", ":/skybox/pz.png"},
+		{"-z", ":/skybox/nz.png"},
 		});
 	~Skybox() = default;
 };
