@@ -35,7 +35,7 @@ qt_add_resources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/shader/shader.qrc
 
 add_executable(${PROJECT_NAME} ${inc_files} ${src_files} ${SOURCES})
 
-message(STATUS ${ASSIMP_LIBRARY_RELEASE})
+message(STATUS ${ASSIMP_INCLUDE_DIR})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core
     Qt::Gui
@@ -49,7 +49,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
       # COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-      COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll 	${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll
+      COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll 	${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll
       #COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll  ${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mt.dll
       COMMAND_EXPAND_LISTS
      )
@@ -57,7 +57,7 @@ elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
       # COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
       #COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/Debug/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll 	${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mtd.dll
-      COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/Release/assimp-${ASSIMP_MSVC_VERSION}-mt.dll  ${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mt.dll
+      COMMAND ${CMAKE_COMMAND} -E copy ${ASSIMP_ROOT_DIR}/bin/assimp-${ASSIMP_MSVC_VERSION}-mt.dll  ${CMAKE_BINARY_DIR}/assimp-${ASSIMP_MSVC_VERSION}-mt.dll
       COMMAND_EXPAND_LISTS
      )
 endif()
