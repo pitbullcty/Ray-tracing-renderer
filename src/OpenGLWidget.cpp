@@ -3,7 +3,7 @@
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
     , modelLoader(ModelLoader::GetInstance())
-    , isRightClicked(false)
+    , isRightClicked(false), isLeftClicked(false)
     ,deltaTime(0.0f),lastFrame(0.0f)
 {
     setFocusPolicy(Qt::ClickFocus); 
@@ -25,11 +25,12 @@ void OpenGLWidget::initializeGL()
    
     initShaders();
     initSceneManager();
-    
+ 
     QString path = "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj";
     QString _path = path.right(path.size() - path.lastIndexOf('/') - 1);
     QString name = _path.left(_path.lastIndexOf('.'));
     Model m = modelLoader->loadModel(path);
+   
     sceneManager->addModel(name,m);
     sceneManager->initSkybox();
 }
@@ -37,11 +38,8 @@ void OpenGLWidget::initializeGL()
 void OpenGLWidget::resizeGL(int w, int h)
 {
     
-    this->glViewport(0, 0, w, h);                //定义视口区域
-    QMatrix4x4 projection;
-    projection.perspective(sceneManager->getCamera()->getZoom(), width() / (float)height(), 0.1f, 500.0f);
-    modelShaderProgram.setUniformValue("projection", projection);
-    skyboxShaderProgram.setUniformValue("projection", projection);
+    this->glViewport(0, 0, w, h);    //定义视口区域
+    sceneManager->resize(w, h);
 }
 
 void OpenGLWidget::paintGL()
@@ -50,7 +48,9 @@ void OpenGLWidget::paintGL()
     sceneManager->getCamera()->processKeyboard(deltaTime);
  
     sceneManager->renderModels();
-    sceneManager->renderSkybox();  //渲染部分
+    sceneManager->renderSkybox();
+    sceneManager->renderGizmo(); //最后渲染gizmo避免被遮挡
+    //渲染部分
 
     float time = QTime::currentTime().msecsSinceStartOfDay() / 1000.0; //返回当天的毫秒数
  
@@ -62,24 +62,9 @@ void OpenGLWidget::paintGL()
 
 void OpenGLWidget::initShaders()
 { 
-    if (!modelShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/model.vert")) {     //添加并编译顶点着色器
-        qDebug() << "ERROR:" << modelShaderProgram.log();    //如果编译出错,打印报错信息
-    }
-    if (!modelShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/model.frag")) {   //添加并编译片段着色器
-        qDebug() << "ERROR:" << modelShaderProgram.log();    //如果编译出错,打印报错信息
-    }
-    if (!modelShaderProgram.link()) {                      //链接着色器
-        qDebug() << "ERROR:" << modelShaderProgram.log();    //如果链接出错,打印报错信息
-    }
-    if (!skyboxShaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/skybox.vert")) {     //添加并编译顶点着色器
-        qDebug() << "ERROR:" << skyboxShaderProgram.log();    //如果编译出错,打印报错信息
-    }
-    if (!skyboxShaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/skybox.frag")) {   //添加并编译片段着色器
-        qDebug() << "ERROR:" << skyboxShaderProgram.log();    //如果编译出错,打印报错信息
-    }
-    if (!skyboxShaderProgram.link()) {                      //链接着色器
-        qDebug() << "ERROR:" << skyboxShaderProgram.log();    //如果链接出错,打印报错信息
-    }
+    compileShader(&modelShaderProgram, "model");
+    compileShader(&skyboxShaderProgram, "skybox");
+    compileShader(&gizmoShaderProgram, "gizmo");
 }
 
 void OpenGLWidget::initSceneManager()
@@ -87,7 +72,23 @@ void OpenGLWidget::initSceneManager()
     QMap<QString, QOpenGLShaderProgram*> map;
     map.insert("model", &modelShaderProgram);
     map.insert("skybox", &skyboxShaderProgram);
-    sceneManager = SceneManager::GetInstance(map, QOpenGLContext::currentContext()->functions(), width(), height());
+    map.insert("gizmo", &gizmoShaderProgram);
+    sceneManager = SceneManager::GetInstance(map, QOpenGLContext::currentContext()->extraFunctions(), width(), height());
+}
+
+void OpenGLWidget::compileShader(QOpenGLShaderProgram* shaderProgram, const QString& shaderName)
+{
+    QString vertName = ":/" + shaderName + ".vert";
+    QString fragName = ":/" + shaderName + ".frag";
+    if (!shaderProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, vertName)) {     //添加并编译顶点着色器
+        qDebug() << "ERROR:" << shaderProgram->log();    //如果编译出错,打印报错信息
+    }
+    if (!shaderProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, fragName)) {   //添加并编译片段着色器
+        qDebug() << "ERROR:" << shaderProgram->log();    //如果编译出错,打印报错信息
+    }
+    if (!shaderProgram->link()) {                      //链接着色器
+        qDebug() << "ERROR:" << shaderProgram->log();    //如果链接出错,打印报错信息
+    }
 }
 
 void OpenGLWidget::keyPressEvent(QKeyEvent* event)
@@ -114,23 +115,43 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
         isRightClicked = true; //右键激活
         lastPos = event->pos();
     }
+    else if (event->button() == Qt::LeftButton) {
+        int x = event->pos().x();
+        int y = event->pos().y();
+        if (sceneManager->getGizmo()->mouseDown(x, y)) {
+            isLeftClicked = true;
+        } //调整Gizmo
+    }
+    else {
+        ;
+    }
 }
 
 void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-    isRightClicked = false;
+    int x = event->pos().x();
+    int y = event->pos().y();
+    if (isLeftClicked) {
+        sceneManager->getGizmo()->mouseUp(x, y);
+        isLeftClicked = false;
+    }
+    else if (isRightClicked)
+        isRightClicked = false;
+    else
+        ;
 }
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
+    int x = event->pos().x();
+    int y = event->pos().y();
     if (isRightClicked) {
-        int xpos = event->pos().x();
-        int ypos = event->pos().y();
-        int xoffset = xpos - lastPos.x();
-        int yoffset = lastPos.y() - ypos;
+        int xoffset = x - lastPos.x();
+        int yoffset = lastPos.y() - y;
         lastPos = event->pos();
         sceneManager->getCamera()->processMouseMovement(xoffset, yoffset);
     }
+    sceneManager->getGizmo()->mouseMove(x, y);
 }
 
 void OpenGLWidget::wheelEvent(QWheelEvent* event)

@@ -4,8 +4,6 @@
 #include <QOpenGLWidget>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
-#include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
 #include <QKeyEvent>
 #include <QTime>
 #include <QTimer>
@@ -36,11 +34,13 @@ private:
 
     QOpenGLShaderProgram modelShaderProgram;
     QOpenGLShaderProgram skyboxShaderProgram;
+    QOpenGLShaderProgram gizmoShaderProgram;
 
     QSharedPointer<SceneManager> sceneManager;
     QSharedPointer<ModelLoader> modelLoader;
 
     bool isRightClicked; //右键是否按下
+    bool isLeftClicked; //右键是否按下
     QPoint lastPos; //上次鼠标停留的位置
 
     float deltaTime; //渲染每帧间隔时间
@@ -48,7 +48,7 @@ private:
 
     void initShaders();
     void initSceneManager();
-    
+    void compileShader(QOpenGLShaderProgram* shaderProgram, const QString& shaderName);
    
 };
 

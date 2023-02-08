@@ -3,6 +3,7 @@
 QSharedPointer<SceneManager> SceneManager::instance = nullptr;
 const float PI = 3.14159f;
 
+
 void SceneManager::destory(SceneManager* sceneManager)
 {
 	sceneManager->VAO.destroy();
@@ -11,28 +12,31 @@ void SceneManager::destory(SceneManager* sceneManager)
 	delete sceneManager;
 }
 
-QSharedPointer<SceneManager>& SceneManager::GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLFunctions* _functions, int width, int height)
+QSharedPointer<SceneManager>& SceneManager::GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height)
 {
 	if (instance.isNull())
 		instance = QSharedPointer<SceneManager>(new SceneManager(_shaderProgram, _functions, width, height), SceneManager::destory);
 	return instance;
 }
 
-SceneManager::SceneManager(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLFunctions* _functions, int width, int height) :
+SceneManager::SceneManager(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
 	shaderProgram(_shaderProgram), functions(_functions), VBO(QOpenGLBuffer::VertexBuffer)
 	, EBO(QOpenGLBuffer::IndexBuffer), width(width), height(height)
 {
 	camera = Camera::GetInstance();
 	skybox = Skybox::GetInstance();
+	gizmo = QSharedPointer<Gizmo>(new Gizmo(functions, shaderProgram["gizmo"]));
+	gizmo->setScale(5.0f);
 	VBO.create();
 	EBO.create();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 }
 
 
-void SceneManager::addModel(const QString& name, const Model& model)
+void SceneManager::addModel(const QString& name, Model model)
 {
 	models.insert(name, model);
+	gizmo->setEditModel(&models[name]);
 }
 
 void SceneManager::clearModel()
@@ -45,11 +49,12 @@ void SceneManager::renderModels()
 {
 	shaderProgram["model"]->bind();
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	projection = QMatrix4x4();
+	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 	shaderProgram["model"]->setUniformValue("projection", projection);
 	shaderProgram["model"]->setUniformValue("view", getCamera()->getView());
 	for (auto it = models.begin(); it != models.end(); it++) {
 		Model model = it.value();
-		model.transform.setOriginPos({ 1.0f,1.0f,1.0f });
 		shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
 		for (auto& mesh :model.getMeshes()) {
 			renderMesh(mesh);
@@ -154,18 +159,38 @@ void SceneManager::renderSkybox()
 	shaderProgram["skybox"]->release();
 }
 
+void SceneManager::renderGizmo()
+{
+	auto view = camera->getView();
+	shaderProgram["gizmo"]->bind();
+	shaderProgram["gizmo"]->setUniformValue("projection", projection);
+	shaderProgram["gizmo"]->setUniformValue("view", view);
+	gizmo->setType(MOVE);
+	gizmo->setCamera(view, projection);
+	gizmo->Draw();
+}
+
+void SceneManager::resize(int w, int h)
+{
+	width = w;
+	height = h;
+	gizmo->setSize(w, h);
+	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
+}
+
+QSharedPointer<Gizmo> SceneManager::getGizmo()
+{
+	return gizmo;
+}
+
 void SceneManager::renderCube(QOpenGLShaderProgram* shaderProgram)
 {
 	QOpenGLVertexArrayObject::Binder binder(&VAO);
-
 	VBO.bind();
 	VBO.allocate(skybox->vertices.data(), skybox->vertices.size() * sizeof(float));
-
 	shaderProgram->enableAttributeArray(0);
 	shaderProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float) * 3);
-
 	functions->glDrawArrays(GL_TRIANGLES, 0, 36);
-
 	VBO.release();
 }
 

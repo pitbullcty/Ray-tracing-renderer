@@ -1,5 +1,5 @@
 ﻿
-set(ASSIMP_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thridparty/assimp")
+set(ASSIMP_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/assimp")
 # Find path of each library
 find_path(ASSIMP_INCLUDE_DIR
 	NAMES

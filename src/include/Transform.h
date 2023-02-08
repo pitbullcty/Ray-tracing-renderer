@@ -6,7 +6,6 @@
 
 class Transform {
 public:
-	QVector3D originPos; //导入的原始位置
 	float scaleX;
 	float scaleY;
 	float scaleZ; //放大系数
@@ -18,8 +17,9 @@ public:
 	float translationZ; //模型平移
 	Transform();
 	~Transform() = default;
-	QMatrix4x4 getModel();
-	void setOriginPos(const QVector3D& pos);
+	void calcModel(); //通过系数计算相应
+	QMatrix4x4 getModel();  //获取模型
+	void setModel(const QMatrix4x4& _model);  //设置模型,反过来计算对应系数
 	
 private:
 	QMatrix4x4 model; //模型矩阵

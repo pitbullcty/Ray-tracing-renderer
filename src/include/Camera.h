@@ -43,7 +43,7 @@ private:
     float speed;    //控制移动速度
 
 	~Camera() = default;
-    Camera(const QVector3D& pos = QVector3D(0.0f, 0.0f, 3.0f), const QVector3D& up=QVector3D(0.0f,1.0f,0.0f));
+    Camera(const QVector3D& pos = QVector3D(0.0f, 0.0f, 0.0f), const QVector3D& up=QVector3D(0.0f,1.0f,0.0f));
 
 };
 
