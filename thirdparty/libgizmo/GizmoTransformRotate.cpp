@@ -30,7 +30,6 @@
 #include "LibBase.h"
 #include "GizmoTransformRotate.h"
 
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -187,7 +186,7 @@ void CGizmoTransformRotate::Rotate1Axe(const tvector3& rayOrigin,const tvector3&
         SnapIt(m_Ng2,m_AngleSnap);
         m_Ng2/=(360.0f/ZPI);
     }
-
+    
     mt.RotationAxis(m_Axis,m_Ng2);
     mt.Multiply(m_InvOrigScale);
     mt.Multiply(m_svgMatrix);
@@ -292,6 +291,7 @@ void CGizmoTransformRotate::Draw()
         plnorm.Normalize();
 
         tplane plCam = vector4(plnorm,0);
+        //plCam = { 1,1,1,0 };
 
         dir = orig-m_CamSrc;
         dir.Normalize();
@@ -361,7 +361,6 @@ void CGizmoTransformRotate::Draw()
 
         if (mMask&AXIS_Y)
         {
-
             if (m_RotateTypePredict != ROTATE_Y)
                 DrawCircleHalf(orig, 0,1,0,right*GetScreenFactor(),frnt*GetScreenFactor(),plCam);
             else

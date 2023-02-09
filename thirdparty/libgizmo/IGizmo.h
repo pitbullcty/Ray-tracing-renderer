@@ -49,6 +49,7 @@ public:
 		AXIS_Z = 4,
 		AXIS_TRACKBALL = 8,
 		AXIS_SCREEN = 16,
+		AXIS_NO_TRACKBALL = 23,
 		AXIS_ALL = 31
 
 	};

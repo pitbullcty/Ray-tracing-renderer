@@ -33,6 +33,7 @@ private:
 	IGizmo* gizmo;
 	float  gizmoModel[16], gizmoView[16], gizmoProj[16]; //gizmo观察、投影矩阵
 	IGizmo* gizmoMove, * gizmoRotate, *gizmoScale; //相关gizmo组件
+	QMatrix4x4 beforeRotate;
 	void applyToModel(); //将结果返回模型
 	void setModelMatrix(const QMatrix4x4& model);
 };

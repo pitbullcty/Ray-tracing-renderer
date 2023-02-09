@@ -45,7 +45,7 @@ public:
         //mTransform = NULL;
         mEditPos =  mEditScale = NULL;
         mEditQT = NULL;
-		mMask = AXIS_ALL;
+		mMask = AXIS_NO_TRACKBALL;
         m_Lng = 1.f;
         mScreenHeight = mScreenWidth = 1;
         m_ScreenFactor = 1;

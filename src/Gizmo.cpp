@@ -24,7 +24,7 @@ void Gizmo::setModelMatrix(const QMatrix4x4& model)
 	gizmoMove->SetEditMatrix(gizmoModel);
 	gizmoMove->SetLocation(IGizmo::LOCATE_WORLD);
 	gizmoRotate->SetEditMatrix(gizmoModel);
-	gizmoRotate->SetLocation(IGizmo::LOCATE_WORLD);
+	gizmoRotate->SetLocation(IGizmo::LOCATE_LOCAL);
 	gizmoScale->SetEditMatrix(gizmoModel);
 	gizmoScale->SetLocation(IGizmo::LOCATE_WORLD);
 }
@@ -32,7 +32,8 @@ void Gizmo::setModelMatrix(const QMatrix4x4& model)
 void Gizmo::setEditModel(Model* model)
 {
 	this->model = model;
-	QMatrix4x4 gizmoModel = model->transform.getModel(); //获取初始模型矩阵
+	QMatrix4x4 gizmoModel ; //获取初始模型矩阵
+	gizmoModel = model->transform.getModel();
 	gizmoModel.translate(model->getCenter()); //转移至中心位置
 	setModelMatrix(gizmoModel);
 }
@@ -41,7 +42,9 @@ void Gizmo::applyToModel()
 {
 	QMatrix4x4 newmodel(gizmo->getEditMatrix());
 	newmodel = newmodel.transposed();
-	newmodel.translate(-model->getCenter()); //往回移动
+	QMatrix4x4 trans;
+	trans.translate(-model->getCenter());
+	newmodel = trans * newmodel; //往回移动
 	model->transform.setModel(newmodel);
 }
 

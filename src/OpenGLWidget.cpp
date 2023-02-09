@@ -1,12 +1,18 @@
 ﻿#include "OpenGLWidget.h"
 
+GIZMO_TYPE type[3] = { MOVE,ROTATE,SCALE };
+int changecount = 0;
+
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
     , modelLoader(ModelLoader::GetInstance())
     , isRightClicked(false), isLeftClicked(false)
     ,deltaTime(0.0f),lastFrame(0.0f)
 {
+    QSurfaceFormat surfaceFormat;
+    surfaceFormat.setSamples(4);
     setFocusPolicy(Qt::ClickFocus); 
+    setFormat(surfaceFormat); //开启多重采样抗锯齿
 }
 
 OpenGLWidget::~OpenGLWidget()
@@ -93,10 +99,22 @@ void OpenGLWidget::compileShader(QOpenGLShaderProgram* shaderProgram, const QStr
 
 void OpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
-    if (event->isAutoRepeat())
-        return;
     Qt::Key key = (Qt::Key)(event->key());
-    sceneManager->getCamera()->addKey(key);
+    if(key == Qt::Key_W || key == Qt::Key_S || key == Qt::Key_A || key == Qt::Key_D
+        || key == Qt::Key_Space || key == Qt::Key_Shift)
+    {
+        if (event->isAutoRepeat())
+            return;
+        sceneManager->getCamera()->addKey(key);
+    }
+    else if (key == Qt::Key_Q) {
+        changecount++;
+        if (changecount == 3) changecount = 0;
+        sceneManager->getGizmo()->setType(type[changecount]);
+    }
+    else {
+        ;
+    }
 
 }
 

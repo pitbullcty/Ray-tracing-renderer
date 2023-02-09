@@ -27,6 +27,7 @@ SceneManager::SceneManager(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, 
 	skybox = Skybox::GetInstance();
 	gizmo = QSharedPointer<Gizmo>(new Gizmo(functions, shaderProgram["gizmo"]));
 	gizmo->setScale(5.0f);
+	gizmo->setType(MOVE);
 	VBO.create();
 	EBO.create();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
@@ -165,7 +166,6 @@ void SceneManager::renderGizmo()
 	shaderProgram["gizmo"]->bind();
 	shaderProgram["gizmo"]->setUniformValue("projection", projection);
 	shaderProgram["gizmo"]->setUniformValue("view", view);
-	gizmo->setType(MOVE);
 	gizmo->setCamera(view, projection);
 	gizmo->Draw();
 }
