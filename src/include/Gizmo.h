@@ -26,6 +26,7 @@ public:
 	void mouseMove(int x, int y);
 	bool mouseDown(int x, int y);
 	void mouseUp(int x, int y);
+	void setLocate(IGizmo::LOCATION location);
 	void Draw();
 
 private:
@@ -35,6 +36,7 @@ private:
 	IGizmo* gizmoMove, * gizmoRotate, *gizmoScale; //相关gizmo组件
 	QMatrix4x4 beforeRotate;
 	void applyToModel(); //将结果返回模型
+	bool checkScale();  //检查模型矩阵
 	void setModelMatrix(const QMatrix4x4& model);
 };
 

@@ -17,6 +17,7 @@ public:
 	void addModel(const QString& name, Model model); //添加模型
 	void clearModel(); //删除模型
 	void renderModels();
+	void renderModel(const QString& name); //渲染单个模型
 	void destoryTexture();
 	void initSkybox();
 	void renderSkybox();

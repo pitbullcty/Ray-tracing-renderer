@@ -6,7 +6,10 @@ Gizmo::Gizmo(QOpenGLExtraFunctions* _functions, QOpenGLShaderProgram* _program) 
 	gizmoMove = CreateMoveGizmo(_functions, _program);
 	gizmoRotate = CreateRotateGizmo(_functions, _program);
 	gizmoScale = CreateScaleGizmo(_functions, _program);
-	memset(gizmoModel, 0 ,sizeof(float)*16);
+	gizmoMove->SetLocation(IGizmo::LOCATE_WORLD);
+	gizmoRotate->SetLocation(IGizmo::LOCATE_WORLD);
+	gizmoScale->SetLocation(IGizmo::LOCATE_WORLD);
+	memset(gizmoModel, 0, sizeof(float) * 16);
 	memset(gizmoView, 0, sizeof(float) * 16);
 	memset(gizmoProj, 0, sizeof(float) * 16);
 }
@@ -22,11 +25,11 @@ void Gizmo::setModelMatrix(const QMatrix4x4& model)
 {
 	model.transposed().copyDataTo(gizmoModel);
 	gizmoMove->SetEditMatrix(gizmoModel);
-	gizmoMove->SetLocation(IGizmo::LOCATE_WORLD);
 	gizmoRotate->SetEditMatrix(gizmoModel);
-	gizmoRotate->SetLocation(IGizmo::LOCATE_LOCAL);
 	gizmoScale->SetEditMatrix(gizmoModel);
-	gizmoScale->SetLocation(IGizmo::LOCATE_WORLD);
+	gizmoMove->setSvgMatrix();
+	gizmoRotate->setSvgMatrix();
+	gizmoScale->setSvgMatrix();
 }
 
 void Gizmo::setEditModel(Model* model)
@@ -46,6 +49,16 @@ void Gizmo::applyToModel()
 	trans.translate(-model->getCenter());
 	newmodel = trans * newmodel; //往回移动
 	model->transform.setModel(newmodel);
+}
+
+bool Gizmo::checkScale()
+{
+	if (abs((model->transform.scaleX - 1.0f)) > 1e-6 || abs((model->transform.scaleY - 1.0f)) > 1e-6
+		|| abs((model->transform.scaleY - 1.0f)) > 1e-6) {
+		model->transform.scaleX = model->transform.scaleY = model->transform.scaleZ = 1.0f;
+		return true;
+	}
+	return false;
 }
 
 void Gizmo::setSize(int w, int h)
@@ -84,18 +97,35 @@ void Gizmo::setType(GIZMO_TYPE type)
 
 void Gizmo::mouseMove(int x, int y)
 {
-	gizmo->OnMouseMove(x, y);
+	gizmo->OnMouseMove(x, y);  //采用消除旋转策略
 	applyToModel();
 }
 
 bool Gizmo::mouseDown(int x, int y)
 {
-	return gizmo->OnMouseDown(x, y);
+	if (gizmo->OnMouseDown(x, y)) {
+		if (gizmo == gizmoRotate) {
+			if (checkScale()) {
+				qDebug() << "消除缩放因子";
+				model->transform.calcModel();
+				auto modelMatrix = model->transform.getModel();
+				modelMatrix.translate(model->getCenter());
+				setModelMatrix(modelMatrix);
+			}
+		} 
+		return true;
+	}
+	return false;
 }
 
 void Gizmo::mouseUp(int x, int y)
 {
 	gizmo->OnMouseUp(x, y);
+}
+
+void Gizmo::setLocate(IGizmo::LOCATION location)
+{
+	gizmo->SetLocation(location);
 }
 
 void Gizmo::Draw()

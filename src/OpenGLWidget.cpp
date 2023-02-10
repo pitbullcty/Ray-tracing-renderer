@@ -1,7 +1,9 @@
 ﻿#include "OpenGLWidget.h"
 
 GIZMO_TYPE type[3] = { MOVE,ROTATE,SCALE };
-int changecount = 0;
+IGizmo::LOCATION locations[2] = { IGizmo::LOCATE_WORLD, IGizmo::LOCATE_LOCAL };
+int changeCount = 0;
+int locationCount = 0;
 
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
@@ -108,9 +110,14 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
         sceneManager->getCamera()->addKey(key);
     }
     else if (key == Qt::Key_Q) {
-        changecount++;
-        if (changecount == 3) changecount = 0;
-        sceneManager->getGizmo()->setType(type[changecount]);
+        changeCount++;
+        if (changeCount == 3) changeCount = 0;
+        sceneManager->getGizmo()->setType(type[changeCount]);
+    }
+    else if (key == Qt::Key_E) {
+        locationCount++;
+        if (locationCount == 2) locationCount = 0;
+        sceneManager->getGizmo()->setLocate(locations[locationCount]);
     }
     else {
         ;

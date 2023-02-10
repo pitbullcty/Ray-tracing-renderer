@@ -38,7 +38,6 @@ class CGizmoTransformRotate : public CGizmoTransform
 public:
 	CGizmoTransformRotate(QOpenGLExtraFunctions* _functions, QOpenGLShaderProgram* _program);
 	virtual ~CGizmoTransformRotate();
-
 	// return true if gizmo transform capture mouse
 	virtual bool OnMouseDown(unsigned int x, unsigned int y);
 	virtual void OnMouseMove(unsigned int x, unsigned int y);

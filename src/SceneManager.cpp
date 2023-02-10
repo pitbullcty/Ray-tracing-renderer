@@ -65,6 +65,22 @@ void SceneManager::renderModels()
 	shaderProgram["model"]->release();
 }
 
+void SceneManager::renderModel(const QString& name)
+{
+	auto model = models[name];
+	shaderProgram["model"]->bind();
+	projection = QMatrix4x4();
+	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
+	shaderProgram["model"]->setUniformValue("projection", projection);
+	shaderProgram["model"]->setUniformValue("view", getCamera()->getView());
+	shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
+	for (auto& mesh : model.getMeshes()) {
+		renderMesh(mesh);
+		renderTexture(mesh);
+	}
+	shaderProgram["model"]->release();
+}
+
 void SceneManager::renderMesh(const Mesh& mesh)
 {
 	QOpenGLVertexArrayObject::Binder binder(&VAO);

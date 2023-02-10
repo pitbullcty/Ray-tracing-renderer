@@ -57,6 +57,7 @@ public:
 
 	virtual void SetEditMatrix(float *pMatrix) = 0;
 	virtual float* getEditMatrix() = 0;
+	virtual void setSvgMatrix(float* svgMatrix = nullptr) = 0;
 
 	virtual void SetCameraMatrix(const float *Model, const float *Proj) = 0;
     virtual void SetScreenDimension( int screenWidth, int screenHeight) = 0;

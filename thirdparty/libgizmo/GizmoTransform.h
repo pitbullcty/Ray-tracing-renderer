@@ -65,6 +65,15 @@ public:
         mEditQT = NULL;
 	}
 
+	virtual void setSvgMatrix(float* svgMatrix = nullptr) {
+		if (svgMatrix == nullptr) {
+			m_svgMatrix = *m_pMatrix;
+		}
+		else {
+			m_svgMatrix = *(tmatrix*)svgMatrix;
+		}
+	}
+
     virtual void SetDisplayScale( float aScale ) { mDisplayScale = aScale; }
 
 	virtual float* getEditMatrix() {
