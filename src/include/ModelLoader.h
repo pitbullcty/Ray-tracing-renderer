@@ -2,7 +2,6 @@
 #define __MODEL_LOADER__
 
 #include <QSharedPointer>
-#include <QDebug>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

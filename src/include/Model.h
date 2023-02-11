@@ -9,9 +9,9 @@ public:
 	Model(const QVector<Mesh>& _meshes, QVector3D _center = QVector3D(0.0f,0.0f,0.0f));
 	Model() = default;
 	~Model() = default;
+	void destroyTextures();
 	QVector<Mesh> getMeshes();
 	QVector3D getCenter();
-	void destroyTextures();
 	Transform transform; //变换组件
 
 private:

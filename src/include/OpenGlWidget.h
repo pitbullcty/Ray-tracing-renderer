@@ -6,9 +6,8 @@
 #include <QOpenGLShaderProgram>
 #include <QKeyEvent>
 #include <QTime>
-#include <QTimer>
+#include "Renderer.h"
 #include "SceneManager.h"
-#include "ModelLoader.h"
 
 class OpenGLWidget: public QOpenGLWidget, public QOpenGLExtraFunctions
 {
@@ -36,8 +35,8 @@ private:
     QOpenGLShaderProgram skyboxShaderProgram;
     QOpenGLShaderProgram gizmoShaderProgram;
 
+    QSharedPointer<Renderer> renderer;
     QSharedPointer<SceneManager> sceneManager;
-    QSharedPointer<ModelLoader> modelLoader;
 
     bool isRightClicked; //右键是否按下
     bool isLeftClicked; //右键是否按下
@@ -47,7 +46,7 @@ private:
     float lastFrame; //上一帧时间
 
     void initShaders();
-    void initSceneManager();
+    void initRenderer();
     void compileShader(QOpenGLShaderProgram* shaderProgram, const QString& shaderName);
    
 };

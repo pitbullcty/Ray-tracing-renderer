@@ -7,8 +7,8 @@ int locationCount = 0;
 
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
-    , modelLoader(ModelLoader::GetInstance())
-    , isRightClicked(false), isLeftClicked(false)
+    ,sceneManager(SceneManager::GetInstance())
+    ,isRightClicked(false), isLeftClicked(false)
     ,deltaTime(0.0f),lastFrame(0.0f)
 {
     QSurfaceFormat surfaceFormat;
@@ -19,7 +19,7 @@ OpenGLWidget::OpenGLWidget(QWidget* parent)
 
 OpenGLWidget::~OpenGLWidget()
 {
-    sceneManager->destoryTexture();
+    sceneManager->clearModels();
 }
 
 void OpenGLWidget::initializeGL()
@@ -30,24 +30,20 @@ void OpenGLWidget::initializeGL()
     this->glEnable(GL_DEPTH_TEST);
     this->glDepthFunc(GL_LEQUAL);
     this->glViewport(0, 0, width(), height());
-   
-    initShaders();
-    initSceneManager();
- 
+
     QString path = "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj";
-    QString _path = path.right(path.size() - path.lastIndexOf('/') - 1);
-    QString name = _path.left(_path.lastIndexOf('.'));
-    Model m = modelLoader->loadModel(path);
-   
-    sceneManager->addModel(name,m);
-    sceneManager->initSkybox();
+    sceneManager->addModel(path);
+
+    initShaders();
+    initRenderer();
+
 }
 
 void OpenGLWidget::resizeGL(int w, int h)
 {
     
     this->glViewport(0, 0, w, h);    //定义视口区域
-    sceneManager->resize(w, h);
+    renderer->resize(w, h);
 }
 
 void OpenGLWidget::paintGL()
@@ -55,9 +51,9 @@ void OpenGLWidget::paintGL()
     
     sceneManager->getCamera()->processKeyboard(deltaTime);
  
-    sceneManager->renderModels();
-    sceneManager->renderSkybox();
-    sceneManager->renderGizmo(); //最后渲染gizmo避免被遮挡
+    renderer->renderModels();
+    renderer->renderSkybox();
+    renderer->renderGizmo(); //最后渲染gizmo避免被遮挡
     //渲染部分
 
     float time = QTime::currentTime().msecsSinceStartOfDay() / 1000.0; //返回当天的毫秒数
@@ -75,13 +71,15 @@ void OpenGLWidget::initShaders()
     compileShader(&gizmoShaderProgram, "gizmo");
 }
 
-void OpenGLWidget::initSceneManager()
+void OpenGLWidget::initRenderer()
 {
     QMap<QString, QOpenGLShaderProgram*> map;
     map.insert("model", &modelShaderProgram);
     map.insert("skybox", &skyboxShaderProgram);
     map.insert("gizmo", &gizmoShaderProgram);
-    sceneManager = SceneManager::GetInstance(map, QOpenGLContext::currentContext()->extraFunctions(), width(), height());
+    renderer = Renderer::GetInstance(map, QOpenGLContext::currentContext()->extraFunctions(), width(), height());
+    renderer->setModels(sceneManager->getModels());
+    renderer->initSkybox();
 }
 
 void OpenGLWidget::compileShader(QOpenGLShaderProgram* shaderProgram, const QString& shaderName)
@@ -112,12 +110,12 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
     else if (key == Qt::Key_Q) {
         changeCount++;
         if (changeCount == 3) changeCount = 0;
-        sceneManager->getGizmo()->setType(type[changeCount]);
+        renderer->getGizmo()->setType(type[changeCount]);
     }
     else if (key == Qt::Key_E) {
         locationCount++;
         if (locationCount == 2) locationCount = 0;
-        sceneManager->getGizmo()->setLocate(locations[locationCount]);
+        renderer->getGizmo()->setLocate(locations[locationCount]);
     }
     else {
         ;
@@ -143,7 +141,7 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
     else if (event->button() == Qt::LeftButton) {
         int x = event->pos().x();
         int y = event->pos().y();
-        if (sceneManager->getGizmo()->mouseDown(x, y)) {
+        if (renderer->getGizmo()->mouseDown(x, y)) {
             isLeftClicked = true;
         } //调整Gizmo
     }
@@ -157,7 +155,7 @@ void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
     int x = event->pos().x();
     int y = event->pos().y();
     if (isLeftClicked) {
-        sceneManager->getGizmo()->mouseUp(x, y);
+        renderer->getGizmo()->mouseUp(x, y);
         isLeftClicked = false;
     }
     else if (isRightClicked)
@@ -176,7 +174,7 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
         lastPos = event->pos();
         sceneManager->getCamera()->processMouseMovement(xoffset, yoffset);
     }
-    sceneManager->getGizmo()->mouseMove(x, y);
+    renderer->getGizmo()->mouseMove(x, y);
 }
 
 void OpenGLWidget::wheelEvent(QWheelEvent* event)

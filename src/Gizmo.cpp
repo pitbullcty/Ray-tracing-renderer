@@ -48,6 +48,7 @@ void Gizmo::applyToModel()
 	QMatrix4x4 trans;
 	trans.translate(-model->getCenter());
 	newmodel = trans * newmodel; //往回移动
+	qDebug() << newmodel;
 	model->transform.setModel(newmodel);
 }
 
@@ -106,10 +107,11 @@ bool Gizmo::mouseDown(int x, int y)
 	if (gizmo->OnMouseDown(x, y)) {
 		if (gizmo == gizmoRotate) {
 			if (checkScale()) {
-				qDebug() << "消除缩放因子";
 				model->transform.calcModel();
 				auto modelMatrix = model->transform.getModel();
-				modelMatrix.translate(model->getCenter());
+				auto trans = QMatrix4x4();
+				trans.translate(model->getCenter());
+				modelMatrix = trans * modelMatrix;
 				setModelMatrix(modelMatrix);
 			}
 		} 
