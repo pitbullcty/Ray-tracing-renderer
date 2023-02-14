@@ -15,7 +15,6 @@
 class Renderer {
 public:
 	void setModels(QMap<QString, Model>* _models); //设置渲染模型指针
-
 	void renderModels();
 	void renderModel(const QString& name); //渲染单个模型
 	void initSkybox();
@@ -53,6 +52,7 @@ private:
 
 	Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height);
 	~Renderer() = default;
+
 	void renderMesh(const Mesh& mesh);
 	void renderTexture(const Mesh& mesh);
 	void renderCube(QOpenGLShaderProgram* shaderProgram);

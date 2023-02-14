@@ -17,11 +17,18 @@ void Camera::destory(Camera* camera) {
 	delete camera;
 }
 
-Camera::Camera(const QVector3D& pos, const QVector3D& up):pos(pos), worldUP(up),direction(-pos.normalized()),up(up),right(QVector3D::crossProduct(direction, worldUP).normalized()),
-yaw(-90.0f),pitch(0.0f),speed(10.0f),sensitivity(0.1f),zoom(30.0f) //初始化值
+Camera::Camera(const QVector3D& pos, const QVector3D& up):pos(pos), 
+    worldUP(up),
+    direction(-pos.normalized()),
+    up(up),
+    right(QVector3D::crossProduct(direction, worldUP).normalized()),
+    yaw(-90.0f),
+    pitch(0.0f),
+    speed(10.0f),
+    sensitivity(0.1f),
+    zoom(30.0f) //初始化值
 {
 }
-
 
 QMatrix4x4 Camera::getView()
 {
@@ -131,5 +138,41 @@ void Camera::updateState()
 	direction = newDirection.normalized();
 	right = QVector3D::crossProduct(direction, worldUP).normalized();
 	up = QVector3D::crossProduct(right, direction).normalized();
+}
+
+void Camera::reSet()
+{
+    pos = { 0,0,0 };
+    worldUP = { 0,1,0 };
+    direction = -pos.normalized();
+    up = { 0,1,0 };
+    right = QVector3D::crossProduct(direction, worldUP).normalized();
+    yaw = -90.0f;
+    pitch = 0.0f;
+    speed = 10.0f;
+    sensitivity = 0.1f;
+    zoom = 30.0f;
+}
+
+QJsonObject Camera::toJson()
+{
+    QJsonObject camera;
+    camera.insert("x", pos.x());
+    camera.insert("y", pos.y());
+    camera.insert("z", pos.z());
+    camera.insert("yaw", yaw);
+    camera.insert("pitch", pitch);
+    return camera;
+}
+
+void Camera::prase(QJsonObject camera)
+{
+    float x = camera["x"].toVariant().toFloat();
+    float y = camera["y"].toVariant().toFloat();
+    float z = camera["z"].toVariant().toFloat();
+    pitch = camera["pitch"].toVariant().toFloat();
+    yaw = camera["yaw"].toVariant().toFloat();
+    setPos({ x,y,z });
+    updateState();
 }
 

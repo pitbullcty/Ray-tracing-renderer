@@ -1,5 +1,5 @@
 ﻿#include "ui_Mainwindow.h"
-
+#include "WindowActions.h"
 
 class MainWindow : public QMainWindow
 {
@@ -12,5 +12,9 @@ public:
 
 private:
     Ui::MainWindow* ui;
+    WindowActions actions;
 
+public slots:
+    void receiveCloseSignal(int signal);
 };
+

@@ -23,6 +23,14 @@ void Transform::calcModel()
 	model.scale(scaleX, scaleY, scaleZ);
 }
 
+void Transform::reSet()
+{
+	scaleX = scaleY = scaleZ = 1.0f;
+	rotationX = rotationY = rotationZ = 0.0f;
+	translationX = translationY = translationZ = 0.0f;
+	calcModel();
+}
+
 QMatrix4x4 Transform::getModel()
 {
 	return model;
@@ -33,7 +41,6 @@ void Transform::setModel(const QMatrix4x4& _model)
 	model = _model;
 	                        
 	float data[16];
-
 	_model.copyDataTo(data);
 
 	translationX = data[3], translationY = data[7], translationZ = data[11]; //计算平移
@@ -49,6 +56,22 @@ void Transform::setModel(const QMatrix4x4& _model)
 	rotationX = rotationX * 180 / PI;
 	rotationY = rotationY * 180 / PI;
 	rotationZ = rotationZ * 180 / PI;  //通过矩阵逆向计算
+
+}
+
+QJsonObject Transform::toJson()
+{
+	QJsonObject transform;
+	transform.insert("translationX", translationX);
+	transform.insert("translationY", translationY);
+	transform.insert("translationZ", translationZ);
+	transform.insert("rotationX", rotationX);
+	transform.insert("rotationY", rotationY);
+	transform.insert("rotationZ", rotationZ);
+	transform.insert("scaleX", scaleX);
+	transform.insert("scaleY", scaleY);
+	transform.insert("scaleZ", scaleZ);
+	return transform;
 
 }
 

@@ -21,6 +21,12 @@ void ModelLoader::destory(ModelLoader* modelLoader) {
 	delete modelLoader;
 }
 
+
+void ModelLoader::clearPathes()
+{
+    pathLoaded.clear();
+}
+
 static QSharedPointer<QOpenGLTexture> textureFromFile(const QString& path)
 {
     QImage image(path);
@@ -37,14 +43,24 @@ static QSharedPointer<QOpenGLTexture> textureFromFile(const QString& path)
 }
 
 
-Model ModelLoader::loadModel(const QString& path) {
+LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
+    
     this->path = path;
+    meshes.clear();
+    textures_loaded.clear();
+    nodeCenters.clear();
+    center = QVector3D(); //加载前清空
+    if (pathLoaded.contains(path)) {
+        qDebug() << "模型" + path + "已加载！";
+        return RELOADED;
+    } //若模型已经加载过则直接复制
+    pathLoaded.push_back(path);
     Assimp::Importer import;
     const aiScene* scene = import.ReadFile(path.toStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals); //读入场景,基于y轴翻转纹理坐标,换所有的模型的原始几何形状为三角形
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)//检查场景和其根节点不为null，并且检查了标记(Flag)，查看返回的数据完整性。
     {
         qDebug() << "ERROR::" << import.GetErrorString();
-        return Model();
+        return FAILED;
     }
     qDebug() << "网格：" << scene->mNumMeshes;
     qDebug() << "材质：" << scene->mNumMaterials;
@@ -54,12 +70,8 @@ Model ModelLoader::loadModel(const QString& path) {
     for (auto& nodeCenter : nodeCenters) {
         center += nodeCenter;
     }
-    Model m(meshes, center/nodeCenters.size());
-    meshes.clear();
-    textures_loaded.clear();
-    nodeCenters.clear();
-    center = QVector3D();
-    return m;
+    model.setData(meshes, path, center/nodeCenters.size());
+    return SUCCESS;
 }
 
 /*
@@ -74,11 +86,11 @@ void ModelLoader::processNode(aiNode* node, const aiScene* scene)
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         Mesh temp = processMesh(mesh, scene);
         nodeCenter += temp.center;
-        meshes.push_back(temp);
+        meshes.emplace_back(temp);
     }
     if (node->mNumMeshes != 0) {
         nodeCenter /= node->mNumMeshes;
-        nodeCenters.push_back(nodeCenter);
+        nodeCenters.emplace_back(nodeCenter);
     }
     // 递归处理子节点重复这一过程
     for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -98,12 +110,7 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
-        QVector3D vector;
-
-        //顶点坐标
-        vector.setX(mesh->mVertices[i].x);
-        vector.setY(mesh->mVertices[i].y);
-        vector.setZ(mesh->mVertices[i].z);
+        QVector3D vector{ mesh->mVertices[i].x, mesh->mVertices[i].y,mesh->mVertices[i].z };//顶点坐标
         vertex.pos = vector;
 
         // 法向量
@@ -137,7 +144,7 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
         aiVector3D faceCenter(0, 0, 0); //面中心
         // 将所有面的索引数据添加到索引数组中
         for (unsigned int j = 0; j < face.mNumIndices; j++) {
-            indices.push_back(face.mIndices[j]);
+            indices.emplace_back(face.mIndices[j]);
             faceCenter = faceCenter + mesh->mVertices[face.mIndices[j]];
         }
         faceCenter /= face.mNumIndices;
@@ -151,22 +158,22 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
     // 1. 漫反射贴图
     QVector<Texture>  diffuseMaps = loadTexture(material, aiTextureType_DIFFUSE, "texture_diffuse");
     for (auto& texture : diffuseMaps)
-        textures.push_back(texture);
+        textures.emplace_back(texture);
 
     // 2. 镜面贴图
     QVector<Texture> specularMaps = loadTexture(material, aiTextureType_SPECULAR, "texture_specular");
     for (auto& texture : specularMaps)
-        textures.push_back(texture);
+        textures.emplace_back(texture);
 
     // 3. 法向量图
     QVector<Texture> normalMaps = loadTexture(material, aiTextureType_HEIGHT, "texture_normal");
     for (auto& texture : normalMaps)
-        textures.push_back(texture);
+        textures.emplace_back(texture);
 
     // 4. 高度图
     QVector<Texture> heightMaps = loadTexture(material, aiTextureType_AMBIENT, "texture_height");
     for (auto& texture : heightMaps)
-        textures.push_back(texture);
+        textures.emplace_back(texture);
 
     QVector3D center = assimp2QVector(meshCenter);
 
@@ -186,11 +193,11 @@ QVector<Texture> ModelLoader::loadTexture(aiMaterial* material, aiTextureType ty
 
         // 检查纹理是否在之前加载过，如果是，则继续到下一个迭代:跳过加载新纹理
         bool skip = false;
-        for (int j = 0; j < textures_loaded.size(); j++)
+        for (const auto& j: textures_loaded)
         {
-            if (std::strcmp(textures_loaded[j].path.toStdString().c_str(), str.C_Str()) == 0)
+            if (std::strcmp(j.path.toStdString().c_str(), str.C_Str()) == 0)
             {
-                textures.push_back(textures_loaded[j]);
+                textures.emplace_back(j);
                 skip = true; //带有相同filepath的纹理已经加载，继续到下一个
                 break;
             }
@@ -203,12 +210,15 @@ QVector<Texture> ModelLoader::loadTexture(aiMaterial* material, aiTextureType ty
             if (!tex.texture.isNull()) {
                 tex.type = name;
                 tex.path = texpath;
-                textures.push_back(tex);
-                textures_loaded.push_back(tex);
+                textures.emplace_back(tex);
+                textures_loaded.emplace_back(tex);
                 qDebug() << "纹理加载成功：" << texpath;
             }
             else {
                 qDebug() << "未能成功加载纹理：" << texpath;
+                int index = pathLoaded.indexOf(this->path);
+                if(index!=-1)
+                    pathLoaded.remove(index); //删除未加载成功模型
             }
         }
     }

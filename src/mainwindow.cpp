@@ -1,9 +1,11 @@
 ﻿#include "Mainwindow.h"
 #include <QFile>
 
-MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindow),actions(WindowActions(ui))
 {
 	ui->setupUi(this);
+    connect(ui->openGLWidget,SIGNAL(sendCloseSignal(int)),this,SLOT(receiveCloseSignal(int))); //绑定子窗口信号
+    actions.bind();
 }
 
 MainWindow::~MainWindow()//析构函数，关掉ＵＩ界面
@@ -13,6 +15,7 @@ MainWindow::~MainWindow()//析构函数，关掉ＵＩ界面
 
 void MainWindow::setStyle(int style)
 {
+
     QFile* f = nullptr;
     if (style)
         f = new QFile(":/qdarkstyle/dark/darkstyle.qss");
@@ -28,4 +31,8 @@ void MainWindow::setStyle(int style)
         qApp->setStyleSheet(ts.readAll());
     }
     delete f;
+}
+
+void MainWindow::receiveCloseSignal(int signal) {
+    if (signal) this->close();
 }

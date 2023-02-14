@@ -231,25 +231,25 @@ void CGizmoTransformRender::Draw(const QVector<float>& data, GLenum mode, int co
 
 
 void CGizmoTransformRender::addColor(QVector<float>& data, const tvector4& col) {
-	data.push_back(col.x);
-	data.push_back(col.y);
-	data.push_back(col.z);
-	data.push_back(col.w);
+	data.emplace_back(col.x);
+	data.emplace_back(col.y);
+	data.emplace_back(col.z);
+	data.emplace_back(col.w);
 	return;
 }
 
 void CGizmoTransformRender::addColor(QVector<float>& data, int r, int g, int b) {
-	data.push_back(r);
-	data.push_back(g);
-	data.push_back(b);
-	data.push_back(1.0f);
+	data.emplace_back(r);
+	data.emplace_back(g);
+	data.emplace_back(b);
+	data.emplace_back(1.0f);
 	return;
 }
 
 void CGizmoTransformRender::addVector3(QVector<float>& data, const tvector3& v)
 {
-	data.push_back(v.x);
-	data.push_back(v.y);
-	data.push_back(v.z);
+	data.emplace_back(v.x);
+	data.emplace_back(v.y);
+	data.emplace_back(v.z);
 	return;
 }

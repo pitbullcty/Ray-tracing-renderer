@@ -4,7 +4,7 @@
 #include <QSharedPointer>
 #include <QVector3D>
 #include <QMatrix4x4>
-
+#include <QJsonObject>
 
 class Camera {
 public:
@@ -14,15 +14,19 @@ public:
     QMatrix4x4 getView();
     void setSensitivity(float _sensitivity);
     void setSpeed(float _speed);
+    void setPos(const QVector3D& _pos);
+
     float getZoom();
     void addKey(Qt::Key key);
     void removeKey(Qt::Key key);
-    void setPos(const QVector3D& _pos);
     void processKeyboard(float deltaTime);
     void processKeyboard(Qt::Key key, float deltaTime);
     void processMouseMovement(float xoffset, float yoffset);
     void processMouseScroll(float yoffset);
     void updateState();
+    void reSet();
+    QJsonObject toJson();
+    void prase(QJsonObject camera);
 
 private:
 	static QSharedPointer<Camera> instance;

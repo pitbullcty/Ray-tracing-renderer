@@ -3,6 +3,7 @@
 
 #include<QVector3D>
 #include <QMatrix4x4>
+#include <QJsonObject>
 
 class Transform {
 public:
@@ -18,8 +19,10 @@ public:
 	Transform();
 	~Transform() = default;
 	void calcModel(); //通过系数计算相应
+	void reSet();
 	QMatrix4x4 getModel();  //获取模型
 	void setModel(const QMatrix4x4& _model);  //设置模型,反过来计算对应系数
+	QJsonObject toJson();
 	
 private:
 	QMatrix4x4 model; //模型矩阵

@@ -1,11 +1,12 @@
 ﻿#include "Gizmo.h"
 
-Gizmo::Gizmo(QOpenGLExtraFunctions* _functions, QOpenGLShaderProgram* _program) {
-	gizmo = nullptr;
-	model = nullptr;
-	gizmoMove = CreateMoveGizmo(_functions, _program);
-	gizmoRotate = CreateRotateGizmo(_functions, _program);
-	gizmoScale = CreateScaleGizmo(_functions, _program);
+Gizmo::Gizmo(QOpenGLExtraFunctions* _functions, QOpenGLShaderProgram* _program) :
+	gizmo(nullptr),
+	model(nullptr),
+	gizmoMove(CreateMoveGizmo(_functions, _program)),
+	gizmoRotate(CreateRotateGizmo(_functions, _program)),
+	gizmoScale(CreateScaleGizmo(_functions, _program))
+{
 	gizmoMove->SetLocation(IGizmo::LOCATE_WORLD);
 	gizmoRotate->SetLocation(IGizmo::LOCATE_WORLD);
 	gizmoScale->SetLocation(IGizmo::LOCATE_WORLD);
@@ -19,6 +20,7 @@ Gizmo::~Gizmo() {
 	delete gizmoRotate;
 	delete gizmoScale;
 	gizmo = gizmoRotate = gizmoMove = gizmoScale = nullptr;
+	model = nullptr;
 }
 
 void Gizmo::setModelMatrix(const QMatrix4x4& model)
@@ -37,7 +39,9 @@ void Gizmo::setEditModel(Model* model)
 	this->model = model;
 	QMatrix4x4 gizmoModel ; //获取初始模型矩阵
 	gizmoModel = model->transform.getModel();
-	gizmoModel.translate(model->getCenter()); //转移至中心位置
+	QMatrix4x4 trans;
+	trans.translate(model->getCenter());
+	gizmoModel = trans * gizmoModel; //转移至中心位置
 	setModelMatrix(gizmoModel);
 }
 
@@ -48,7 +52,6 @@ void Gizmo::applyToModel()
 	QMatrix4x4 trans;
 	trans.translate(-model->getCenter());
 	newmodel = trans * newmodel; //往回移动
-	qDebug() << newmodel;
 	model->transform.setModel(newmodel);
 }
 

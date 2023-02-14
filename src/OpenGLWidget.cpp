@@ -8,18 +8,23 @@ int locationCount = 0;
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
     ,sceneManager(SceneManager::GetInstance())
-    ,isRightClicked(false), isLeftClicked(false)
-    ,deltaTime(0.0f),lastFrame(0.0f)
+    ,isRightClicked(false)
+    ,isLeftClicked(false)
+    ,isFullScreen(false)
+    ,deltaTime(0.0f)
+    ,lastFrameTime(0.0f)
 {
     QSurfaceFormat surfaceFormat;
     surfaceFormat.setSamples(4);
-    setFocusPolicy(Qt::ClickFocus); 
+    surfaceFormat.setDepthBufferSize(24); //深度测试缓冲区位数
     setFormat(surfaceFormat); //开启多重采样抗锯齿
+    setFocusPolicy(Qt::ClickFocus); 
+
 }
 
 OpenGLWidget::~OpenGLWidget()
 {
-    sceneManager->clearModels();
+    ;
 }
 
 void OpenGLWidget::initializeGL()
@@ -30,39 +35,49 @@ void OpenGLWidget::initializeGL()
     this->glEnable(GL_DEPTH_TEST);
     this->glDepthFunc(GL_LEQUAL);
     this->glViewport(0, 0, width(), height());
-
-    QString path = "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj";
-    sceneManager->addModel(path);
-
+   // sceneManager->loadScene("C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/test.json");
     initShaders();
     initRenderer();
-
 }
 
 void OpenGLWidget::resizeGL(int w, int h)
 {
-    
+    this->glEnable(GL_DEPTH_TEST);
+    this->glDepthFunc(GL_LEQUAL);
     this->glViewport(0, 0, w, h);    //定义视口区域
+    //oldGeometry = this->frameGeometry();
     renderer->resize(w, h);
+    
 }
 
 void OpenGLWidget::paintGL()
 {
-    
-    sceneManager->getCamera()->processKeyboard(deltaTime);
- 
-    renderer->renderModels();
-    renderer->renderSkybox();
-    renderer->renderGizmo(); //最后渲染gizmo避免被遮挡
-    //渲染部分
 
-    float time = QTime::currentTime().msecsSinceStartOfDay() / 1000.0; //返回当天的毫秒数
- 
-    deltaTime = time - lastFrame;
-   
-    lastFrame = time; //计算渲染时间
+    if (sceneManager->getState() == NONE) {
+        drawTips("请新建或打开文件！");
+        return;
+    }
+
+    else {
+
+        sceneManager->getCamera()->processKeyboard(deltaTime);
+
+        //Opengl渲染部分
+
+        renderer->renderModels();
+        renderer->renderSkybox();
+        renderer->renderGizmo(); //最后渲染gizmo避免被遮挡
+
+        float time = QTime::currentTime().msecsSinceStartOfDay() / 1000.0; //返回当天的秒数
+        deltaTime = time - lastFrameTime;
+        lastFrameTime = time; //计算渲染时间
+
+        drawFPS();
+
+    }
     update();
 }
+
 
 void OpenGLWidget::initShaders()
 { 
@@ -97,6 +112,42 @@ void OpenGLWidget::compileShader(QOpenGLShaderProgram* shaderProgram, const QStr
     }
 }
 
+void OpenGLWidget::drawFPS()
+{
+    if (abs(deltaTime-0.0f)<1e-6) return; 
+    this->glDisable(GL_DEPTH_TEST);
+    int fps = 1.0f / deltaTime;
+    if (fps > 144) {
+        return;
+    }
+    if (!painter.isActive())
+        painter.begin(this);
+    painter.setPen(QColor(0, 0, 0));//设置画笔颜色
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    QFont font;//设置字体，下面设置字体属性
+    font.setFamily("宋体");//字体样式
+    font.setPointSizeF(20);
+    painter.setFont(font);
+    QString text = "FPS:" + QString::number(fps);
+    painter.drawText(rect(), Qt::AlignLeft, text);
+    this->glEnable(GL_DEPTH_TEST);
+    painter.end();
+}
+
+void OpenGLWidget::drawTips(const QString& tips)
+{
+    if(!painter.isActive())
+        painter.begin(this);
+    painter.setPen(QColor(0, 0, 0));//设置画笔颜色
+    painter.setRenderHint(QPainter::Antialiasing, true); // 反走样
+    QFont font;//设置字体，下面设置字体属性
+    font.setFamily("宋体");//字体样式
+    font.setPointSizeF(30);
+    painter.setFont(font);
+    painter.drawText(rect(), Qt::AlignCenter, tips);
+    painter.end();
+}
+
 void OpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
     Qt::Key key = (Qt::Key)(event->key());
@@ -116,6 +167,22 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
         locationCount++;
         if (locationCount == 2) locationCount = 0;
         renderer->getGizmo()->setLocate(locations[locationCount]);
+    }
+    else if (key == Qt::Key_F5) {
+        if (!isFullScreen) {
+            setWindowFlags(Qt::Window);
+            showFullScreen();
+            isFullScreen = true;
+        }
+      
+    }
+    else if (key == Qt::Key_Escape) {
+        if (isFullScreen) {
+            setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint); //去除边框和按钮
+            setWindowFlag(Qt::SubWindow);
+            showNormal();
+            isFullScreen = false;
+        }
     }
     else {
         ;
@@ -181,5 +248,17 @@ void OpenGLWidget::wheelEvent(QWheelEvent* event)
 {
     QPoint offset = event->angleDelta();
     sceneManager->getCamera()->processMouseScroll(offset.y() / 20.0f);
+}
+
+void OpenGLWidget::closeEvent(QCloseEvent* event)
+{
+    if (sceneManager->closeApp()) {
+        emit sendCloseSignal(1);
+        event->accept();
+    }
+    else {
+        emit sendCloseSignal(0);
+        event->ignore();
+    }
 }
 

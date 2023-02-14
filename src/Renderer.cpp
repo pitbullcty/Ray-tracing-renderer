@@ -9,6 +9,7 @@ void Renderer::destory(Renderer* renderer)
 	renderer->VAO.destroy();
 	renderer->VBO.destroy();
 	renderer->EBO.destroy();
+	renderer->models = nullptr;
 	delete renderer;
 }
 
@@ -20,8 +21,12 @@ QSharedPointer<Renderer>& Renderer::GetInstance(QMap<QString, QOpenGLShaderProgr
 }
 
 Renderer::Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
-	shaderProgram(_shaderProgram), functions(_functions), VBO(QOpenGLBuffer::VertexBuffer)
-	, EBO(QOpenGLBuffer::IndexBuffer), width(width), height(height)
+	shaderProgram(_shaderProgram), 
+	functions(_functions), 
+	VBO(QOpenGLBuffer::VertexBuffer),
+	EBO(QOpenGLBuffer::IndexBuffer), 
+	width(width), 
+	height(height)
 {
 	models = nullptr;
 	camera = Camera::GetInstance();
@@ -44,6 +49,7 @@ void Renderer::setModels(QMap<QString, Model>* _models)
 void Renderer::renderModels()
 {
 	shaderProgram["model"]->bind();
+	functions->glEnable(GL_DEPTH_TEST);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	projection = QMatrix4x4();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
@@ -138,7 +144,7 @@ void Renderer::initSkybox()
 	int i = 0;
 	for (auto& key:keys)
 	{
-		QImage tex(skybox->path[key]);
+		QImage tex(skybox->pathes[key]);
 		tex = tex.convertToFormat(QImage::Format_RGB888);
 		functions->glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 			0, GL_RGB, tex.width(), tex.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, tex.bits()

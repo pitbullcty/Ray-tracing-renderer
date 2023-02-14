@@ -1,0 +1,79 @@
+{
+    "camera": {
+        "pitch": -32.200077056884766,
+        "x": 24.431222915649414,
+        "y": 19.906970977783203,
+        "yaw": -503.79962158203125,
+        "z": 17.751564025878906
+    },
+    "models": [
+        {
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
+            "name": "nanosuit",
+            "transform": {
+                "rotationX": -3.615574836730957,
+                "rotationY": -50.08341598510742,
+                "rotationZ": 3.6205263137817383,
+                "scaleX": 0.9999997615814209,
+                "scaleY": 0.9999997615814209,
+                "scaleZ": 0.9999997615814209,
+                "translationX": 0.6680102348327637,
+                "translationY": -0.7309370040893555,
+                "translationZ": 10.471872329711914
+            }
+        },
+        {
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
+            "name": "nanosuit01",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": 10,
+                "translationY": 5,
+                "translationZ": 3
+            }
+        },
+        {
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
+            "name": "nanosuit03",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": 2,
+                "translationY": 2,
+                "translationZ": 2
+            }
+        },
+        {
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
+            "name": "nanosuit04",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": 0,
+                "translationY": 0,
+                "translationZ": 0
+            }
+        }
+    ],
+    "skybox": {
+        "+x": ":/skybox/px.png",
+        "+y": ":/skybox/py.png",
+        "+z": ":/skybox/pz.png",
+        "-x": ":/skybox/nx.png",
+        "-y": ":/skybox/ny.png",
+        "-z": ":/skybox/nz.png"
+    }
+}
