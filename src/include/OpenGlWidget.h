@@ -46,8 +46,6 @@ private:
     bool isLeftClicked; //右键是否按下
     bool isFullScreen;  //是否全屏显示
 
-    QRect oldGeometry; //全屏前geometry
-
     QPoint lastPos; //上次鼠标停留的位置
     QPainter painter; //绘制提示/FPS
 

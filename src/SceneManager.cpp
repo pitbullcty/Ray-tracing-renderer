@@ -11,7 +11,6 @@ QSharedPointer<SceneManager>& SceneManager::GetInstance()
 
 void SceneManager::destory(SceneManager* sceneManager)
 {
-	sceneManager->clearModels();
 	delete sceneManager;
 }
 
@@ -61,7 +60,9 @@ void SceneManager::addModel(const QString& path, const QString& modelName)
 		models[newname].transform.reSet(); //重置transform
 	}
 	else if(loadRes == SUCCESS){
-		qDebug() << "模型" + newname + "加载耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms";
+		QString loadModelTime = "模型" + newname + "加载耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms";
+		Console::Info(loadModelTime);
+		//qDebug() << loadTime;
 		return;
 	}
 	return;
@@ -100,7 +101,8 @@ STATE SceneManager::getState()
 void SceneManager::loadScene(const QString& path)
 {
 
-	dealDifference();
+	if (!dealDifference()) return;
+	Console::clear();
 
 	sceneFileName = path;
 	bool res = true;
@@ -171,10 +173,14 @@ void SceneManager::loadScene(const QString& path)
 		res = false;
 	}
 	if (!res) {
-		qDebug() << "场景加载失败！请检查json格式";
+		Console::Error("场景加载失败！请检查json格式");
+		return;
+		//qDebug() << "场景加载失败！请检查json格式";
 	}
 	else {
-		qDebug() << "场景加载成功！耗时：" + QString::number(timer.elapsed(), 'f', 2) + "ms";
+		QString loadSceneTime = "场景加载成功！耗时：" + QString::number(timer.elapsed(), 'f', 2) + "ms";
+		Console::Info(loadSceneTime);
+		//qDebug() << loadSceneTime;
 	}
 	state = CREATED;
 }
@@ -195,6 +201,7 @@ bool SceneManager::saveScene()
 	file.open(QFile::WriteOnly);
 	file.write(doc.toJson());
 	file.close(); //写入json
+	Console::Info("场景保存至" + sceneFileName);
 	qDebug() << "场景保存至" + sceneFileName;
 	return true;
 }
@@ -206,6 +213,7 @@ void SceneManager::saveSceneAs(const QString& path)
 	QFile file(sceneFileName);
 	file.open(QFile::WriteOnly);
 	file.write(doc.toJson());
+	Console::Info("场景保存至" + sceneFileName);
 	qDebug() << "场景保存至" + sceneFileName;
 	file.close(); //写入json
 }
@@ -213,6 +221,7 @@ void SceneManager::saveSceneAs(const QString& path)
 void SceneManager::createScene()
 {
 	if (!dealDifference()) return;
+	Console::clear();
 	sceneFileName = ""; //清除保存文件名
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
@@ -223,6 +232,7 @@ void SceneManager::createScene()
 void SceneManager::closeScene()
 {
 	if (!dealDifference()) return;
+	Console::clear();
 	sceneFileName = ""; //清除保存文件名
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型

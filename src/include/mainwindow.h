@@ -18,3 +18,4 @@ public slots:
     void receiveCloseSignal(int signal);
 };
 
+

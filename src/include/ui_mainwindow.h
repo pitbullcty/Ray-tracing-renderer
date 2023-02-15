@@ -1,4 +1,4 @@
-/********************************************************************************
+﻿/********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
 ** Created by: Qt User Interface Compiler version 6.2.4
@@ -18,10 +18,10 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
-#include <QtWidgets/QTextBrowser>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include "Console.h"
 #include "OpenGLWidget.h"
 
 QT_BEGIN_NAMESPACE
@@ -55,7 +55,7 @@ public:
     QDockWidget *dockWidgetConsole;
     QWidget *consoleContents;
     QVBoxLayout *verticalLayout;
-    QTextBrowser *console;
+    Console *console;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -149,11 +149,8 @@ public:
         consoleContents->setObjectName(QString::fromUtf8("consoleContents"));
         verticalLayout = new QVBoxLayout(consoleContents);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        console = new QTextBrowser(consoleContents);
+        console = new Console(consoleContents);
         console->setObjectName(QString::fromUtf8("console"));
-        sizePolicy.setHeightForWidth(console->sizePolicy().hasHeightForWidth());
-        console->setSizePolicy(sizePolicy);
-        console->setMaximumSize(QSize(16777215, 16777215));
 
         verticalLayout->addWidget(console);
 
@@ -216,7 +213,6 @@ public:
         menu_4->setTitle(QCoreApplication::translate("MainWindow", "\347\252\227\345\217\243(&W)", nullptr));
         toolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar", nullptr));
     } // retranslateUi
-
 };
 
 namespace Ui {

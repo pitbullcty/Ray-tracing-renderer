@@ -51,7 +51,8 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
     nodeCenters.clear();
     center = QVector3D(); //加载前清空
     if (pathLoaded.contains(path)) {
-        qDebug() << "模型" + path + "已加载！";
+        Console::Info("模型" + path + "已加载！");
+       // qDebug() << "模型" + path + "已加载！";
         return RELOADED;
     } //若模型已经加载过则直接复制
     pathLoaded.push_back(path);
@@ -59,13 +60,19 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
     const aiScene* scene = import.ReadFile(path.toStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals); //读入场景,基于y轴翻转纹理坐标,换所有的模型的原始几何形状为三角形
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)//检查场景和其根节点不为null，并且检查了标记(Flag)，查看返回的数据完整性。
     {
-        qDebug() << "ERROR::" << import.GetErrorString();
+        auto error = import.GetErrorString();
+        Console::Error("ASSIMP ERRPR:" + QString(error));
+        qDebug() << "ERROR::" << error;
         return FAILED;
     }
-    qDebug() << "网格：" << scene->mNumMeshes;
-    qDebug() << "材质：" << scene->mNumMaterials;
-    qDebug() << "纹理：" << scene->mNumTextures;
-    qDebug() << "动画：" << scene->mNumAnimations;
+    Console::Info("模型网格数量："+ QString::number(scene->mNumMeshes));
+    Console::Info("模型材质材质数量："+ QString::number(scene->mNumMaterials));
+    Console::Info("模型纹理纹理数量："+ QString::number(scene->mNumTextures));
+    Console::Info("模型动画数量："+ QString::number(scene->mNumAnimations));
+   // qDebug() << "网格：" << scene->mNumMeshes;
+   // qDebug() << "材质：" << scene->mNumMaterials;
+   // qDebug() << "纹理：" << scene->mNumTextures;
+   // qDebug() << "动画：" << scene->mNumAnimations;
     processNode(scene->mRootNode, scene);
     for (auto& nodeCenter : nodeCenters) {
         center += nodeCenter;
@@ -212,10 +219,12 @@ QVector<Texture> ModelLoader::loadTexture(aiMaterial* material, aiTextureType ty
                 tex.path = texpath;
                 textures.emplace_back(tex);
                 textures_loaded.emplace_back(tex);
-                qDebug() << "纹理加载成功：" << texpath;
+                Console::Info("纹理" + texpath + "加载成功!");
+               // qDebug() << "纹理加载成功：" << texpath;
             }
             else {
-                qDebug() << "未能成功加载纹理：" << texpath;
+                Console::Warning("未能加载纹理" + texpath);
+               // qDebug() << "未能成功加载纹理：" << texpath;
                 int index = pathLoaded.indexOf(this->path);
                 if(index!=-1)
                     pathLoaded.remove(index); //删除未加载成功模型

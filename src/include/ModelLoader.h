@@ -6,7 +6,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "Model.h"
-#include <QOpenGLContext>
+#include "Console.h"
 
 enum LOADRESULT {
 	SUCCESS,

@@ -19,12 +19,11 @@ OpenGLWidget::OpenGLWidget(QWidget* parent)
     surfaceFormat.setDepthBufferSize(24); //深度测试缓冲区位数
     setFormat(surfaceFormat); //开启多重采样抗锯齿
     setFocusPolicy(Qt::ClickFocus); 
-
 }
 
 OpenGLWidget::~OpenGLWidget()
 {
-    ;
+    sceneManager->clearModels();
 }
 
 void OpenGLWidget::initializeGL()
@@ -35,7 +34,6 @@ void OpenGLWidget::initializeGL()
     this->glEnable(GL_DEPTH_TEST);
     this->glDepthFunc(GL_LEQUAL);
     this->glViewport(0, 0, width(), height());
-   // sceneManager->loadScene("C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/test.json");
     initShaders();
     initRenderer();
 }
@@ -45,9 +43,7 @@ void OpenGLWidget::resizeGL(int w, int h)
     this->glEnable(GL_DEPTH_TEST);
     this->glDepthFunc(GL_LEQUAL);
     this->glViewport(0, 0, w, h);    //定义视口区域
-    //oldGeometry = this->frameGeometry();
     renderer->resize(w, h);
-    
 }
 
 void OpenGLWidget::paintGL()

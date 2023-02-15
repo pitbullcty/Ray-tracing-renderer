@@ -4,8 +4,13 @@
 MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindow),actions(WindowActions(ui))
 {
 	ui->setupUi(this);
+    this->setWindowIcon(QIcon(":icons/title.ico"));
+    this->setWindowTitle("光线追踪渲染器");
+    this->setStyle();
+    this->showMaximized();
+    Console::setConsole(ui->console); //加载控制台
     connect(ui->openGLWidget,SIGNAL(sendCloseSignal(int)),this,SLOT(receiveCloseSignal(int))); //绑定子窗口信号
-    actions.bind();
+    actions.bind(); //绑定actions
 }
 
 MainWindow::~MainWindow()//析构函数，关掉ＵＩ界面
