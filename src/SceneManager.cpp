@@ -189,7 +189,9 @@ bool SceneManager::saveScene()
 {
 
 	if (sceneFileName.isEmpty()) {
-		QString savePath = QFileDialog::getSaveFileName(nullptr, "选择保存路径", QDir::currentPath(), "场景文件(*.json)");
+		QFileDialog dialog;
+		dialog.setWindowIcon(QIcon(":icons/title.ico"));
+		QString savePath = dialog.getSaveFileName(nullptr, "选择保存路径", QDir::currentPath(), "场景文件(*.json)");
 		if (!savePath.isEmpty())
 			sceneFileName = savePath;
 		else
@@ -303,11 +305,20 @@ bool SceneManager::dealDifference()
 		}
 	}
 	if (isDifference) {
-		auto choice = QMessageBox::warning(nullptr, "警告", "当前更改为保存，是否保存？", QMessageBox::Yes | QMessageBox::No);
-		if (choice == QMessageBox::Yes) {
+		QIcon icon(":icons/title.ico");
+		QMessageBox msgBox(QMessageBox::Warning, "警告", "当前更改为保存，是否保存？", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+		msgBox.setWindowIcon(icon);
+		auto res = msgBox.exec();
+		if(res == QMessageBox::Yes){
 			if (!saveScene()) {
 				return false;
 			}
+		}
+		else if(res == QMessageBox::Cancel){
+			return false;
+		}
+		else {
+			;
 		}
 	}
 	return true;

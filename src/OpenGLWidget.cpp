@@ -26,6 +26,11 @@ OpenGLWidget::~OpenGLWidget()
     sceneManager->clearModels();
 }
 
+bool OpenGLWidget::closeApp()
+{
+    return sceneManager->closeApp();
+}
+
 void OpenGLWidget::initializeGL()
 {
  
@@ -244,17 +249,5 @@ void OpenGLWidget::wheelEvent(QWheelEvent* event)
 {
     QPoint offset = event->angleDelta();
     sceneManager->getCamera()->processMouseScroll(offset.y() / 20.0f);
-}
-
-void OpenGLWidget::closeEvent(QCloseEvent* event)
-{
-    if (sceneManager->closeApp()) {
-        emit sendCloseSignal(1);
-        event->accept();
-    }
-    else {
-        emit sendCloseSignal(0);
-        event->ignore();
-    }
 }
 

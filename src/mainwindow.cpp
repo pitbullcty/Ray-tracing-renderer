@@ -9,7 +9,6 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindo
     this->setStyle();
     this->showMaximized();
     Console::setConsole(ui->console); //加载控制台
-    connect(ui->openGLWidget,SIGNAL(sendCloseSignal(int)),this,SLOT(receiveCloseSignal(int))); //绑定子窗口信号
     actions.bind(); //绑定actions
 }
 
@@ -38,6 +37,13 @@ void MainWindow::setStyle(int style)
     delete f;
 }
 
-void MainWindow::receiveCloseSignal(int signal) {
-    if (signal) this->close();
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    if (ui->openGLWidget->closeApp()) {
+        event->accept();
+    }
+    else {
+        event->ignore();
+    }
 }
+

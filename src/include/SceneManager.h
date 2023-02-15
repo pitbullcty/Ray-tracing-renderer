@@ -13,6 +13,7 @@
 #include <QElapsedTimer>
 #include <QFileDialog>
 #include <QMessagebox>
+#include <QIcon>
 
 enum STATE {
 	NONE,

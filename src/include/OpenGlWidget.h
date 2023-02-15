@@ -19,6 +19,7 @@ public:
 
     OpenGLWidget(QWidget* parent = 0);
     ~OpenGLWidget();
+    bool closeApp();
 
 protected:
     virtual void initializeGL() override;
@@ -31,7 +32,6 @@ protected:
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
-    void closeEvent(QCloseEvent* event) override;
     
 private:
 
@@ -57,9 +57,6 @@ private:
     void compileShader(QOpenGLShaderProgram* shaderProgram, const QString& shaderName);
     void drawFPS();
     void drawTips(const QString& tips);
-
-signals:
-    void sendCloseSignal(int signal); //子窗口关闭信号
 
 };
 

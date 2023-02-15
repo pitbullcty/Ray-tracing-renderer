@@ -3,6 +3,7 @@
 
 #include <QTextBrowser>
 #include <QApplication>
+#include <QDateTime>
 
 class Console :public QTextBrowser {
 	Q_OBJECT
