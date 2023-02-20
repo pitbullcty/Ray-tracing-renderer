@@ -6,9 +6,9 @@ const float PI = 3.14159f;
 
 void Renderer::destory(Renderer* renderer)
 {
-	renderer->VAO.destroy();
-	renderer->VBO.destroy();
-	renderer->EBO.destroy();
+	renderer->modelVAO.destroy();
+	renderer->modelVBO.destroy();
+	renderer->modelEBO.destroy();
 	renderer->models = nullptr;
 	delete renderer;
 }
@@ -23,8 +23,9 @@ QSharedPointer<Renderer>& Renderer::GetInstance(QMap<QString, QOpenGLShaderProgr
 Renderer::Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
 	shaderProgram(_shaderProgram), 
 	functions(_functions), 
-	VBO(QOpenGLBuffer::VertexBuffer),
-	EBO(QOpenGLBuffer::IndexBuffer), 
+	modelVBO(QOpenGLBuffer::VertexBuffer),
+	modelEBO(QOpenGLBuffer::IndexBuffer), 
+	skyboxVBO(QOpenGLBuffer::VertexBuffer),
 	width(width), 
 	height(height)
 {
@@ -34,8 +35,9 @@ Renderer::Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLE
 	gizmo = QSharedPointer<Gizmo>(new Gizmo(functions, shaderProgram["gizmo"]));
 	gizmo->setScale(5.0f);
 	gizmo->setType(MOVE);
-	VBO.create();
-	EBO.create();
+	modelVBO.create();
+	skyboxVBO.create();
+	modelEBO.create();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 }
 
@@ -84,14 +86,14 @@ void Renderer::renderModel(const QString& name)
 
 void Renderer::renderMesh(const Mesh& mesh)
 {
-	QOpenGLVertexArrayObject::Binder binder(&VAO);
+	QOpenGLVertexArrayObject::Binder binder(&modelVAO);
 
-	VBO.bind();
+	modelVBO.bind();
 
-	VBO.allocate(mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
+	modelVBO.allocate(mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
 
-	EBO.bind();
-	EBO.allocate(mesh.indices.data(), mesh.indices.size() * sizeof(unsigned int));
+	modelEBO.bind();
+	modelEBO.allocate(mesh.indices.data(), mesh.indices.size() * sizeof(unsigned int));
 
 	shaderProgram["model"]->enableAttributeArray(0);
 	shaderProgram["model"]->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(Vertex));
@@ -127,10 +129,10 @@ void Renderer::renderTexture(const Mesh& mesh)
 		shaderProgram["model"]->setUniformValue((name + number).toStdString().c_str(), i); //传输不同材质值
 	}
 	// 绘制网格
-	QOpenGLVertexArrayObject::Binder binder(&VAO);
+	QOpenGLVertexArrayObject::Binder binder(&modelVAO);
 	functions->glDrawElements(GL_TRIANGLES, (unsigned int)mesh.indices.size(), GL_UNSIGNED_INT, 0);
-	VBO.release();
-	EBO.release();
+	modelVBO.release();
+	modelEBO.release();
 }
 
 
@@ -157,6 +159,13 @@ void Renderer::initSkybox()
 	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	shaderProgram["skybox"]->setUniformValue("skybox", 0);
+
+	QOpenGLVertexArrayObject::Binder binder(&skyboxVAO);
+	skyboxVBO.bind();
+	skyboxVBO.allocate(skybox->vertices.data(), skybox->vertices.size() * sizeof(float));
+	shaderProgram["skybox"]->enableAttributeArray(0);
+	shaderProgram["skybox"]->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float) * 3);
+
 	shaderProgram["skybox"]->release();
 }
 
@@ -167,7 +176,9 @@ void Renderer::renderSkybox()
 	shaderProgram["skybox"]->setUniformValue("view",camera->getView());
 	functions->glActiveTexture(GL_TEXTURE0);
 	functions->glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
-	renderCube(shaderProgram["skybox"]);
+	QOpenGLVertexArrayObject::Binder binder(&skyboxVAO);
+	functions->glDrawArrays(GL_TRIANGLES, 0, 36);
+	skyboxVBO.release();
 	shaderProgram["skybox"]->release();
 }
 
@@ -194,16 +205,6 @@ QSharedPointer<Gizmo> Renderer::getGizmo()
 	return gizmo;
 }
 
-void Renderer::renderCube(QOpenGLShaderProgram* shaderProgram)
-{
-	QOpenGLVertexArrayObject::Binder binder(&VAO);
-	VBO.bind();
-	VBO.allocate(skybox->vertices.data(), skybox->vertices.size() * sizeof(float));
-	shaderProgram->enableAttributeArray(0);
-	shaderProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float) * 3);
-	functions->glDrawArrays(GL_TRIANGLES, 0, 36);
-	VBO.release();
-}
 
 QSharedPointer<Camera> Renderer::getCamera()
 {

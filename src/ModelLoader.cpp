@@ -109,9 +109,7 @@ void ModelLoader::processNode(aiNode* node, const aiScene* scene)
 
 Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 {
-    QVector<Vertex> vertices;
-    QVector<unsigned int> indices;
-    QVector<Texture> textures; //存放
+    Mesh m;
     aiVector3D meshCenter(0, 0, 0);
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -141,7 +139,7 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
             vertex.texCoords = QVector2D(0, 0);
         }
 
-        vertices.push_back(vertex);
+        m.vertices.push_back(vertex);
     }
 
     //检索相应的顶点索引。
@@ -151,7 +149,7 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
         aiVector3D faceCenter(0, 0, 0); //面中心
         // 将所有面的索引数据添加到索引数组中
         for (unsigned int j = 0; j < face.mNumIndices; j++) {
-            indices.emplace_back(face.mIndices[j]);
+            m.indices.emplace_back(face.mIndices[j]);
             faceCenter = faceCenter + mesh->mVertices[face.mIndices[j]];
         }
         faceCenter /= face.mNumIndices;
@@ -165,26 +163,26 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
     // 1. 漫反射贴图
     QVector<Texture>  diffuseMaps = loadTexture(material, aiTextureType_DIFFUSE, "texture_diffuse");
     for (auto& texture : diffuseMaps)
-        textures.emplace_back(texture);
+        m.textures.emplace_back(texture);
 
     // 2. 镜面贴图
     QVector<Texture> specularMaps = loadTexture(material, aiTextureType_SPECULAR, "texture_specular");
     for (auto& texture : specularMaps)
-        textures.emplace_back(texture);
+        m.textures.emplace_back(texture);
 
     // 3. 法向量图
     QVector<Texture> normalMaps = loadTexture(material, aiTextureType_HEIGHT, "texture_normal");
     for (auto& texture : normalMaps)
-        textures.emplace_back(texture);
+        m.textures.emplace_back(texture);
 
     // 4. 高度图
     QVector<Texture> heightMaps = loadTexture(material, aiTextureType_AMBIENT, "texture_height");
     for (auto& texture : heightMaps)
-        textures.emplace_back(texture);
+        m.textures.emplace_back(texture);
 
     QVector3D center = assimp2QVector(meshCenter);
 
-    return Mesh(vertices, indices, textures, center);
+    return m;
 
 }
 

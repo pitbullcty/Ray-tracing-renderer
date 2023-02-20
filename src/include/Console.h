@@ -4,6 +4,8 @@
 #include <QTextBrowser>
 #include <QApplication>
 #include <QDateTime>
+#include <QTimer>
+
 
 class Console :public QTextBrowser {
 	Q_OBJECT
@@ -15,7 +17,6 @@ public:
 	static QString error;
 
 	Console(QWidget* parent = 0);
-	~Console();
 	static void Warning(const QString& text);
 	static void Info(const QString& text);
 	static void Error(const QString& text);

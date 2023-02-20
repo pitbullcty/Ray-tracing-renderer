@@ -36,8 +36,13 @@ private:
 	//OpenGl上下文相关
 	QMap<QString, QOpenGLShaderProgram*> shaderProgram;
 	QOpenGLExtraFunctions* functions;
-	QOpenGLBuffer VBO,EBO;
-	QOpenGLVertexArrayObject VAO;
+
+	QOpenGLBuffer modelVBO,modelEBO;
+	QOpenGLVertexArrayObject modelVAO;
+
+	QOpenGLBuffer skyboxVBO;
+	QOpenGLVertexArrayObject skyboxVAO;
+
 	unsigned int envCubemap;
 
 	int width;
@@ -55,7 +60,6 @@ private:
 
 	void renderMesh(const Mesh& mesh);
 	void renderTexture(const Mesh& mesh);
-	void renderCube(QOpenGLShaderProgram* shaderProgram);
 
 };
 

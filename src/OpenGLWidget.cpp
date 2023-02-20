@@ -5,6 +5,9 @@ IGizmo::LOCATION locations[2] = { IGizmo::LOCATE_WORLD, IGizmo::LOCATE_LOCAL };
 int changeCount = 0;
 int locationCount = 0;
 
+extern bool isBusy;
+
+
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
     ,sceneManager(SceneManager::GetInstance())
@@ -30,6 +33,7 @@ bool OpenGLWidget::closeApp()
 {
     return sceneManager->closeApp();
 }
+
 
 void OpenGLWidget::initializeGL()
 {
@@ -151,6 +155,11 @@ void OpenGLWidget::drawTips(const QString& tips)
 
 void OpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
+    if (isBusy) {
+        event->ignore();
+        return;
+    }
+
     Qt::Key key = (Qt::Key)(event->key());
     if(key == Qt::Key_W || key == Qt::Key_S || key == Qt::Key_A || key == Qt::Key_D
         || key == Qt::Key_Space || key == Qt::Key_Shift)
@@ -193,6 +202,11 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
 
 void OpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 {
+    if (isBusy) {
+        event->ignore();
+        return;
+    }
+
     if (event->isAutoRepeat())
         return;
     Qt::Key key = (Qt::Key)(event->key());
@@ -201,7 +215,11 @@ void OpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 
 void OpenGLWidget::mousePressEvent(QMouseEvent* event)
 {
-  
+    if (isBusy) {
+        event->ignore();
+        return;
+    }
+
     if (event->button() == Qt::RightButton) {
         isRightClicked = true; //右键激活
         lastPos = event->pos();
@@ -220,6 +238,11 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
 
 void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+    if (isBusy) {
+        event->ignore();
+        return;
+    }
+
     int x = event->pos().x();
     int y = event->pos().y();
     if (isLeftClicked) {
@@ -234,6 +257,11 @@ void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
+    if (isBusy) {
+        event->ignore();
+        return;
+    }
+
     int x = event->pos().x();
     int y = event->pos().y();
     if (isRightClicked) {
@@ -247,7 +275,13 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 
 void OpenGLWidget::wheelEvent(QWheelEvent* event)
 {
+    if (isBusy) {
+        event->ignore();
+        return;
+    }
+
     QPoint offset = event->angleDelta();
     sceneManager->getCamera()->processMouseScroll(offset.y() / 20.0f);
 }
+
 

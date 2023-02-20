@@ -1,6 +1,8 @@
 ﻿#include "Mainwindow.h"
 #include <QFile>
 
+extern bool isBusy;
+
 MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindow),actions(WindowActions(ui))
 {
 	ui->setupUi(this);
@@ -39,6 +41,10 @@ void MainWindow::setStyle(int style)
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    if (isBusy) {
+        event->ignore();
+        return;
+    }
     if (ui->openGLWidget->closeApp()) {
         event->accept();
     }
@@ -46,4 +52,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
         event->ignore();
     }
 }
+
+
 

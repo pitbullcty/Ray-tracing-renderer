@@ -20,6 +20,7 @@ public:
     OpenGLWidget(QWidget* parent = 0);
     ~OpenGLWidget();
     bool closeApp();
+ 
 
 protected:
     virtual void initializeGL() override;
