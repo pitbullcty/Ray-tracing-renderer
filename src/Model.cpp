@@ -1,6 +1,6 @@
 ﻿#include "Model.h"
 
-QVector<Mesh> Model::getMeshes()
+QVector<Mesh>& Model::getMeshes()
 {
     return meshes;
 }

@@ -22,6 +22,7 @@ public:
 	static void Error(const QString& text);
 	static void setConsole(Console* newconsole);
 	static void clear();
+	static void scroll();
 
 private:
 	static void destroy();

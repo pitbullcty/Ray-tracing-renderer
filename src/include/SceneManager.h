@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Skybox.h"
 #include "Gizmo.h"
+#include "BVHBuilder.h"
 #include <QFile>
 #include <QRegularExpression>
 #include <QJsonArray>
@@ -38,6 +39,7 @@ public:
 	bool closeApp(); //关闭app
 
 	QSharedPointer<Camera> getCamera();
+	QSharedPointer<BVHBuilder> getBVHbuilder();
 	QMap<QString, Model>* getModels(); //返回模型指针
 	STATE getState();
 
@@ -45,12 +47,15 @@ public:
 private:
 
 	QSharedPointer<ModelLoader> modelLoader; //模型加载器
+	QSharedPointer<BVHBuilder> bvhBuilder;
 
 	QMap<QString, Model> models; //模型
 	QSharedPointer<Camera> camera; //摄像机
 	QSharedPointer<Skybox> skybox; //天空盒
 	QString sceneFileName; //场景文件名
 	STATE state; //当前编辑状态
+
+	BVH sceneBVH; //场景BVH
 
 	static QSharedPointer<SceneManager> instance;
 	SceneManager();

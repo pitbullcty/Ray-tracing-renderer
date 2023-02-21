@@ -11,7 +11,7 @@ public:
 	Model() = default;
 	~Model() = default;
 	void destroyTextures();
-	QVector<Mesh> getMeshes();
+	QVector<Mesh>& getMeshes();
 	QVector3D getCenter();
 	QString getPath();
 	QJsonObject toJson();
@@ -21,6 +21,7 @@ public:
 
 private:
 	QString path;
+	BVH bvh; //合并后BVH
 	QVector<Mesh> meshes; //纹理
 	QVector3D center; //模型重心
 };

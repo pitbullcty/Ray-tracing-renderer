@@ -88,6 +88,11 @@ QSharedPointer<Camera> SceneManager::getCamera()
 	return camera;
 }
 
+QSharedPointer<BVHBuilder> SceneManager::getBVHbuilder()
+{
+	return bvhBuilder;
+}
+
 QMap<QString, Model>* SceneManager::getModels()
 {
 	return &models;
@@ -251,8 +256,10 @@ SceneManager::SceneManager():
 	modelLoader(ModelLoader::GetInstance()),
 	camera(Camera::GetInstance()),
 	skybox(Skybox::GetInstance()),
+	bvhBuilder(BVHBuilder::GetInstance(&models)),
 	state(NONE)
 {
+	
 }
 
 QJsonObject SceneManager::toJsonObeject()

@@ -59,7 +59,6 @@ private:
 	~Renderer() = default;
 
 	void renderMesh(const Mesh& mesh);
-	void renderTexture(const Mesh& mesh);
 
 };
 

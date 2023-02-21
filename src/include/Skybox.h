@@ -1,5 +1,6 @@
 ﻿#ifndef __SKYBOX__
 #define __SKYBOX__
+
 #include <QString>
 #include <QJsonObject>
 #include <QMatrix4x4>

@@ -69,6 +69,13 @@ void Console::clear()
 	console->setText("");
 }
 
+void Console::scroll()
+{
+	if (console) {
+		console->moveCursor(QTextCursor::End);
+	}
+}
+
 void Console::destroy()
 {
 	console = nullptr;

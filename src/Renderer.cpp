@@ -62,7 +62,6 @@ void Renderer::renderModels()
 		shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
 		for (auto& mesh :model.getMeshes()) {
 			renderMesh(mesh);
-			renderTexture(mesh);
 		}
 	}
 	shaderProgram["model"]->release();
@@ -79,7 +78,6 @@ void Renderer::renderModel(const QString& name)
 	shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
 	for (auto& mesh : model.getMeshes()) {
 		renderMesh(mesh);
-		renderTexture(mesh);
 	}
 	shaderProgram["model"]->release();
 }
@@ -104,10 +102,6 @@ void Renderer::renderMesh(const Mesh& mesh)
 	shaderProgram["model"]->enableAttributeArray(2);
 	shaderProgram["model"]->setAttributeBuffer(2, GL_FLOAT, offsetof(Vertex, texCoords), 2, sizeof(Vertex));
 
-}
-
-void Renderer::renderTexture(const Mesh& mesh)
-{
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
 	unsigned int normalNr = 1;
@@ -129,7 +123,6 @@ void Renderer::renderTexture(const Mesh& mesh)
 		shaderProgram["model"]->setUniformValue((name + number).toStdString().c_str(), i); //传输不同材质值
 	}
 	// 绘制网格
-	QOpenGLVertexArrayObject::Binder binder(&modelVAO);
 	functions->glDrawElements(GL_TRIANGLES, (unsigned int)mesh.indices.size(), GL_UNSIGNED_INT, 0);
 	modelVBO.release();
 	modelEBO.release();

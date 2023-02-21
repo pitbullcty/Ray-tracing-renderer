@@ -17,6 +17,7 @@ find_package(Qt6 COMPONENTS Gui)
 find_package(Qt6 COMPONENTS Widgets)
 find_package(Qt6 COMPONENTS OpenGL)
 find_package(Qt6 COMPONENTS OpenGLWidgets)
+find_package(Qt6 COMPONENTS Concurrent)
 find_package(assimp MODULE REQUIRED)
 
 
@@ -46,6 +47,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core
     Qt::OpenGL
     Qt::OpenGLWidgets
     Qt::Widgets
+    Qt6::Concurrent
     optimized 	${ASSIMP_LIBRARY_RELEASE}
 	debug		${ASSIMP_LIBRARY_DEBUG}
 )

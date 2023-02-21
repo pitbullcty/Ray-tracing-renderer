@@ -157,6 +157,7 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
     }
     meshCenter /= mesh->mNumFaces;
 
+
     // 处理材质
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
@@ -183,7 +184,6 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
     QVector3D center = assimp2QVector(meshCenter);
 
     return m;
-
 }
 
 QVector<Texture> ModelLoader::loadTexture(aiMaterial* material, aiTextureType type, QString name) {

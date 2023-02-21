@@ -7,7 +7,9 @@
 #include <QVector3D>
 #include <QOpenGLTexture>
 #include <QSharedPointer>
-
+#include "BVH.h"
+#include <omp.h>
+#include <algorithm>
 /*
 * 顶点类
 */
@@ -31,17 +33,19 @@ struct Texture {
 /*
 * 网格类
 */
-struct Mesh {
+
+class Mesh {
+
+public:
+
 	QVector<Vertex> vertices;               //顶点数据
 	QVector<unsigned int> indices;          //索引数组
 	QVector<Texture> textures;             //纹理数据
+	QVector<Triangle> triangles; //当前mesh的三角形
 	QVector3D center; //中心
+	BVH bvh; //当前mesh的BVH
 	Mesh() = default;
-	void destoryTextures() {
-		for (auto& texture : textures) {
-			texture.texture->destroy();
-		}
-	}
+	void destoryTextures();
 };
 
 
