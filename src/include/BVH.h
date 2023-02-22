@@ -4,25 +4,18 @@
 #include <QVector3D>
 #include <QVector>
 #include <limits.h>
+#include <QMatrix4x4>
 
 constexpr auto MAX = std::numeric_limits<float>::max();
 constexpr auto MIN = -std::numeric_limits<float>::max();
 
+QVector3D max(const QVector3D& a, const QVector3D& b);
+QVector3D min(const QVector3D& a, const QVector3D& b);
 
 enum DIM {
 	AXIS_X,
 	AXIS_Y,
 	AXIS_Z
-};
-
-struct Ray
-{
-	QVector3D pos;
-	QVector3D direction;
-
-	Ray() = default;
-	Ray(const QVector3D& pos, const QVector3D& direction) :pos(pos), direction(direction) {};
-
 };
 
 struct AABB {
@@ -39,32 +32,14 @@ struct AABB {
 	}
 
 	AABB& Union(const AABB& other) {
-		float minx = std::min(minpos.x(), other.minpos.x());
-		float miny = std::min(minpos.y(), other.minpos.y());
-		float minz = std::min(minpos.z(), other.minpos.z());
-
-		float maxx = std::max(maxpos.x(), other.maxpos.x());
-		float maxy = std::max(maxpos.y(), other.maxpos.y());
-		float maxz = std::max(maxpos.z(), other.maxpos.z());
-
-		minpos = {minx, miny, minz};
-		maxpos = {maxx, maxy, maxz};
-
+		minpos = min(minpos, other.minpos);
+		maxpos = max(maxpos, other.maxpos);
 		return *this;
 	}
 
 	AABB& Union(const QVector3D& other) {
-		float minx = std::min(minpos.x(), other.x());
-		float miny = std::min(minpos.y(), other.y());
-		float minz = std::min(minpos.z(), other.z());
-
-		float maxx = std::max(maxpos.x(), other.x());
-		float maxy = std::max(maxpos.y(), other.y());
-		float maxz = std::max(maxpos.z(), other.z());
-
-		minpos = { minx, miny, minz };
-		maxpos = { maxx, maxy, maxz };
-
+		minpos = min(minpos,other);
+		maxpos = max(maxpos,other);
 		return *this;
 	}
 
@@ -106,6 +81,7 @@ struct AABB {
 	}
 };
 
+
 struct Triangle
 {
 	QVector3D a;
@@ -114,20 +90,51 @@ struct Triangle
 	AABB bound;
 	Triangle() = default;
 	Triangle(const QVector3D& a, const QVector3D& b, const QVector3D& c) :a(a), b(b), c(c) {
-		float minx = std::min(a.x(), std::min(b.x(), c.x()));
-		float miny = std::min(a.y(), std::min(b.y(), c.y()));
-		float minz = std::min(a.z(), std::min(b.z(), c.z()));
-
-		float maxx = std::max(a.x(), std::max(b.x(), c.x()));
-		float maxy = std::max(a.y(), std::max(b.y(), c.y()));
-		float maxz = std::max(a.z(), std::max(b.z(), c.z()));
-
-		bound.maxpos = { maxx,maxy,maxz };
-		bound.minpos = { minx,miny,minz };
+		bound.maxpos = max(a, max(b, c));
+		bound.minpos = min(a, min(b, c));
 	};
 	QVector3D getCenter() const {
 		return (a + b + c) / 3;
 	}
+};
+
+struct Ray
+{
+	QVector3D pos;
+	QVector3D direction;
+
+	Ray() = default;
+	Ray(const QVector3D& pos, const QVector3D& direction) :pos(pos), direction(direction) {};
+	Ray(float x, float y, const QMatrix4x4& projection, const QMatrix4x4& view) {
+
+		QVector3D ndc = { x, y,1.0f}; //还原至NDC坐标
+		QVector4D clip = QVector4D(ndc, 1.0f); //裁剪前坐标
+
+		QVector4D eye = projection.inverted() * clip; //眼睛坐标
+		QVector4D world = view.inverted() * eye; //世界坐标
+
+		if ((world.w()-0.0f)>1e-6) {
+			world.setX(world.x() / world.w());
+			world.setY(world.y() / world.w());
+			world.setZ(world.z() / world.w());
+		} //转换为标准坐标
+
+		pos = QVector3D(world);
+	};
+
+	float hitAABB(const AABB& bound) {
+		QVector3D in = (bound.minpos - pos) / direction;
+		QVector3D out = (bound.maxpos - pos) / direction;
+
+		QVector3D tmax = max(in, out);
+		QVector3D tmin = min(in, out);
+
+		float t1 = std::min(tmax.x(), std::min(tmax.y(), tmax.z()));
+		float t0 = std::max(tmin.x(), std::max(tmin.y(), tmin.z()));
+
+		return (t1 >= t0) ? ((t0 > 0.0) ? (t0) : (t1)) : (-1);
+
+	} //计算和aabb相交的最近距离
 };
 
 struct BVHNode

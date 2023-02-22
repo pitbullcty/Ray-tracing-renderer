@@ -73,12 +73,20 @@ void Renderer::renderModels()
 		auto& model = it.value();
 		shaderProgram["model"]->bind();
 		shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
-		for (auto& mesh :model.getMeshes()) {
-			renderMesh(mesh);
+		if (model.isCopy()) {
+			auto& meshes = model.getCopy()->getMeshes();
+			for (auto& mesh : meshes) {
+				renderMesh(mesh);
+			}
+		}
+		else {
+			auto& meshes = model.getMeshes();
+			for (auto& mesh : meshes) {
+				renderMesh(mesh);
+			}
 		}
 	}
 	shaderProgram["model"]->release();
-	
 }
 
 void Renderer::renderModel(const QString& name)
@@ -90,8 +98,17 @@ void Renderer::renderModel(const QString& name)
 	shaderProgram["model"]->setUniformValue("projection", projection);
 	shaderProgram["model"]->setUniformValue("view", getCamera()->getView());
 	shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
-	for (auto& mesh : model.getMeshes()) {
-		renderMesh(mesh);
+	if (model.isCopy()) {
+		auto& meshes = model.getCopy()->getMeshes();
+		for (auto& mesh : meshes) {
+			renderMesh(mesh);
+		}
+	}
+	else {
+		auto& meshes = model.getMeshes();
+		for (auto& mesh : meshes) {
+			renderMesh(mesh);
+		}
 	}
 	shaderProgram["model"]->release();
 }

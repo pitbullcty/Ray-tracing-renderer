@@ -30,7 +30,8 @@ void SceneManager::addModel(const QString& path, const QString& modelName)
 			QString num = exp.match(key).captured(0);
 			if (num.toInt() > maxNum.toInt()) maxNum = num;
 		}
-		if (it.value().getPath() == path && modelLoaded.isEmpty()) {
+		auto& model = it.value();
+		if (model.getPath() == path && modelLoaded.isEmpty() && !model.isCopy()) {
 			modelLoaded = key;
 		}
 	} //提取最大的编号,并且查找是否有相同路径模型
@@ -56,8 +57,7 @@ void SceneManager::addModel(const QString& path, const QString& modelName)
 	timer.start();
 	auto loadRes = modelLoader->loadModel(path, models[newname]);
 	if (loadRes == RELOADED) {
-		models[newname] = models[modelLoaded]; //如果已经加载过则直接复制
-		models[newname].transform.reSet(); //重置transform
+		models[newname].setCopy(&models[modelLoaded]); //如果已经加载过则直接复制
 	}
 	else if(loadRes == SUCCESS){
 		QString loadModelTime = "模型" + newname + "加载耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms";
@@ -84,7 +84,38 @@ void SceneManager::clearModels()
 
 Model* SceneManager::getSelected(int posx, int posy)
 {
-	return &models["nanosuit"];
+	float x = 2.0f * posx / width - 1.0f;
+	float y = 1.0f - (2.0f * posy / height);
+
+	QMatrix4x4 projection;
+	projection.perspective(camera->getZoom(), width / (float)height, 0.1f, 500.0f);
+	QMatrix4x4 view = camera->getView();
+
+	Ray ray(x, y, projection, view);
+	ray.direction = (ray.pos - camera->getPos()).normalized(); //构建射线
+
+	Model* selected = nullptr;
+
+	float t = 1e10; //存储最大t值
+
+	for (auto it = models.begin(); it != models.end(); it++) {
+		auto& model = it.value();
+		float t0 = ray.hitAABB(model.getDectionBound());
+		if (t0 != -1) {
+			if (t0 < t) {
+				t = t0;
+				selected = &model;
+			}
+		} //寻找最近交点
+	}
+
+	return selected;
+}
+
+void SceneManager::setSize(int width, int height)
+{
+	this->width = width;
+	this->height = height;
 }
 
 
@@ -185,12 +216,10 @@ void SceneManager::loadScene(const QString& path)
 	if (!res) {
 		Console::Error("场景加载失败！请检查json格式");
 		return;
-		//qDebug() << "场景加载失败！请检查json格式";
 	}
 	else {
 		QString loadSceneTime = "场景加载成功！耗时：" + QString::number(timer.elapsed(), 'f', 2) + "ms";
 		Console::Info(loadSceneTime);
-		//qDebug() << loadSceneTime;
 	}
 	state = CREATED;
 }
@@ -257,15 +286,13 @@ bool SceneManager::closeApp()
 	return dealDifference();
 }
 
-SceneManager::SceneManager():
+SceneManager::SceneManager() :
 	modelLoader(ModelLoader::GetInstance()),
 	camera(Camera::GetInstance()),
 	skybox(Skybox::GetInstance()),
 	bvhBuilder(BVHBuilder::GetInstance(&models)),
 	state(NONE)
-{
-	
-}
+{};
 
 QJsonObject SceneManager::toJsonObeject()
 {

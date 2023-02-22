@@ -52,7 +52,6 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
     center = QVector3D(); //加载前清空
     if (pathLoaded.contains(path)) {
         Console::Info("模型" + path + "已加载！");
-       // qDebug() << "模型" + path + "已加载！";
         return RELOADED;
     } //若模型已经加载过则直接复制
     pathLoaded.push_back(path);
@@ -69,10 +68,6 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
     Console::Info("模型材质材质数量："+ QString::number(scene->mNumMaterials));
     Console::Info("模型纹理纹理数量："+ QString::number(scene->mNumTextures));
     Console::Info("模型动画数量："+ QString::number(scene->mNumAnimations));
-   // qDebug() << "网格：" << scene->mNumMeshes;
-   // qDebug() << "材质：" << scene->mNumMaterials;
-   // qDebug() << "纹理：" << scene->mNumTextures;
-   // qDebug() << "动画：" << scene->mNumAnimations;
     processNode(scene->mRootNode, scene);
     for (auto& nodeCenter : nodeCenters) {
         center += nodeCenter;
@@ -186,6 +181,8 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
         m.textures.emplace_back(texture);
 
     QVector3D center = assimp2QVector(meshCenter);
+
+    m.center = center;
 
     return m;
 }

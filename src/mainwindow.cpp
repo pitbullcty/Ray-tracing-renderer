@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindo
     this->showMaximized();
     Console::setConsole(ui->console); //加载控制台
     actions.bind(); //绑定actions
+    connect(ui->closeWindow, &QAction::triggered, this, &MainWindow::close);
 }
 
 MainWindow::~MainWindow()//析构函数，关掉ＵＩ界面

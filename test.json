@@ -1,25 +1,25 @@
 {
     "camera": {
-        "pitch": -18.50007438659668,
-        "x": 35.392913818359375,
-        "y": 21.3803653717041,
-        "yaw": -536.0994262695312,
-        "z": 0.16308395564556122
+        "pitch": -29.300188064575195,
+        "x": 2.4543542861938477,
+        "y": 28.868709564208984,
+        "yaw": -810.3976440429688,
+        "z": 46.73586654663086
     },
     "models": [
         {
             "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
             "name": "nanosuit",
             "transform": {
-                "rotationX": -3.615574836730957,
+                "rotationX": -123.87093353271484,
                 "rotationY": -50.08341598510742,
                 "rotationZ": 3.6205263137817383,
                 "scaleX": 0.9999997615814209,
                 "scaleY": 0.9999997615814209,
-                "scaleZ": 0.9999997615814209,
+                "scaleZ": 0.9999998211860657,
                 "translationX": 0.6680102348327637,
                 "translationY": -0.7309370040893555,
-                "translationZ": 10.471872329711914
+                "translationZ": 11.386096954345703
             }
         },
         {
@@ -33,8 +33,8 @@
                 "scaleY": 1,
                 "scaleZ": 1,
                 "translationX": 10,
-                "translationY": 5,
-                "translationZ": 3
+                "translationY": 4.585731506347656,
+                "translationZ": 21.45227813720703
             }
         },
         {
@@ -47,9 +47,9 @@
                 "scaleX": 1,
                 "scaleY": 1,
                 "scaleZ": 1,
-                "translationX": 2,
-                "translationY": 2,
-                "translationZ": 2
+                "translationX": 10.172609329223633,
+                "translationY": 5.371585845947266,
+                "translationZ": 18.697956085205078
             }
         },
         {
@@ -62,9 +62,9 @@
                 "scaleX": 1,
                 "scaleY": 1,
                 "scaleZ": 1,
-                "translationX": 0,
+                "translationX": -13.204705238342285,
                 "translationY": 0,
-                "translationZ": 0
+                "translationZ": 11.206258773803711
             }
         }
     ],

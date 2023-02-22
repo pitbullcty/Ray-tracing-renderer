@@ -19,7 +19,7 @@ void WindowActions::bind()
 	connect(ui->saveAsSceneJson, &QAction::triggered, this, &WindowActions::saveSceneAS);
 	connect(ui->createScene, &QAction::triggered, this, &WindowActions::crateScene);
 	connect(ui->closeScene, &QAction::triggered, this, &WindowActions::closeScene);
-	connect(ui->closeWindow, &QAction::triggered, ui->openGLWidget, &OpenGLWidget::close);
+	
 }
 
 void WindowActions::loadModel()

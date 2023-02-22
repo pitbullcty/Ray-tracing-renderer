@@ -52,6 +52,7 @@ void OpenGLWidget::resizeGL(int w, int h)
     this->glDepthFunc(GL_LEQUAL);
     this->glViewport(0, 0, w, h);    //定义视口区域
     renderer->resize(w, h);
+    sceneManager->setSize(w, h);
 }
 
 void OpenGLWidget::paintGL()
@@ -151,7 +152,7 @@ void OpenGLWidget::drawTips(const QString& tips)
 
 void OpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
-    if (isBusy) {
+    if (isBusy || sceneManager->getState() == NONE) {
         event->ignore();
         return;
     }
@@ -198,7 +199,7 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
 
 void OpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 {
-    if (isBusy) {
+    if (isBusy || sceneManager->getState() == NONE) {
         event->ignore();
         return;
     }
@@ -211,7 +212,7 @@ void OpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 
 void OpenGLWidget::mousePressEvent(QMouseEvent* event)
 {
-    if (isBusy) {
+    if (isBusy || sceneManager->getState() == NONE) {
         event->ignore();
         return;
     }
@@ -241,7 +242,7 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
 
 void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (isBusy) {
+    if (isBusy || sceneManager->getState() == NONE) {
         event->ignore();
         return;
     }
@@ -260,7 +261,7 @@ void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
-    if (isBusy) {
+    if (isBusy || sceneManager->getState() == NONE) {
         event->ignore();
         return;
     }
@@ -279,7 +280,7 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 
 void OpenGLWidget::wheelEvent(QWheelEvent* event)
 {
-    if (isBusy) {
+    if (isBusy || sceneManager->getState() == NONE) {
         event->ignore();
         return;
     }

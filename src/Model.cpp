@@ -5,12 +5,12 @@ QVector<Mesh>& Model::getMeshes()
     return meshes;
 }
 
-QVector3D Model::getCenter()
+QVector3D Model::getCenter() const
 {
     return center;
 }
 
-QString Model::getPath()
+QString Model::getPath() const
 {
     return path;
 }
@@ -18,6 +18,19 @@ QString Model::getPath()
 AABB& Model::getBound()
 {
     return bound;
+}
+
+AABB& Model::getDectionBound()
+{
+    return boundDetect;
+}
+
+void Model::updateBound()
+{
+    auto model = transform.getModel();
+
+    boundDetect.minpos = model.map(bound.minpos);
+    boundDetect.maxpos = model.map(bound.maxpos);
 }
 
 QJsonObject Model::toJson()
@@ -40,6 +53,7 @@ void Model::prase(QJsonObject transform)
     this->transform.scaleY = transform["scaleY"].toVariant().toFloat();
     this->transform.scaleZ = transform["scaleZ"].toVariant().toFloat();
     this->transform.calcModel();
+    updateBound();
 }
 
 void Model::setData(const QVector<Mesh>& _meshes, const QString& _path, QVector3D _center)
@@ -51,17 +65,42 @@ void Model::setData(const QVector<Mesh>& _meshes, const QString& _path, QVector3
 
 void Model::destroyTextures()
 {
+    if (meshes.isEmpty()) return;
     for (auto& mesh : meshes) {
         mesh.destoryTextures();
     }
 }
 
-Model::Model(const QVector<Mesh>& _meshes, QVector3D _center) :meshes(_meshes),center(_center) 
+void Model::setCopy(Model* copy)
+{
+    data = copy;
+    bound = copy->getBound();
+    center = copy->getCenter(); //复制bound以及center
+    path = copy->getPath();
+    transform.reSet();
+}
+
+Model* Model::getCopy()
+{
+    return data;
+}
+
+bool Model::isCopy()
+{
+    return data ? true : false;
+}
+
+Model::Model(const QVector<Mesh>& _meshes, QVector3D _center) :meshes(_meshes),center(_center), data(nullptr)
 {
     
 }
 
-Model::Model(const QVector<Mesh>& _meshes, const QString& _path, QVector3D _center):meshes(_meshes), center(_center), path(_path)
+Model::Model(const QVector<Mesh>& _meshes, const QString& _path, QVector3D _center):meshes(_meshes), center(_center), path(_path), data(nullptr)
 {
 
+}
+
+Model::Model():
+    data(nullptr)
+{
 }

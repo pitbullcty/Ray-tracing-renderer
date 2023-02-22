@@ -52,6 +52,11 @@ float Camera::getZoom()
     return zoom;
 }
 
+QVector3D Camera::getPos() const
+{
+    return pos;
+}
+
 void Camera::addKey(Qt::Key key)
 {
     keys.insert(key);

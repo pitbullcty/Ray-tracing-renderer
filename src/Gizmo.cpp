@@ -55,6 +55,7 @@ void Gizmo::applyToModel()
 	trans.translate(-model->getCenter());
 	newmodel = trans * newmodel; //往回移动
 	model->transform.setModel(newmodel);
+	model->updateBound(); //更新包围盒
 }
 
 bool Gizmo::checkScale()

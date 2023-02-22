@@ -32,6 +32,7 @@ public:
 	void clearModels();
 
 	Model* getSelected(int posx, int posy);
+	void setSize(int width, int height);
 
 	void loadScene(const QString& path); //读取场景
 	bool saveScene(); //保存场景
@@ -58,6 +59,9 @@ private:
 	STATE state; //当前编辑状态
 
 	BVH sceneBVH; //场景BVH
+
+	int width; 
+	int height; //窗口大小
 
 	static QSharedPointer<SceneManager> instance;
 	SceneManager();

@@ -17,6 +17,8 @@ public:
     void setPos(const QVector3D& _pos);
 
     float getZoom();
+    QVector3D getPos() const;
+
     void addKey(Qt::Key key);
     void removeKey(Qt::Key key);
     void processKeyboard(float deltaTime);
