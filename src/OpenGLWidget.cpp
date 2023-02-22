@@ -34,12 +34,11 @@ bool OpenGLWidget::closeApp()
     return sceneManager->closeApp();
 }
 
-
 void OpenGLWidget::initializeGL()
 {
  
     this->initializeOpenGLFunctions();
-    this->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);  //设置清屏颜色
+    this->glClearColor(1.0f, 1.0f, 1.0f, 0.0f);  //设置清屏颜色
     this->glEnable(GL_DEPTH_TEST);
     this->glDepthFunc(GL_LEQUAL);
     this->glViewport(0, 0, width(), height());
@@ -68,16 +67,15 @@ void OpenGLWidget::paintGL()
         sceneManager->getCamera()->processKeyboard(deltaTime);
 
         //Opengl渲染部分
-
         renderer->renderModels();
         renderer->renderSkybox();
+        renderer->renderAABB();
         renderer->renderGizmo(); //最后渲染gizmo避免被遮挡
+        drawFPS();
 
         float time = QTime::currentTime().msecsSinceStartOfDay() / 1000.0; //返回当天的秒数
         deltaTime = time - lastFrameTime;
         lastFrameTime = time; //计算渲染时间
-
-        drawFPS();
 
     }
     update();
@@ -120,7 +118,6 @@ void OpenGLWidget::compileShader(QOpenGLShaderProgram* shaderProgram, const QStr
 void OpenGLWidget::drawFPS()
 {
     if (abs(deltaTime-0.0f)<1e-6) return; 
-    this->glDisable(GL_DEPTH_TEST);
     int fps = 1.0f / deltaTime;
     if (fps > 144) {
         return;
@@ -135,7 +132,6 @@ void OpenGLWidget::drawFPS()
     painter.setFont(font);
     QString text = "FPS:" + QString::number(fps);
     painter.drawText(rect(), Qt::AlignLeft, text);
-    this->glEnable(GL_DEPTH_TEST);
     painter.end();
 }
 
@@ -219,14 +215,21 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
         event->ignore();
         return;
     }
+    Model* selected = nullptr;
 
     if (event->button() == Qt::RightButton) {
         isRightClicked = true; //右键激活
+
         lastPos = event->pos();
     }
     else if (event->button() == Qt::LeftButton) {
         int x = event->pos().x();
         int y = event->pos().y();
+
+        selected = sceneManager->getSelected(x, y); //计算选中的物体
+        renderer->setSelected(selected); 
+        renderer->getGizmo()->setEditModel(selected); //如果选中物体
+
         if (renderer->getGizmo()->mouseDown(x, y)) {
             isLeftClicked = true;
         } //调整Gizmo
@@ -270,7 +273,8 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
         lastPos = event->pos();
         sceneManager->getCamera()->processMouseMovement(xoffset, yoffset);
     }
-    renderer->getGizmo()->mouseMove(x, y);
+    if(sceneManager->getState() != NONE)
+        renderer->getGizmo()->mouseMove(x, y);
 }
 
 void OpenGLWidget::wheelEvent(QWheelEvent* event)

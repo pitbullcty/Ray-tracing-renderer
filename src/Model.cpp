@@ -15,6 +15,11 @@ QString Model::getPath()
     return path;
 }
 
+AABB& Model::getBound()
+{
+    return bound;
+}
+
 QJsonObject Model::toJson()
 {
     QJsonObject model;

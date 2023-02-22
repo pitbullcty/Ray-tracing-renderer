@@ -32,8 +32,6 @@ void WindowActions::loadModel()
 		sceneManager->createScene();
 	}
 	sceneManager->addModel(fileName);
-	Console::Info("正在建立BVH...");
-	QtConcurrent::run(&BVHBuilder::buildBVH, sceneManager->getBVHbuilder().data()); //异步建立BVH
 }
 
 void WindowActions::crateScene()
@@ -48,8 +46,6 @@ void WindowActions::loadScene()
 		return;
 	}
 	sceneManager->loadScene(fileName);
-	Console::Info("正在建立BVH...");
-	QtConcurrent::run(&BVHBuilder::buildBVH, sceneManager->getBVHbuilder().data()); //异步建立BVH
 }
 
 void WindowActions::saveScene()

@@ -6,7 +6,7 @@
 #include <limits.h>
 
 constexpr auto MAX = std::numeric_limits<float>::max();
-constexpr auto MIN = std::numeric_limits<float>::min();
+constexpr auto MIN = -std::numeric_limits<float>::max();
 
 
 enum DIM {
@@ -81,6 +81,29 @@ struct AABB {
 		else if (max == leny) return AXIS_Y;
 		else return AXIS_Z;
 	}
+
+	 QVector<QVector<float>> generateAABBData() {
+		float minx = minpos.x();
+		float miny = minpos.y();
+		float minz = minpos.z();
+
+		float maxx = maxpos.x();
+		float maxy = maxpos.y();
+		float maxz = maxpos.z();
+
+		QVector<float> data1 = { minx, miny, minz,0.0f,1.0f,0.0f,1.0f };
+		QVector<float> data2 = { maxx, miny, minz,0.0f,1.0f,0.0f,1.0f };
+		QVector<float> data3 = { minx, maxy, minz,0.0f,1.0f,0.0f,1.0f };
+		QVector<float> data4 = { maxx, maxy, minz,0.0f,1.0f,0.0f,1.0f };
+		QVector<float> data5 = { minx, miny, maxz,0.0f,1.0f,0.0f,1.0f };
+		QVector<float> data6 = { maxx, miny, maxz,0.0f,1.0f,0.0f,1.0f };
+		QVector<float> data7 = { minx, maxy, maxz,0.0f,1.0f,0.0f,1.0f };
+		QVector<float> data8 = { maxx, maxy, maxz,0.0f,1.0f,0.0f,1.0f };
+
+		QVector<QVector<float>> data = {data1, data2, data3, data4, data5, data6, data7, data8}; //生成长方形数据
+		
+		return data;
+	}
 };
 
 struct Triangle
@@ -120,6 +143,7 @@ struct BVHNode
 class BVH {
 public:
 	QVector<BVHNode> nodes;
+	QVector<int> hitInfo; //记录节点碰撞信息
 	BVH() = default;
 };
 

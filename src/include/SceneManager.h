@@ -31,6 +31,8 @@ public:
 	void clearModel(const QString& name);
 	void clearModels();
 
+	Model* getSelected(int posx, int posy);
+
 	void loadScene(const QString& path); //读取场景
 	bool saveScene(); //保存场景
 	void saveSceneAs(const QString& path);

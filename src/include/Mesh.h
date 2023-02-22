@@ -43,9 +43,14 @@ public:
 	QVector<Texture> textures;             //纹理数据
 	QVector<Triangle> triangles; //当前mesh的三角形
 	QVector3D center; //中心
-	BVH bvh; //当前mesh的BVH
+	AABB bound; //mesh的碰撞箱
+	BVH bvh; //待删除
 	Mesh() = default;
-	void destoryTextures();
+	void destoryTextures() {
+		for (auto& texture : textures) {
+			texture.texture->destroy();
+		}
+	}
 };
 
 

@@ -3,6 +3,8 @@
 QSharedPointer<Renderer> Renderer::instance = nullptr;
 const float PI = 3.14159f;
 
+int renderIndex[][2] ={{0, 1},{2, 3},{4, 5},{6, 7},{0, 2},{1, 3},{4, 6},{5, 7},{0, 4},{1, 5},{7, 3},{2, 6}};
+//AABB渲染顺序
 
 void Renderer::destory(Renderer* renderer)
 {
@@ -10,6 +12,7 @@ void Renderer::destory(Renderer* renderer)
 	renderer->modelVBO.destroy();
 	renderer->modelEBO.destroy();
 	renderer->models = nullptr;
+	renderer->selected = nullptr;
 	delete renderer;
 }
 
@@ -26,8 +29,10 @@ Renderer::Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLE
 	modelVBO(QOpenGLBuffer::VertexBuffer),
 	modelEBO(QOpenGLBuffer::IndexBuffer), 
 	skyboxVBO(QOpenGLBuffer::VertexBuffer),
+	AABBVBO(QOpenGLBuffer::VertexBuffer),
 	width(width), 
-	height(height)
+	height(height),
+	selected(nullptr)
 {
 	models = nullptr;
 	camera = Camera::GetInstance();
@@ -35,8 +40,10 @@ Renderer::Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLE
 	gizmo = QSharedPointer<Gizmo>(new Gizmo(functions, shaderProgram["gizmo"]));
 	gizmo->setScale(5.0f);
 	gizmo->setType(MOVE);
+	gizmo->setEditModel(nullptr);
 	modelVBO.create();
 	skyboxVBO.create();
+	AABBVBO.create();
 	modelEBO.create();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 }
@@ -44,8 +51,13 @@ Renderer::Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLE
 
 void Renderer::setModels(QMap<QString, Model>* _models)
 {
+	
 	models = _models;
-	gizmo->setEditModel(&(*models)["nanosuit"]);
+}
+
+void Renderer::setSelected(Model* model)
+{
+	this->selected = model;
 }
 
 void Renderer::renderModels()
@@ -59,12 +71,14 @@ void Renderer::renderModels()
 	shaderProgram["model"]->setUniformValue("view", getCamera()->getView());
 	for (auto it = models->begin(); it != models->end(); it++) {
 		auto& model = it.value();
+		shaderProgram["model"]->bind();
 		shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
 		for (auto& mesh :model.getMeshes()) {
 			renderMesh(mesh);
 		}
 	}
 	shaderProgram["model"]->release();
+	
 }
 
 void Renderer::renderModel(const QString& name)
@@ -84,10 +98,9 @@ void Renderer::renderModel(const QString& name)
 
 void Renderer::renderMesh(const Mesh& mesh)
 {
+	shaderProgram["model"]->bind();
 	QOpenGLVertexArrayObject::Binder binder(&modelVAO);
-
 	modelVBO.bind();
-
 	modelVBO.allocate(mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
 
 	modelEBO.bind();
@@ -124,6 +137,7 @@ void Renderer::renderMesh(const Mesh& mesh)
 	}
 	// 绘制网格
 	functions->glDrawElements(GL_TRIANGLES, (unsigned int)mesh.indices.size(), GL_UNSIGNED_INT, 0);
+	shaderProgram["model"]->release();
 	modelVBO.release();
 	modelEBO.release();
 }
@@ -169,6 +183,7 @@ void Renderer::renderSkybox()
 	shaderProgram["skybox"]->setUniformValue("view",camera->getView());
 	functions->glActiveTexture(GL_TEXTURE0);
 	functions->glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+	functions->glDepthFunc(GL_LEQUAL); //一定要设置
 	QOpenGLVertexArrayObject::Binder binder(&skyboxVAO);
 	functions->glDrawArrays(GL_TRIANGLES, 0, 36);
 	skyboxVBO.release();
@@ -181,8 +196,39 @@ void Renderer::renderGizmo()
 	shaderProgram["gizmo"]->bind();
 	shaderProgram["gizmo"]->setUniformValue("projection", projection);
 	shaderProgram["gizmo"]->setUniformValue("view", view);
+	shaderProgram["gizmo"]->setUniformValue("model", QMatrix4x4());
 	gizmo->setCamera(view, projection);
 	gizmo->Draw();
+	shaderProgram["gizmo"]->release();
+}
+
+void Renderer::renderAABB()
+{
+	if (!selected) return;
+
+	auto view = camera->getView();
+	shaderProgram["gizmo"]->bind();
+	shaderProgram["gizmo"]->setUniformValue("projection", projection);
+	shaderProgram["gizmo"]->setUniformValue("view", view);
+	shaderProgram["gizmo"]->setUniformValue("model", selected->transform.getModel());
+	auto AABBdata = selected->getBound().generateAABBData();
+	float data[2 * 7];
+	functions->glDisable(GL_DEPTH_TEST);
+	QOpenGLVertexArrayObject::Binder binder(&AABBVAO);
+	for (int i = 0; i < 12; i++) {
+		memcpy(data, AABBdata[renderIndex[i][0]].data(), sizeof(float)*7);
+		memcpy(data+7, AABBdata[renderIndex[i][1]].data(), sizeof(float)*7);
+		AABBVBO.bind();
+		AABBVBO.allocate(data,sizeof(data));
+		shaderProgram["gizmo"]->enableAttributeArray(0);
+		shaderProgram["gizmo"]->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float) * 7);
+		shaderProgram["gizmo"]->enableAttributeArray(1);
+		shaderProgram["gizmo"]->setAttributeBuffer(1, GL_FLOAT, sizeof(float) * 3, 4, sizeof(float) * 7);
+		functions->glDrawArrays(GL_LINES, 0, 2);
+	}
+	functions->glEnable(GL_DEPTH_TEST);
+	AABBVBO.release();
+	shaderProgram["gizmo"]->release();
 }
 
 void Renderer::resize(int w, int h)

@@ -82,6 +82,11 @@ void SceneManager::clearModels()
 	models.clear();
 }
 
+Model* SceneManager::getSelected(int posx, int posy)
+{
+	return &models["nanosuit"];
+}
+
 
 QSharedPointer<Camera> SceneManager::getCamera()
 {

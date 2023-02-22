@@ -38,7 +38,7 @@ typedef tvector4 tplane;
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
-
+#include "src/include/Model.h"
 
 class CGizmoTransformRender  
 {

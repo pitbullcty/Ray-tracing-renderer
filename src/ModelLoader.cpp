@@ -77,6 +77,9 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
     for (auto& nodeCenter : nodeCenters) {
         center += nodeCenter;
     }
+    for (auto& mesh : meshes) {
+        model.getBound().Union(mesh.bound);
+    }
     model.setData(meshes, path, center/nodeCenters.size());
     return SUCCESS;
 }
@@ -140,6 +143,7 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
         }
 
         m.vertices.push_back(vertex);
+        m.bound.Union(vertex.pos); //计算bound
     }
 
     //检索相应的顶点索引。

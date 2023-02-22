@@ -37,6 +37,8 @@ void Gizmo::setModelMatrix(const QMatrix4x4& model)
 void Gizmo::setEditModel(Model* model)
 {
 	this->model = model;
+	if (!model) return;
+
 	QMatrix4x4 gizmoModel ; //获取初始模型矩阵
 	gizmoModel = model->transform.getModel();
 	QMatrix4x4 trans;
@@ -101,12 +103,15 @@ void Gizmo::setType(GIZMO_TYPE type)
 
 void Gizmo::mouseMove(int x, int y)
 {
+	if (!model) return;
 	gizmo->OnMouseMove(x, y);  //采用消除旋转策略
 	applyToModel();
 }
 
 bool Gizmo::mouseDown(int x, int y)
 {
+	if (!model) return false;
+
 	if (gizmo->OnMouseDown(x, y)) {
 		if (gizmo == gizmoRotate) {
 			if (checkScale()) {
@@ -125,6 +130,7 @@ bool Gizmo::mouseDown(int x, int y)
 
 void Gizmo::mouseUp(int x, int y)
 {
+	if (!model) return;
 	gizmo->OnMouseUp(x, y);
 }
 
@@ -135,5 +141,6 @@ void Gizmo::setLocate(IGizmo::LOCATION location)
 
 void Gizmo::Draw()
 {
+	if(!model) return;
 	gizmo->Draw();
 }

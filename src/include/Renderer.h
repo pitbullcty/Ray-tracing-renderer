@@ -15,11 +15,17 @@
 class Renderer {
 public:
 	void setModels(QMap<QString, Model>* _models); //设置渲染模型指针
+	void setSelected(Model* model);
+
 	void renderModels();
 	void renderModel(const QString& name); //渲染单个模型
+
 	void initSkybox();
 	void renderSkybox();
+
 	void renderGizmo();
+	void renderAABB();
+
 	void resize(int w, int h);
 
 	QSharedPointer<Gizmo> getGizmo();
@@ -41,7 +47,10 @@ private:
 	QOpenGLVertexArrayObject modelVAO;
 
 	QOpenGLBuffer skyboxVBO;
+	QOpenGLBuffer AABBVBO;
+
 	QOpenGLVertexArrayObject skyboxVAO;
+	QOpenGLVertexArrayObject AABBVAO;
 
 	unsigned int envCubemap;
 
@@ -54,6 +63,8 @@ private:
 	QSharedPointer<Camera> camera; //摄像机
 	QSharedPointer<Skybox> skybox; //天空盒
 	QSharedPointer<Gizmo> gizmo; //gizmo控件
+
+	Model* selected; //被选中的物体
 
 	Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height);
 	~Renderer() = default;
