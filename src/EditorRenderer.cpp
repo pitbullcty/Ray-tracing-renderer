@@ -1,12 +1,12 @@
-﻿#include "Renderer.h"
+﻿#include "EditorRenderer.h"
 
-QSharedPointer<Renderer> Renderer::instance = nullptr;
+QSharedPointer<EditorRenderer> EditorRenderer::instance = nullptr;
 const float PI = 3.14159f;
 
 int renderIndex[][2] ={{0, 1},{2, 3},{4, 5},{6, 7},{0, 2},{1, 3},{4, 6},{5, 7},{0, 4},{1, 5},{7, 3},{2, 6}};
 //AABB渲染顺序
 
-void Renderer::destory(Renderer* renderer)
+void EditorRenderer::destory(EditorRenderer* renderer)
 {
 	renderer->modelVAO.destroy();
 	renderer->modelVBO.destroy();
@@ -16,14 +16,14 @@ void Renderer::destory(Renderer* renderer)
 	delete renderer;
 }
 
-QSharedPointer<Renderer>& Renderer::GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height)
+QSharedPointer<EditorRenderer>& EditorRenderer::GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height)
 {
 	if (instance.isNull())
-		instance = QSharedPointer<Renderer>(new Renderer(_shaderProgram, _functions, width, height), Renderer::destory);
+		instance = QSharedPointer<EditorRenderer>(new EditorRenderer(_shaderProgram, _functions, width, height), EditorRenderer::destory);
 	return instance;
 }
 
-Renderer::Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
+EditorRenderer::EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
 	shaderProgram(_shaderProgram), 
 	functions(_functions), 
 	modelVBO(QOpenGLBuffer::VertexBuffer),
@@ -49,18 +49,23 @@ Renderer::Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLE
 }
 
 
-void Renderer::setModels(QMap<QString, Model>* _models)
+void EditorRenderer::setModels(QMap<QString, Model>* _models)
 {
 	
 	models = _models;
 }
 
-void Renderer::setSelected(Model* model)
+void EditorRenderer::setSelected(Model* model)
 {
 	this->selected = model;
 }
 
-void Renderer::renderModels()
+Model* EditorRenderer::getSelected()
+{
+	return selected;
+}
+
+void EditorRenderer::renderModels()
 {
 	shaderProgram["model"]->bind();
 	functions->glEnable(GL_DEPTH_TEST);
@@ -73,23 +78,19 @@ void Renderer::renderModels()
 		auto& model = it.value();
 		shaderProgram["model"]->bind();
 		shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
+		QVector<Mesh> meshes;
 		if (model.isCopy()) {
-			auto& meshes = model.getCopy()->getMeshes();
-			for (auto& mesh : meshes) {
-				renderMesh(mesh);
-			}
+			meshes = model.getCopy()->getMeshes();
 		}
-		else {
-			auto& meshes = model.getMeshes();
-			for (auto& mesh : meshes) {
-				renderMesh(mesh);
-			}
+		else meshes = model.getMeshes();
+		for (auto& mesh : meshes) {
+			renderMesh(mesh);
 		}
 	}
 	shaderProgram["model"]->release();
 }
 
-void Renderer::renderModel(const QString& name)
+void EditorRenderer::renderModel(const QString& name)
 {
 	auto& model = (*models)[name];
 	shaderProgram["model"]->bind();
@@ -98,22 +99,18 @@ void Renderer::renderModel(const QString& name)
 	shaderProgram["model"]->setUniformValue("projection", projection);
 	shaderProgram["model"]->setUniformValue("view", getCamera()->getView());
 	shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
+	QVector<Mesh> meshes;
 	if (model.isCopy()) {
-		auto& meshes = model.getCopy()->getMeshes();
-		for (auto& mesh : meshes) {
-			renderMesh(mesh);
-		}
+		meshes = model.getCopy()->getMeshes();
 	}
-	else {
-		auto& meshes = model.getMeshes();
-		for (auto& mesh : meshes) {
-			renderMesh(mesh);
-		}
+	else meshes = model.getMeshes();
+	for (auto& mesh : meshes) {
+		renderMesh(mesh);
 	}
 	shaderProgram["model"]->release();
 }
 
-void Renderer::renderMesh(const Mesh& mesh)
+void EditorRenderer::renderMesh(const Mesh& mesh)
 {
 	shaderProgram["model"]->bind();
 	QOpenGLVertexArrayObject::Binder binder(&modelVAO);
@@ -161,7 +158,7 @@ void Renderer::renderMesh(const Mesh& mesh)
 
 
 
-void Renderer::initSkybox()
+void EditorRenderer::initSkybox()
 {
 	shaderProgram["skybox"]->bind();
 	functions->glGenTextures(1, &envCubemap);
@@ -193,7 +190,7 @@ void Renderer::initSkybox()
 	shaderProgram["skybox"]->release();
 }
 
-void Renderer::renderSkybox()
+void EditorRenderer::renderSkybox()
 {
 	shaderProgram["skybox"]->bind();
 	shaderProgram["skybox"]->setUniformValue("projection", projection);
@@ -207,7 +204,7 @@ void Renderer::renderSkybox()
 	shaderProgram["skybox"]->release();
 }
 
-void Renderer::renderGizmo()
+void EditorRenderer::renderGizmo()
 {
 	auto view = camera->getView();
 	shaderProgram["gizmo"]->bind();
@@ -219,7 +216,7 @@ void Renderer::renderGizmo()
 	shaderProgram["gizmo"]->release();
 }
 
-void Renderer::renderAABB()
+void EditorRenderer::renderAABB()
 {
 	if (!selected) return;
 
@@ -248,7 +245,7 @@ void Renderer::renderAABB()
 	shaderProgram["gizmo"]->release();
 }
 
-void Renderer::resize(int w, int h)
+void EditorRenderer::resize(int w, int h)
 {
 	width = w;
 	height = h;
@@ -256,13 +253,13 @@ void Renderer::resize(int w, int h)
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 }
 
-QSharedPointer<Gizmo> Renderer::getGizmo()
+QSharedPointer<Gizmo> EditorRenderer::getGizmo()
 {
 	return gizmo;
 }
 
 
-QSharedPointer<Camera> Renderer::getCamera()
+QSharedPointer<Camera> EditorRenderer::getCamera()
 {
 	return camera;
 }

@@ -5,7 +5,6 @@
 #include "Camera.h"
 #include "Skybox.h"
 #include "Gizmo.h"
-#include "BVHBuilder.h"
 #include <QFile>
 #include <QRegularExpression>
 #include <QJsonArray>
@@ -28,7 +27,8 @@ public:
 	static void destory(SceneManager* sceneManager);
 
 	void addModel(const QString& path, const QString& modelName="");
-	void clearModel(const QString& name);
+	void removeModel(const QString& name);
+	void removeModel(Model* model);
 	void clearModels();
 
 	Model* getSelected(int posx, int posy);
@@ -42,7 +42,6 @@ public:
 	bool closeApp(); //关闭app
 
 	QSharedPointer<Camera> getCamera();
-	QSharedPointer<BVHBuilder> getBVHbuilder();
 	QMap<QString, Model>* getModels(); //返回模型指针
 	STATE getState();
 
@@ -50,8 +49,6 @@ public:
 private:
 
 	QSharedPointer<ModelLoader> modelLoader; //模型加载器
-	QSharedPointer<BVHBuilder> bvhBuilder;
-
 	QMap<QString, Model> models; //模型
 	QSharedPointer<Camera> camera; //摄像机
 	QSharedPointer<Skybox> skybox; //天空盒

@@ -3,6 +3,7 @@
 
 #include "ui_Mainwindow.h"
 #include "SceneManager.h"
+#include<QtConcurrent>
 #include <QAction>
 
 class WindowActions:public QObject {

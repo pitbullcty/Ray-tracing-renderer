@@ -1,19 +1,19 @@
-{
+﻿{
     "camera": {
-        "pitch": -29.300188064575195,
-        "x": 2.4543542861938477,
-        "y": 28.868709564208984,
-        "yaw": -810.3976440429688,
-        "z": 46.73586654663086
+        "pitch": -24.900238037109375,
+        "x": -12.67631721496582,
+        "y": 27.908214569091797,
+        "yaw": -790.4972534179688,
+        "z": 47.53754806518555
     },
     "models": [
         {
             "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
             "name": "nanosuit",
             "transform": {
-                "rotationX": -123.87093353271484,
-                "rotationY": -50.08341598510742,
-                "rotationZ": 3.6205263137817383,
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
                 "scaleX": 0.9999997615814209,
                 "scaleY": 0.9999997615814209,
                 "scaleZ": 0.9999998211860657,
@@ -54,7 +54,7 @@
         },
         {
             "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
-            "name": "nanosuit04",
+            "name": "nanosuit05",
             "transform": {
                 "rotationX": 0,
                 "rotationY": 0,
@@ -62,9 +62,9 @@
                 "scaleX": 1,
                 "scaleY": 1,
                 "scaleZ": 1,
-                "translationX": -13.204705238342285,
+                "translationX": -20.156082153320312,
                 "translationY": 0,
-                "translationZ": 11.206258773803711
+                "translationZ": 0
             }
         }
     ],

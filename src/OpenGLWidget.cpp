@@ -26,12 +26,18 @@ OpenGLWidget::OpenGLWidget(QWidget* parent)
 
 OpenGLWidget::~OpenGLWidget()
 {
+    BVHtask.cancel();
     sceneManager->clearModels();
 }
 
 bool OpenGLWidget::closeApp()
 {
     return sceneManager->closeApp();
+}
+
+QFuture<void>* OpenGLWidget::getTask()
+{
+    return &BVHtask;
 }
 
 void OpenGLWidget::initializeGL()
@@ -51,7 +57,7 @@ void OpenGLWidget::resizeGL(int w, int h)
     this->glEnable(GL_DEPTH_TEST);
     this->glDepthFunc(GL_LEQUAL);
     this->glViewport(0, 0, w, h);    //定义视口区域
-    renderer->resize(w, h);
+    editorRenderer->resize(w, h);
     sceneManager->setSize(w, h);
 }
 
@@ -68,10 +74,10 @@ void OpenGLWidget::paintGL()
         sceneManager->getCamera()->processKeyboard(deltaTime);
 
         //Opengl渲染部分
-        renderer->renderModels();
-        renderer->renderSkybox();
-        renderer->renderAABB();
-        renderer->renderGizmo(); //最后渲染gizmo避免被遮挡
+        editorRenderer->renderModels();
+        editorRenderer->renderSkybox();
+        editorRenderer->renderAABB();
+        editorRenderer->renderGizmo(); //最后渲染gizmo避免被遮挡
         drawFPS();
 
         float time = QTime::currentTime().msecsSinceStartOfDay() / 1000.0; //返回当天的秒数
@@ -96,9 +102,11 @@ void OpenGLWidget::initRenderer()
     map.insert("model", &modelShaderProgram);
     map.insert("skybox", &skyboxShaderProgram);
     map.insert("gizmo", &gizmoShaderProgram);
-    renderer = Renderer::GetInstance(map, QOpenGLContext::currentContext()->extraFunctions(), width(), height());
-    renderer->setModels(sceneManager->getModels());
-    renderer->initSkybox();
+    editorRenderer = EditorRenderer::GetInstance(map, QOpenGLContext::currentContext()->extraFunctions(), width(), height());
+    editorRenderer->setModels(sceneManager->getModels());
+    rayTracingRender = RayTracingRender::GetInstance();
+    rayTracingRender->setModels(sceneManager->getModels());
+    editorRenderer->initSkybox();
 }
 
 void OpenGLWidget::compileShader(QOpenGLShaderProgram* shaderProgram, const QString& shaderName)
@@ -168,12 +176,12 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
     else if (key == Qt::Key_Q) {
         changeCount++;
         if (changeCount == 3) changeCount = 0;
-        renderer->getGizmo()->setType(type[changeCount]);
+        editorRenderer->getGizmo()->setType(type[changeCount]);
     }
     else if (key == Qt::Key_E) {
         locationCount++;
         if (locationCount == 2) locationCount = 0;
-        renderer->getGizmo()->setLocate(locations[locationCount]);
+        editorRenderer->getGizmo()->setLocate(locations[locationCount]);
     }
     else if (key == Qt::Key_F5) {
         if (!isFullScreen) {
@@ -181,7 +189,6 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
             showFullScreen();
             isFullScreen = true;
         }
-      
     }
     else if (key == Qt::Key_Escape) {
         if (isFullScreen) {
@@ -190,6 +197,18 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
             showNormal();
             isFullScreen = false;
         }
+    }
+    else if (key == Qt::Key_Delete) {
+        auto selected = editorRenderer->getSelected();
+        if(selected){
+            sceneManager->removeModel(selected);
+            editorRenderer->setSelected(nullptr);
+            editorRenderer->getGizmo()->setEditModel(nullptr); //如果选中物体
+            if (BVHtask.isRunning()) {
+                BVHtask.waitForFinished();
+            } 
+            BVHtask = QtConcurrent::run(&RayTracingRender::buildBVH, rayTracingRender.data()); //异步构建
+        }//如果选中了物体
     }
     else {
         ;
@@ -227,13 +246,15 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
         int x = event->pos().x();
         int y = event->pos().y();
 
-        selected = sceneManager->getSelected(x, y); //计算选中的物体
-        renderer->setSelected(selected); 
-        renderer->getGizmo()->setEditModel(selected); //如果选中物体
-
-        if (renderer->getGizmo()->mouseDown(x, y)) {
+        if (editorRenderer->getGizmo()->mouseDown(x, y)) {
             isLeftClicked = true;
         } //调整Gizmo
+
+        else {
+            selected = sceneManager->getSelected(x, y); //计算选中的物体
+            editorRenderer->setSelected(selected);
+            editorRenderer->getGizmo()->setEditModel(selected); //如果选中物体
+        }
     }
     else {
         ;
@@ -250,7 +271,11 @@ void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
     int x = event->pos().x();
     int y = event->pos().y();
     if (isLeftClicked) {
-        renderer->getGizmo()->mouseUp(x, y);
+        editorRenderer->getGizmo()->mouseUp(x, y);
+        if (BVHtask.isRunning()) {
+            BVHtask.waitForFinished();
+        } //如果上次重建任务
+        BVHtask = QtConcurrent::run(&RayTracingRender::buildBVH, rayTracingRender.data()); //异步构建
         isLeftClicked = false;
     }
     else if (isRightClicked)
@@ -275,7 +300,7 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
         sceneManager->getCamera()->processMouseMovement(xoffset, yoffset);
     }
     if(sceneManager->getState() != NONE)
-        renderer->getGizmo()->mouseMove(x, y);
+        editorRenderer->getGizmo()->mouseMove(x, y);
 }
 
 void OpenGLWidget::wheelEvent(QWheelEvent* event)

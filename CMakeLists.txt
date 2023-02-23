@@ -19,6 +19,7 @@ find_package(Qt6 COMPONENTS OpenGL)
 find_package(Qt6 COMPONENTS OpenGLWidgets)
 find_package(Qt6 COMPONENTS Concurrent)
 find_package(assimp MODULE REQUIRED)
+find_package(OpenMP REQUIRED)
 
 
 file(GLOB_RECURSE src_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
@@ -48,6 +49,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core
     Qt::OpenGLWidgets
     Qt::Widgets
     Qt6::Concurrent
+    OpenMP::OpenMP_CXX
     optimized 	${ASSIMP_LIBRARY_RELEASE}
 	debug		${ASSIMP_LIBRARY_DEBUG}
 )

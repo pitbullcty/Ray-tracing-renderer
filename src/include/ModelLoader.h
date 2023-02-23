@@ -18,6 +18,7 @@ class ModelLoader {
 public:
 	static QSharedPointer<ModelLoader>& GetInstance();
 	static void destory(ModelLoader* modelLoader);
+	void removePath(const QString& path);
 	void clearPathes();
 	LOADRESULT loadModel(const QString& path, Model& model);
 

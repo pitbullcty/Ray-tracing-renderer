@@ -16,7 +16,6 @@ void SceneManager::destory(SceneManager* sceneManager)
 
 void SceneManager::addModel(const QString& path, const QString& modelName)
 {
-	
 	QString newname;
 	QString pathSep = path.right(path.size() - path.lastIndexOf('/') - 1);
 	QString name = pathSep.left(pathSep.lastIndexOf('.'));
@@ -60,18 +59,51 @@ void SceneManager::addModel(const QString& path, const QString& modelName)
 		models[newname].setCopy(&models[modelLoaded]); //如果已经加载过则直接复制
 	}
 	else if(loadRes == SUCCESS){
+		models[newname].updateBound();
 		QString loadModelTime = "模型" + newname + "加载耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms";
 		Console::Info(loadModelTime);
-		//qDebug() << loadTime;
 		return;
 	}
 	return;
 }
 
-void SceneManager::clearModel(const QString& name)
+void SceneManager::removeModel(const QString& name)
 {
-	models[name].destroyTextures();
+	auto& model = models[name];
+	if (!model.isCopy()) {
+		Model* change = nullptr; //用于转移的复制
+		for (auto it = models.begin(); it != models.end(); it++) {
+			auto& copyModel = it.value();
+			if (copyModel.isCopy() && copyModel.getCopy() == &model) { 
+				change = &copyModel;
+				break;
+			} //统计copy数量
+		}
+		if (change) {
+			change->setData(model.getMeshes(), model.getPath(), model.getCenter());
+			for (auto it = models.begin(); it != models.end(); it++) {
+				auto& copyModel = it.value();
+				if (copyModel.getCopy() == &model && &copyModel!=change) {
+					copyModel.setCopy(change, false);
+				}
+			}
+		} //如果有物体的复制,转移数据
+		else {
+			modelLoader->removePath(model.getPath());
+		} //如果没有说明是最后一个物体,清除modelLoader保存信息
+
+	} //如果要删除的是原始数据
 	models.remove(name);
+}
+
+void SceneManager::removeModel(Model* model)
+{
+	for (auto it = models.begin(); it != models.end(); it++) {
+		if (model == &it.value()) { //如果指向同一个物体
+			removeModel(it.key());
+			return;
+		}
+	}
 }
 
 void SceneManager::clearModels()
@@ -122,11 +154,6 @@ void SceneManager::setSize(int width, int height)
 QSharedPointer<Camera> SceneManager::getCamera()
 {
 	return camera;
-}
-
-QSharedPointer<BVHBuilder> SceneManager::getBVHbuilder()
-{
-	return bvhBuilder;
 }
 
 QMap<QString, Model>* SceneManager::getModels()
@@ -290,7 +317,7 @@ SceneManager::SceneManager() :
 	modelLoader(ModelLoader::GetInstance()),
 	camera(Camera::GetInstance()),
 	skybox(Skybox::GetInstance()),
-	bvhBuilder(BVHBuilder::GetInstance(&models)),
+	width(0),height(0),
 	state(NONE)
 {};
 

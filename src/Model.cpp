@@ -61,6 +61,7 @@ void Model::setData(const QVector<Mesh>& _meshes, const QString& _path, QVector3
     meshes = _meshes;
     path = _path;
     center = _center;
+    data = nullptr;
 }
 
 void Model::destroyTextures()
@@ -71,13 +72,16 @@ void Model::destroyTextures()
     }
 }
 
-void Model::setCopy(Model* copy)
+void Model::setCopy(Model* copy, bool needUpdate)
 {
     data = copy;
     bound = copy->getBound();
     center = copy->getCenter(); //复制bound以及center
     path = copy->getPath();
-    transform.reSet();
+    if (needUpdate) {
+        transform.reSet();
+        updateBound();
+    }
 }
 
 Model* Model::getCopy()
@@ -103,4 +107,9 @@ Model::Model(const QVector<Mesh>& _meshes, const QString& _path, QVector3D _cent
 Model::Model():
     data(nullptr)
 {
+}
+
+Model::~Model()
+{
+    data = nullptr;
 }

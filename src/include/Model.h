@@ -9,10 +9,10 @@ public:
 	Model(const QVector<Mesh>& _meshes, QVector3D _center = QVector3D(0.0f,0.0f,0.0f));
 	Model(const QVector<Mesh>& _meshes, const QString& _path, QVector3D _center = QVector3D(0.0f, 0.0f, 0.0f));
 	Model();
-	~Model() = default;
+	~Model();
 	void destroyTextures();
 
-	void setCopy(Model* copy);
+	void setCopy(Model* copy, bool needUpdate = true);
 	Model* getCopy();
 	bool isCopy(); 
 

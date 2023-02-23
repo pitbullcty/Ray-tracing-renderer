@@ -21,6 +21,11 @@ void ModelLoader::destory(ModelLoader* modelLoader) {
 	delete modelLoader;
 }
 
+void ModelLoader::removePath(const QString& path)
+{
+    pathLoaded.removeAll(path);
+}
+
 
 void ModelLoader::clearPathes()
 {

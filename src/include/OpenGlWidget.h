@@ -6,8 +6,9 @@
 #include <QOpenGLShaderProgram>
 #include <QKeyEvent>
 #include <QTime>
-#include "Renderer.h"
+#include "EditorRenderer.h"
 #include "SceneManager.h"
+#include "RayTracingRender.h"
 #include <QTimer>
 #include <QPainter>
 
@@ -20,7 +21,7 @@ public:
     OpenGLWidget(QWidget* parent = 0);
     ~OpenGLWidget();
     bool closeApp();
- 
+    QFuture<void>* getTask();
 
 protected:
     virtual void initializeGL() override;
@@ -40,8 +41,9 @@ private:
     QOpenGLShaderProgram skyboxShaderProgram;
     QOpenGLShaderProgram gizmoShaderProgram;
 
-    QSharedPointer<Renderer> renderer;
-    QSharedPointer<SceneManager> sceneManager; //常见管理和渲染器
+    QSharedPointer<EditorRenderer> editorRenderer; //编辑器所用渲染器
+    QSharedPointer<RayTracingRender> rayTracingRender; //光线追踪渲染器
+    QSharedPointer<SceneManager> sceneManager; //场景管理器
 
     bool isRightClicked; //右键是否按下
     bool isLeftClicked; //右键是否按下
@@ -52,6 +54,8 @@ private:
 
     float deltaTime; //渲染每帧间隔时间
     float lastFrameTime; //上一帧时间
+
+    QFuture<void> BVHtask;
 
     void initShaders();
     void initRenderer();

@@ -12,10 +12,11 @@
 #include <QOpenGLVertexArrayObject>
 
 //使用单例模式
-class Renderer {
+class EditorRenderer {
 public:
 	void setModels(QMap<QString, Model>* _models); //设置渲染模型指针
 	void setSelected(Model* model);
+	Model* getSelected();
 
 	void renderModels();
 	void renderModel(const QString& name); //渲染单个模型
@@ -31,13 +32,13 @@ public:
 	QSharedPointer<Gizmo> getGizmo();
 	QSharedPointer<Camera> getCamera();
 
-	static void destory(Renderer* sceneManager);
+	static void destory(EditorRenderer* sceneManager);
 	
-	static QSharedPointer<Renderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions
+	static QSharedPointer<EditorRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions
 	, int width, int height);
 
 private:
-	static QSharedPointer<Renderer> instance;
+	static QSharedPointer<EditorRenderer> instance;
 
 	//OpenGl上下文相关
 	QMap<QString, QOpenGLShaderProgram*> shaderProgram;
@@ -66,8 +67,8 @@ private:
 
 	Model* selected; //被选中的物体
 
-	Renderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height);
-	~Renderer() = default;
+	EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height);
+	~EditorRenderer() = default;
 
 	void renderMesh(const Mesh& mesh);
 

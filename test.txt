@@ -1,1 +1,0 @@
-﻿ uic ./ui/mainwindow.ui -o ./src/include/ui_mainwindow.h

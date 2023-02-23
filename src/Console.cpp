@@ -26,6 +26,7 @@ void Console::Warning(const QString& text)
 	console->append(warning.arg(now).arg(text));
 	isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
+	scroll();
 	isBusy = false;
 }
 
@@ -39,6 +40,7 @@ void Console::Info(const QString& text)
 	console->append(info.arg(now).arg(text));
 	isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
+	scroll();
 	isBusy = false;
 }
 
@@ -52,6 +54,7 @@ void Console::Error(const QString& text)
 	console->append(error.arg(now).arg(text));
 	isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
+	scroll();
 	isBusy = false;
 }
 
