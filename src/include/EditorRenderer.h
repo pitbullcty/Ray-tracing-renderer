@@ -1,15 +1,12 @@
 ﻿#ifndef __RENDERER__
 #define __RENDERER__
 
-#include"Model.h"
+#include "Model.h"
 #include "Camera.h"
 #include "Skybox.h"
 #include "Gizmo.h"
 #include <QMap>
-#include <QOpenGLExtraFunctions>
-#include <QOpenGLShaderProgram>
-#include <QOpenGLBuffer>
-#include <QOpenGLVertexArrayObject>
+
 
 //使用单例模式
 class EditorRenderer {
@@ -19,7 +16,6 @@ public:
 	Model* getSelected();
 
 	void renderModels();
-	void renderModel(const QString& name); //渲染单个模型
 
 	void initSkybox();
 	void renderSkybox();
@@ -44,9 +40,6 @@ private:
 	QMap<QString, QOpenGLShaderProgram*> shaderProgram;
 	QOpenGLExtraFunctions* functions;
 
-	QOpenGLBuffer modelVBO,modelEBO;
-	QOpenGLVertexArrayObject modelVAO;
-
 	QOpenGLBuffer skyboxVBO;
 	QOpenGLBuffer AABBVBO;
 
@@ -69,9 +62,6 @@ private:
 
 	EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height);
 	~EditorRenderer() = default;
-
-	void renderMesh(const Mesh& mesh);
-
 };
 
 #endif

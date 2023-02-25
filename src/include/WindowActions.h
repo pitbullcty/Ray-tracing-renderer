@@ -2,7 +2,6 @@
 #define __WINDOW_ACTION__
 
 #include "ui_Mainwindow.h"
-#include "SceneManager.h"
 #include<QtConcurrent>
 #include <QAction>
 
@@ -16,7 +15,6 @@ public:
 
 private:
 	Ui::MainWindow* ui;
-	QSharedPointer<SceneManager> sceneManager;
 	void loadModel();
 	void crateScene();
 	void loadScene();

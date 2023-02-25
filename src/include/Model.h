@@ -6,8 +6,8 @@
 
 class Model {
 public:
-	Model(const QVector<Mesh>& _meshes, QVector3D _center = QVector3D(0.0f,0.0f,0.0f));
-	Model(const QVector<Mesh>& _meshes, const QString& _path, QVector3D _center = QVector3D(0.0f, 0.0f, 0.0f));
+	Model(const QVector<QSharedPointer<Mesh>>& _meshes, QVector3D _center = QVector3D(0.0f,0.0f,0.0f));
+	Model(const QVector<QSharedPointer<Mesh>>& _meshes, const QString& _path, QVector3D _center = QVector3D(0.0f, 0.0f, 0.0f));
 	Model();
 	~Model();
 	void destroyTextures();
@@ -16,23 +16,24 @@ public:
 	Model* getCopy();
 	bool isCopy(); 
 
-	QVector<Mesh>& getMeshes();
+	QVector<QSharedPointer<Mesh>>& getMeshes();
 	QVector3D getCenter() const;
 	QString getPath() const;
+
 	AABB& getBound();
 	AABB& getDectionBound();
 	void updateBound();
 
 	QJsonObject toJson();
 	void prase(QJsonObject transform);
-	void setData(const QVector<Mesh>& _meshes, const QString& _path, QVector3D _center);
+	void setData(const QVector<QSharedPointer<Mesh>>& _meshes, const QString& _path, QVector3D _center);
 
 	Transform transform; //变换组件
 
 
 private:
 	QString path;
-	QVector<Mesh> meshes; //纹理
+	QVector<QSharedPointer<Mesh>> meshes; //纹理
 	QVector3D center; //模型重心
 
 	Model* data; //指向正确数据的指针

@@ -8,10 +8,8 @@ int renderIndex[][2] ={{0, 1},{2, 3},{4, 5},{6, 7},{0, 2},{1, 3},{4, 6},{5, 7},{
 
 void EditorRenderer::destory(EditorRenderer* renderer)
 {
-	renderer->modelVAO.destroy();
-	renderer->modelVBO.destroy();
-	renderer->modelEBO.destroy();
 	renderer->models = nullptr;
+	renderer->selected = nullptr;
 	renderer->selected = nullptr;
 	delete renderer;
 }
@@ -26,8 +24,6 @@ QSharedPointer<EditorRenderer>& EditorRenderer::GetInstance(QMap<QString, QOpenG
 EditorRenderer::EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
 	shaderProgram(_shaderProgram), 
 	functions(_functions), 
-	modelVBO(QOpenGLBuffer::VertexBuffer),
-	modelEBO(QOpenGLBuffer::IndexBuffer), 
 	skyboxVBO(QOpenGLBuffer::VertexBuffer),
 	AABBVBO(QOpenGLBuffer::VertexBuffer),
 	width(width), 
@@ -41,13 +37,10 @@ EditorRenderer::EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgr
 	gizmo->setScale(5.0f);
 	gizmo->setType(MOVE);
 	gizmo->setEditModel(nullptr);
-	modelVBO.create();
 	skyboxVBO.create();
 	AABBVBO.create();
-	modelEBO.create();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 }
-
 
 void EditorRenderer::setModels(QMap<QString, Model>* _models)
 {
@@ -65,6 +58,7 @@ Model* EditorRenderer::getSelected()
 	return selected;
 }
 
+
 void EditorRenderer::renderModels()
 {
 	shaderProgram["model"]->bind();
@@ -78,84 +72,20 @@ void EditorRenderer::renderModels()
 		auto& model = it.value();
 		shaderProgram["model"]->bind();
 		shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
-		QVector<Mesh> meshes;
+		QVector<QSharedPointer<Mesh>> meshes;
 		if (model.isCopy()) {
 			meshes = model.getCopy()->getMeshes();
 		}
 		else meshes = model.getMeshes();
 		for (auto& mesh : meshes) {
-			renderMesh(mesh);
+			if (!mesh->isInit) {
+				mesh->setUp();
+			} //mesh未初始化则直接初始化
+			mesh->render();
 		}
 	}
 	shaderProgram["model"]->release();
 }
-
-void EditorRenderer::renderModel(const QString& name)
-{
-	auto& model = (*models)[name];
-	shaderProgram["model"]->bind();
-	projection = QMatrix4x4();
-	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
-	shaderProgram["model"]->setUniformValue("projection", projection);
-	shaderProgram["model"]->setUniformValue("view", getCamera()->getView());
-	shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
-	QVector<Mesh> meshes;
-	if (model.isCopy()) {
-		meshes = model.getCopy()->getMeshes();
-	}
-	else meshes = model.getMeshes();
-	for (auto& mesh : meshes) {
-		renderMesh(mesh);
-	}
-	shaderProgram["model"]->release();
-}
-
-void EditorRenderer::renderMesh(const Mesh& mesh)
-{
-	shaderProgram["model"]->bind();
-	QOpenGLVertexArrayObject::Binder binder(&modelVAO);
-	modelVBO.bind();
-	modelVBO.allocate(mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
-
-	modelEBO.bind();
-	modelEBO.allocate(mesh.indices.data(), mesh.indices.size() * sizeof(unsigned int));
-
-	shaderProgram["model"]->enableAttributeArray(0);
-	shaderProgram["model"]->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(Vertex));
-
-	shaderProgram["model"]->enableAttributeArray(1);
-	shaderProgram["model"]->setAttributeBuffer(1, GL_FLOAT, offsetof(Vertex, normal), 3, sizeof(Vertex));
-
-	shaderProgram["model"]->enableAttributeArray(2);
-	shaderProgram["model"]->setAttributeBuffer(2, GL_FLOAT, offsetof(Vertex, texCoords), 2, sizeof(Vertex));
-
-	unsigned int diffuseNr = 1;
-	unsigned int specularNr = 1;
-	unsigned int normalNr = 1;
-	unsigned int heightNr = 1; //各类材质数量
-
-	for (unsigned int i = 0; i < mesh.textures.size(); i++)
-	{
-		QString number;
-		QString name = mesh.textures[i].type;
-		if (name == "texture_diffuse")
-			number = QString::number(diffuseNr++);
-		else if (name == "texture_specular")
-			number = QString::number(specularNr++);
-		else if (name == "texture_normal")
-			number = QString::number(normalNr++);
-		else if (name == "texture_height")
-			number = QString::number(heightNr++);
-		mesh.textures[i].texture->bind(i);
-		shaderProgram["model"]->setUniformValue((name + number).toStdString().c_str(), i); //传输不同材质值
-	}
-	// 绘制网格
-	functions->glDrawElements(GL_TRIANGLES, (unsigned int)mesh.indices.size(), GL_UNSIGNED_INT, 0);
-	shaderProgram["model"]->release();
-	modelVBO.release();
-	modelEBO.release();
-}
-
 
 
 void EditorRenderer::initSkybox()
@@ -206,6 +136,7 @@ void EditorRenderer::renderSkybox()
 
 void EditorRenderer::renderGizmo()
 {
+	if (!selected) return;
 	auto view = camera->getView();
 	shaderProgram["gizmo"]->bind();
 	shaderProgram["gizmo"]->setUniformValue("projection", projection);
@@ -219,7 +150,6 @@ void EditorRenderer::renderGizmo()
 void EditorRenderer::renderAABB()
 {
 	if (!selected) return;
-
 	auto view = camera->getView();
 	shaderProgram["gizmo"]->bind();
 	shaderProgram["gizmo"]->setUniformValue("projection", projection);

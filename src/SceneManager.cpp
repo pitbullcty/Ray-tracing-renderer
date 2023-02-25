@@ -90,6 +90,7 @@ void SceneManager::removeModel(const QString& name)
 		} //如果有物体的复制,转移数据
 		else {
 			modelLoader->removePath(model.getPath());
+			model.destroyTextures(); //可以删除材质
 		} //如果没有说明是最后一个物体,清除modelLoader保存信息
 
 	} //如果要删除的是原始数据
@@ -113,6 +114,7 @@ void SceneManager::clearModels()
 	}
 	models.clear();
 }
+
 
 Model* SceneManager::getSelected(int posx, int posy)
 {

@@ -1,9 +1,7 @@
 ﻿#include "WindowActions.h"
 
-WindowActions::WindowActions(Ui::MainWindow* ui)
+WindowActions::WindowActions(Ui::MainWindow* ui) : ui(ui)
 {
-	this->ui = ui;
-	sceneManager = SceneManager::GetInstance();
 }
 
 WindowActions::~WindowActions()
@@ -28,6 +26,10 @@ void WindowActions::loadModel()
 	if (fileName.isEmpty()) {
 		return;
 	}
+	auto sceneManager = ui->openGLWidget->getSceneManager();
+	auto editorRenderer = ui->openGLWidget->getEditorRenderer();
+	editorRenderer->setSelected(nullptr);
+	editorRenderer->getGizmo()->setEditModel(nullptr);
 	if (sceneManager->getState() == NONE) {
 		sceneManager->createScene();
 	}
@@ -42,6 +44,10 @@ void WindowActions::loadModel()
 
 void WindowActions::crateScene()
 {
+	auto sceneManager = ui->openGLWidget->getSceneManager();
+	auto editorRenderer = ui->openGLWidget->getEditorRenderer();
+	editorRenderer->setSelected(nullptr);
+	editorRenderer->getGizmo()->setEditModel(nullptr);
 	sceneManager->createScene();
 }
 
@@ -51,6 +57,10 @@ void WindowActions::loadScene()
 	if (fileName.isEmpty()) {
 		return;
 	}
+	auto sceneManager = ui->openGLWidget->getSceneManager();
+	auto editorRenderer = ui->openGLWidget->getEditorRenderer();
+	editorRenderer->setSelected(nullptr);
+	editorRenderer->getGizmo()->setEditModel(nullptr);
 	sceneManager->loadScene(fileName);
 	auto buildTask = ui->openGLWidget->getTask();
 	if (buildTask->isRunning()) {
@@ -61,6 +71,7 @@ void WindowActions::loadScene()
 
 void WindowActions::saveScene()
 {
+	auto sceneManager = ui->openGLWidget->getSceneManager();
 	if (sceneManager->getState() == NONE) {
 		QMessageBox::warning(nullptr, "警告", "尚未打开场景！", QMessageBox::Yes);
 		return;
@@ -70,6 +81,7 @@ void WindowActions::saveScene()
 
 void WindowActions::saveSceneAS()
 {
+	auto sceneManager = ui->openGLWidget->getSceneManager();
 	if (sceneManager->getState() == NONE) {
 		QMessageBox::warning(nullptr, "警告", "尚未打开场景！", QMessageBox::Yes);
 		return;
@@ -84,6 +96,7 @@ void WindowActions::saveSceneAS()
 
 void WindowActions::closeScene()
 {
+	auto sceneManager = ui->openGLWidget->getSceneManager();
 	if (sceneManager->getState() == NONE) return;
 	sceneManager->closeScene();
 }

@@ -124,14 +124,14 @@ void RayTracingRender::buildTriangles()
 	for (auto it = modelCopy.begin(); it != modelCopy.end(); it++) {
 		auto& model = it.value();
 		auto modelMatrix = model.transform.getModel();
-		QVector<Mesh> meshes;
+		QVector<QSharedPointer<Mesh>> meshes;
 		if (model.isCopy()) {
 			meshes = model.getCopy()->getMeshes();
 		}
 		else meshes = model.getMeshes();
 		for (auto& mesh : meshes) {
-			for (int i = 0; i < mesh.indices.size() / 3; i++) {
-				Triangle tri(modelMatrix.map(mesh.vertices[i].pos), modelMatrix.map(mesh.vertices[i + 1].pos), modelMatrix.map(mesh.vertices[i + 2].pos));
+			for (int i = 0; i < mesh->indices.size() / 3; i++) {
+				Triangle tri(modelMatrix.map(mesh->vertices[mesh->indices.at(i*3)].pos), modelMatrix.map(mesh->vertices[mesh->indices.at(i*3+1)].pos), modelMatrix.map(mesh->vertices[mesh->indices.at(i*3+2)].pos));
 				triangles.emplace_back(tri);
 			}
 		}

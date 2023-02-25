@@ -9,6 +9,10 @@
 #include <QSharedPointer>
 #include "BVH.h"
 #include <omp.h>
+#include <QOpenGLExtraFunctions>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
 #include <algorithm>
 /*
 * 顶点类
@@ -44,13 +48,21 @@ public:
 	QVector<Triangle> triangles; //当前mesh的三角形
 	QVector3D center; //中心
 	AABB bound; //mesh的碰撞箱
-	BVH bvh; //待删除
-	Mesh() = default;
-	void destoryTextures() {
-		for (auto& texture : textures) {
-			texture.texture->destroy();
-		}
-	}
+	bool isInit; //mesh是否初始化
+
+	QOpenGLVertexArrayObject VAO;
+	QOpenGLBuffer VBO, EBO;
+
+	Mesh(QOpenGLExtraFunctions* functions, QOpenGLShaderProgram* program);
+	~Mesh();
+	void setUp();
+	void render();
+	void destoryTextures();
+
+private:
+
+	QOpenGLExtraFunctions* functions;
+	QOpenGLShaderProgram* shaderProgram;
 };
 
 

@@ -5,6 +5,9 @@ IGizmo::LOCATION locations[2] = { IGizmo::LOCATE_WORLD, IGizmo::LOCATE_LOCAL };
 int changeCount = 0;
 int locationCount = 0;
 
+
+bool test = false;
+
 extern bool isBusy;
 
 
@@ -38,6 +41,16 @@ bool OpenGLWidget::closeApp()
 QFuture<void>* OpenGLWidget::getTask()
 {
     return &BVHtask;
+}
+
+QSharedPointer<EditorRenderer> OpenGLWidget::getEditorRenderer() const
+{
+    return editorRenderer;
+}
+
+QSharedPointer<SceneManager> OpenGLWidget::getSceneManager() const
+{
+    return sceneManager;
 }
 
 void OpenGLWidget::initializeGL()
@@ -106,6 +119,8 @@ void OpenGLWidget::initRenderer()
     editorRenderer->setModels(sceneManager->getModels());
     rayTracingRender = RayTracingRender::GetInstance();
     rayTracingRender->setModels(sceneManager->getModels());
+    auto& modelLoader = ModelLoader::GetInstance();
+    modelLoader->setContext(QOpenGLContext::currentContext()->extraFunctions(), &modelShaderProgram);
     editorRenderer->initSkybox();
 }
 

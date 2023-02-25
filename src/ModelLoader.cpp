@@ -32,6 +32,12 @@ void ModelLoader::clearPathes()
     pathLoaded.clear();
 }
 
+void ModelLoader::setContext(QOpenGLExtraFunctions* functions, QOpenGLShaderProgram* shaderProgram)
+{
+    this->functions = functions;
+    this->shaderProgram = shaderProgram;
+}
+
 static QSharedPointer<QOpenGLTexture> textureFromFile(const QString& path)
 {
     QImage image(path);
@@ -78,7 +84,7 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
         center += nodeCenter;
     }
     for (auto& mesh : meshes) {
-        model.getBound().Union(mesh.bound);
+        model.getBound().Union(mesh->bound);
     }
     model.setData(meshes, path, center/nodeCenters.size());
     return SUCCESS;
@@ -94,8 +100,8 @@ void ModelLoader::processNode(aiNode* node, const aiScene* scene)
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        Mesh temp = processMesh(mesh, scene);
-        nodeCenter += temp.center;
+        auto temp = processMesh(mesh, scene);
+        nodeCenter += temp->center;
         meshes.emplace_back(temp);
     }
     if (node->mNumMeshes != 0) {
@@ -110,9 +116,9 @@ void ModelLoader::processNode(aiNode* node, const aiScene* scene)
 }
 
 
-Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
+QSharedPointer<Mesh> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
 {
-    Mesh m;
+    QSharedPointer<Mesh> m(new Mesh(functions, shaderProgram));
     aiVector3D meshCenter(0, 0, 0);
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -142,8 +148,8 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
             vertex.texCoords = QVector2D(0, 0);
         }
 
-        m.vertices.push_back(vertex);
-        m.bound.Union(vertex.pos); //计算bound
+        m->vertices.push_back(vertex);
+        m->bound.Union(vertex.pos); //计算bound
     }
 
     //检索相应的顶点索引。
@@ -153,7 +159,7 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
         aiVector3D faceCenter(0, 0, 0); //面中心
         // 将所有面的索引数据添加到索引数组中
         for (unsigned int j = 0; j < face.mNumIndices; j++) {
-            m.indices.emplace_back(face.mIndices[j]);
+            m->indices.emplace_back(face.mIndices[j]);
             faceCenter = faceCenter + mesh->mVertices[face.mIndices[j]];
         }
         faceCenter /= face.mNumIndices;
@@ -168,26 +174,26 @@ Mesh ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene)
     // 1. 漫反射贴图
     QVector<Texture>  diffuseMaps = loadTexture(material, aiTextureType_DIFFUSE, "texture_diffuse");
     for (auto& texture : diffuseMaps)
-        m.textures.emplace_back(texture);
+        m->textures.emplace_back(texture);
 
     // 2. 镜面贴图
     QVector<Texture> specularMaps = loadTexture(material, aiTextureType_SPECULAR, "texture_specular");
     for (auto& texture : specularMaps)
-        m.textures.emplace_back(texture);
+        m->textures.emplace_back(texture);
 
     // 3. 法向量图
     QVector<Texture> normalMaps = loadTexture(material, aiTextureType_HEIGHT, "texture_normal");
     for (auto& texture : normalMaps)
-        m.textures.emplace_back(texture);
+        m->textures.emplace_back(texture);
 
     // 4. 高度图
     QVector<Texture> heightMaps = loadTexture(material, aiTextureType_AMBIENT, "texture_height");
     for (auto& texture : heightMaps)
-        m.textures.emplace_back(texture);
+        m->textures.emplace_back(texture);
 
     QVector3D center = assimp2QVector(meshCenter);
 
-    m.center = center;
+    m->center = center;
 
     return m;
 }

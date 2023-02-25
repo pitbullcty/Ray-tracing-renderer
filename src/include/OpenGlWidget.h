@@ -22,6 +22,8 @@ public:
     ~OpenGLWidget();
     bool closeApp();
     QFuture<void>* getTask();
+    QSharedPointer<EditorRenderer> getEditorRenderer() const;
+    QSharedPointer<SceneManager> getSceneManager() const;
 
 protected:
     virtual void initializeGL() override;

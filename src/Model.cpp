@@ -1,6 +1,6 @@
 ﻿#include "Model.h"
 
-QVector<Mesh>& Model::getMeshes()
+QVector<QSharedPointer<Mesh>>& Model::getMeshes()
 {
     return meshes;
 }
@@ -56,7 +56,7 @@ void Model::prase(QJsonObject transform)
     updateBound();
 }
 
-void Model::setData(const QVector<Mesh>& _meshes, const QString& _path, QVector3D _center)
+void Model::setData(const QVector<QSharedPointer<Mesh>>& _meshes, const QString& _path, QVector3D _center)
 {
     meshes = _meshes;
     path = _path;
@@ -68,7 +68,7 @@ void Model::destroyTextures()
 {
     if (meshes.isEmpty()) return;
     for (auto& mesh : meshes) {
-        mesh.destoryTextures();
+        mesh->destoryTextures();
     }
 }
 
@@ -94,12 +94,19 @@ bool Model::isCopy()
     return data ? true : false;
 }
 
-Model::Model(const QVector<Mesh>& _meshes, QVector3D _center) :meshes(_meshes),center(_center), data(nullptr)
+Model::Model(const QVector<QSharedPointer<Mesh>>& _meshes, QVector3D _center) :
+    meshes(_meshes),
+    center(_center), 
+    data(nullptr)
 {
     
 }
 
-Model::Model(const QVector<Mesh>& _meshes, const QString& _path, QVector3D _center):meshes(_meshes), center(_center), path(_path), data(nullptr)
+Model::Model(const QVector<QSharedPointer<Mesh>>& _meshes, const QString& _path, QVector3D _center):
+    meshes(_meshes), 
+    center(_center),
+    path(_path),
+    data(nullptr)
 {
 
 }
