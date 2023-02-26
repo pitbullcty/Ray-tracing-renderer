@@ -58,6 +58,11 @@ void MainWindow::bindSignals()
     auto& seceneManager = SceneManager::GetInstance();
     connect(seceneManager.data(), &SceneManager::updateList, ui->listWidget, &ModelListWidget::updateList); //关联更新信号
     connect(ui->listWidget, &ModelListWidget::sendNewname, seceneManager.data(), &SceneManager::rename);
+    connect(ui->listWidget, &ModelListWidget::sendRemoveName, seceneManager.data(), &SceneManager::removeModelByName);
+    connect(ui->listWidget, &ModelListWidget::sendCopyName, seceneManager.data(), &SceneManager::pasteByName);
+    connect(ui->listWidget, &ModelListWidget::sendAddPath, &actions, &WindowActions::loadModel);
+    connect(ui->listWidget, &ModelListWidget::itemClicked, ui->listWidget, &ModelListWidget::lookAt);
+    connect(ui->listWidget, &ModelListWidget::sendLookAtName, seceneManager.data(), &SceneManager::lookAtModel);
 
     connect(seceneManager.data(), &SceneManager::Info, ui->console, &Console::Info);
     connect(seceneManager.data(), &SceneManager::Error,ui->console, &Console::Error);

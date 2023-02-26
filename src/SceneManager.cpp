@@ -93,7 +93,7 @@ void SceneManager::copyModel(Model* model)
 	this->modelToCopy = model;
 }
 
-Model* SceneManager::removeModel(const QString& name)
+Model* SceneManager::removeModelByName(const QString& name)
 {
 	auto& model = models[name];
 	Model* change = nullptr;
@@ -123,6 +123,7 @@ Model* SceneManager::removeModel(const QString& name)
 	} //如果要删除的是原始数据
 	models.remove(name);
 	emit updateList(&models);
+	emit sendEditModel(nullptr);
 	return change;
 }
 
@@ -130,15 +131,22 @@ void SceneManager::removeModel(Model* model)
 {
 	for (auto it = models.begin(); it != models.end(); it++) {
 		if (model == &it.value()) { //如果指向同一个物体
-			removeModel(it.key());
+			removeModelByName(it.key());
 			return;
 		}
 	}
 }
 
-void SceneManager::copyModel(const QString name)
+void SceneManager::copyModel(const QString& name)
 {
 	this->modelToCopy = &models[name];
+}
+
+void SceneManager::lookAtModel(const QString& name)
+{
+	QVector3D trans = models[name].transform.getTranslation();
+	camera->setPos(trans - QVector3D(10.0f,0.0f,10.0f));
+	emit sendEditModel(&models[name]);
 }
 
 void SceneManager::pasteModel(QVector3D pos)
@@ -150,18 +158,27 @@ void SceneManager::pasteModel(QVector3D pos)
 		models[name].transform.translationZ = pos.z();
 		models[name].transform.calcModel();
 		models[name].updateBound();
+		emit sendEditModel(&models[name]);
 	} //如果有要复制的模型
+}
+
+
+void SceneManager::pasteByName(const QString& name)
+{
+	copyModel(&models[name]);
+	pasteModel(models[name].transform.getTranslation());
 }
 
 void SceneManager::rename(const QString& oldname, const QString& newname)
 {
 	auto model = models[oldname]; //直接复制
-	auto change = removeModel(oldname); 
+	auto change = removeModelByName(oldname);
 	if (change) {
 		model.getMeshes().clear();
 		model.setCopy(change, false);
 	} //如果需要
 	models.insert(newname, model);
+	emit sendEditModel(&models[newname]);
 	emit updateList(&models);
 }
 

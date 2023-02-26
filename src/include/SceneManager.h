@@ -45,21 +45,23 @@ public:
 	void clearModels();
 	void copyModel(Model* model);
 	void removeModel(Model* model);
-	QString addModel(const QString& path, const QString& modelName = "", bool isCopy=false);
 	void pasteModel(QPoint pos);
+	void pasteModel(QVector3D pos);
+	void copyModel(const QString& name);
+	void lookAtModel(const QString& name);
 
 signals:
 	void updateList(QMap<QString, Model>* models);
 	void Info(QString info);
 	void Error(QString error);
 	void Clear();
-	
+	void sendEditModel(Model* model);
 
 public slots:
-	Model* removeModel(const QString& name);
-	void copyModel(const QString name);
-	void pasteModel(QVector3D pos);
+	Model* removeModelByName(const QString& name);
+	void pasteByName(const QString& name);
 	void rename(const QString& oldname, const QString& newname);
+	QString addModel(const QString& path, const QString& modelName = "", bool isCopy = false);
 
 private:
 

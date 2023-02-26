@@ -68,7 +68,6 @@ void OpenGLWidget::resizeGL(int w, int h)
 
 void OpenGLWidget::paintGL()
 {
-    if (isBusy) return; //忙碌时不处理绘制事件
 
     if (sceneManager->getState() == NONE) {
         drawTips("请新建或打开文件！");
@@ -108,10 +107,14 @@ void OpenGLWidget::initRenderer()
     map.insert("model", &modelShaderProgram);
     map.insert("skybox", &skyboxShaderProgram);
     map.insert("gizmo", &gizmoShaderProgram);
+
     editorRenderer = EditorRenderer::GetInstance(map, QOpenGLContext::currentContext()->extraFunctions(), width(), height());
     editorRenderer->setModels(sceneManager->getModels());
+    connect(sceneManager.data(), &SceneManager::sendEditModel, editorRenderer.data(), &EditorRenderer::setSelected);
+
     rayTracingRender = RayTracingRender::GetInstance();
     rayTracingRender->setModels(sceneManager->getModels());
+
     auto& modelLoader = ModelLoader::GetInstance();
     modelLoader->setContext(QOpenGLContext::currentContext()->extraFunctions(), &modelShaderProgram);
     editorRenderer->initSkybox();
@@ -211,8 +214,6 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
         auto selected = editorRenderer->getSelected();
         if(selected){
             sceneManager->removeModel(selected);
-            editorRenderer->setSelected(nullptr);
-            editorRenderer->getGizmo()->setEditModel(nullptr); //如果选中物体
         }//如果选中了物体
     }
     else if (modifiers == Qt::ControlModifier && key == Qt::Key_C) {

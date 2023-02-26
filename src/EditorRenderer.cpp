@@ -51,6 +51,7 @@ void EditorRenderer::setModels(QMap<QString, Model>* _models)
 void EditorRenderer::setSelected(Model* model)
 {
 	this->selected = model;
+	getGizmo()->setEditModel(model);
 }
 
 Model* EditorRenderer::getSelected()

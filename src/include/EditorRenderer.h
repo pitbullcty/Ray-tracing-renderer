@@ -9,10 +9,11 @@
 
 
 //使用单例模式
-class EditorRenderer {
+class EditorRenderer:public QObject {
+	Q_OBJECT
+
 public:
 	void setModels(QMap<QString, Model>* _models); //设置渲染模型指针
-	void setSelected(Model* model);
 	Model* getSelected();
 
 	void renderModels();
@@ -32,6 +33,9 @@ public:
 	
 	static QSharedPointer<EditorRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions
 	, int width, int height);
+
+public slots:
+	void setSelected(Model* model);
 
 private:
 	static QSharedPointer<EditorRenderer> instance;

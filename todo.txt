@@ -1,4 +1,5 @@
 ﻿ uic ./ui/mainwindow.ui -o ./src/include/ui_mainwindow.h
 
  快捷键复制，删除物体
+ 右键完善，双击显示到物体
  利用信号槽机制更新listWidget

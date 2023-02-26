@@ -12,15 +12,16 @@ public:
 	WindowActions(Ui::MainWindow* ui);
 	~WindowActions();
 	void bind();
-
-private:
-	Ui::MainWindow* ui;
 	void loadModel();
 	void crateScene();
 	void loadScene();
 	void saveScene();
 	void saveSceneAS();
 	void closeScene();
+
+private:
+	Ui::MainWindow* ui;
+	
 };
 
 #endif
