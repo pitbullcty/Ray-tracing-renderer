@@ -31,6 +31,11 @@ void Transform::reSet()
 	calcModel();
 }
 
+QVector3D Transform::getTranslation()
+{
+	return QVector3D(translationX, translationY, translationZ);
+}
+
 QMatrix4x4 Transform::getModel()
 {
 	return model;

@@ -56,8 +56,9 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::bindSignals()
 {
     auto& seceneManager = SceneManager::GetInstance();
-    ui->listWidget->setModels(seceneManager->getModels());
     connect(seceneManager.data(), &SceneManager::updateList, ui->listWidget, &ModelListWidget::updateList); //关联更新信号
+    connect(ui->listWidget, &ModelListWidget::sendNewname, seceneManager.data(), &SceneManager::rename);
+
     connect(seceneManager.data(), &SceneManager::Info, ui->console, &Console::Info);
     connect(seceneManager.data(), &SceneManager::Error,ui->console, &Console::Error);
     connect(seceneManager.data(), &SceneManager::Clear,ui->console, &Console::Clear);
@@ -71,6 +72,7 @@ void MainWindow::bindSignals()
     connect(rayTracingRender.data(), &RayTracingRender::Info, ui->console, &Console::Info);
 
     connect(ui->closeWindow, &QAction::triggered, this, &MainWindow::close);
+    
 }
 
 

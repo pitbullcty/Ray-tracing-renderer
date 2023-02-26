@@ -28,11 +28,6 @@ public:
 	static QSharedPointer<SceneManager>& GetInstance();
 	static void destory(SceneManager* sceneManager);
 
-	void addModel(const QString& path, const QString& modelName="");
-	void removeModel(const QString& name);
-	void removeModel(Model* model);
-	void clearModels();
-
 	Model* getSelected(int posx, int posy);
 	void setSize(int width, int height);
 
@@ -47,11 +42,24 @@ public:
 	QMap<QString, Model>* getModels(); //返回模型指针
 	STATE getState();
 
+	void clearModels();
+	void copyModel(Model* model);
+	void removeModel(Model* model);
+	QString addModel(const QString& path, const QString& modelName = "", bool isCopy=false);
+	void pasteModel(QPoint pos);
+
 signals:
-	void updateList();
+	void updateList(QMap<QString, Model>* models);
 	void Info(QString info);
 	void Error(QString error);
 	void Clear();
+	
+
+public slots:
+	Model* removeModel(const QString& name);
+	void copyModel(const QString name);
+	void pasteModel(QVector3D pos);
+	void rename(const QString& oldname, const QString& newname);
 
 private:
 
@@ -64,6 +72,8 @@ private:
 
 	int width; 
 	int height; //窗口大小
+
+	Model* modelToCopy;
 
 	static QSharedPointer<SceneManager> instance;
 	SceneManager();

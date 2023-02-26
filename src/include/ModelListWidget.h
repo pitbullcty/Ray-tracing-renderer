@@ -3,6 +3,11 @@
 
 #include <QListWidget>
 #include "Model.h"
+#include <QMenu>
+#include <QAction>
+#include <QContextMenuEvent>
+#include <QInputDialog>
+#include <QMessageBox>
 
 class ModelListWidget:public QListWidget {
 	Q_OBJECT
@@ -10,13 +15,19 @@ class ModelListWidget:public QListWidget {
 public:
 	ModelListWidget(QWidget* parent = 0);
 	~ModelListWidget();
-	void setModels(QMap<QString, Model>* models);
+
+protected:
+	virtual void contextMenuEvent(QContextMenuEvent* event);
+
+signals:
+	void sendNewname(const QString& oldname, const QString& newname);
 
 public slots:
-	void updateList();
+	void updateList(QMap<QString, Model>* models);
+	void rename();
 
 private:
-	QMap<QString, Model>* models; //模型
+	QListWidgetItem* current;
 };
 
 #endif

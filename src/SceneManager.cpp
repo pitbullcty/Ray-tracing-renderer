@@ -11,10 +11,11 @@ QSharedPointer<SceneManager>& SceneManager::GetInstance()
 
 void SceneManager::destory(SceneManager* sceneManager)
 {
+	sceneManager->modelToCopy = nullptr;
 	delete sceneManager;
 }
 
-void SceneManager::addModel(const QString& path, const QString& modelName)
+QString SceneManager::addModel(const QString& path, const QString& modelName, bool isCopy)
 {
 	QString newname;
 	QString pathSep = path.right(path.size() - path.lastIndexOf('/') - 1);
@@ -57,23 +58,47 @@ void SceneManager::addModel(const QString& path, const QString& modelName)
 	auto loadRes = modelLoader->loadModel(path, models[newname]);
 	if (loadRes == RELOADED) {
 		models[newname].setCopy(&models[modelLoaded]); //如果已经加载过则直接复制
-		emit updateList();
+		if(!isCopy)  emit Info("模型" + path + "已加载！");
+		emit updateList(&models);
 	}
-	else if(loadRes == SUCCESS){
+	else if (loadRes == SUCCESS) {
 		models[newname].updateBound();
 		QString loadModelTime = "模型" + newname + "加载耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms";
 		emit Info(loadModelTime);
-		emit updateList();
-		return;
+		emit updateList(&models);
 	}
-	return;
+	else newname = "";
+	return newname;
 }
 
-void SceneManager::removeModel(const QString& name)
+void SceneManager::pasteModel(QPoint pos)
+{
+	float x = 2.0f * pos.x() / width - 1.0f;
+	float y = 1.0f - (2.0f * pos.y() / height);
+
+	QMatrix4x4 projection;
+	projection.perspective(camera->getZoom(), width / (float)height, 0.1f, 500.0f);
+	QMatrix4x4 view = camera->getView();
+
+	Ray ray(x, y, projection, view);
+	ray.direction = (ray.pos - camera->getPos()).normalized(); //构建射线
+
+	pasteModel(camera->getPos() + 50 *ray.direction); //往射线方向移动
+
+}
+
+
+void SceneManager::copyModel(Model* model)
+{
+	this->modelToCopy = model;
+}
+
+Model* SceneManager::removeModel(const QString& name)
 {
 	auto& model = models[name];
+	Model* change = nullptr;
 	if (!model.isCopy()) {
-		Model* change = nullptr; //用于转移的复制
+		 //用于转移的复制
 		for (auto it = models.begin(); it != models.end(); it++) {
 			auto& copyModel = it.value();
 			if (copyModel.isCopy() && copyModel.getCopy() == &model) { 
@@ -97,7 +122,8 @@ void SceneManager::removeModel(const QString& name)
 
 	} //如果要删除的是原始数据
 	models.remove(name);
-	emit updateList();
+	emit updateList(&models);
+	return change;
 }
 
 void SceneManager::removeModel(Model* model)
@@ -110,13 +136,41 @@ void SceneManager::removeModel(Model* model)
 	}
 }
 
+void SceneManager::copyModel(const QString name)
+{
+	this->modelToCopy = &models[name];
+}
+
+void SceneManager::pasteModel(QVector3D pos)
+{
+	if (modelToCopy) {
+		QString name = addModel(modelToCopy->getPath(),"",true);
+		models[name].transform.translationX = pos.x();
+		models[name].transform.translationY = pos.y();
+		models[name].transform.translationZ = pos.z();
+		models[name].transform.calcModel();
+		models[name].updateBound();
+	} //如果有要复制的模型
+}
+
+void SceneManager::rename(const QString& oldname, const QString& newname)
+{
+	auto model = models[oldname]; //直接复制
+	auto change = removeModel(oldname); 
+	if (change) {
+		model.getMeshes().clear();
+		model.setCopy(change, false);
+	} //如果需要
+	models.insert(newname, model);
+	emit updateList(&models);
+}
+
 void SceneManager::clearModels()
 {
 	for (auto it = models.begin(); it != models.end(); it++) {
 		it->destroyTextures();
 	}
 	models.clear();
-
 }
 
 
@@ -300,7 +354,7 @@ void SceneManager::createScene()
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();
-	emit updateList();
+	emit updateList(&models);
 	state = CREATED;
 }
 
@@ -312,7 +366,7 @@ void SceneManager::closeScene()
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();
-	emit updateList();
+	emit updateList(&models);
 	state = NONE;
 }
 
@@ -326,7 +380,8 @@ SceneManager::SceneManager() :
 	camera(Camera::GetInstance()),
 	skybox(Skybox::GetInstance()),
 	width(0),height(0),
-	state(NONE)
+	state(NONE),
+	modelToCopy(nullptr)
 {
 };
 

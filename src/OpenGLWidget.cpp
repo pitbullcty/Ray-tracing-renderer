@@ -5,11 +5,8 @@ IGizmo::LOCATION locations[2] = { IGizmo::LOCATE_WORLD, IGizmo::LOCATE_LOCAL };
 int changeCount = 0;
 int locationCount = 0;
 
-
 bool test = false;
-
 extern bool isBusy;
-
 
 OpenGLWidget::OpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
@@ -177,7 +174,8 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
     }
 
     Qt::Key key = (Qt::Key)(event->key());
-    if(key == Qt::Key_W || key == Qt::Key_S || key == Qt::Key_A || key == Qt::Key_D
+    auto modifiers = event->modifiers();
+    if(key == Qt::Key_W || key == Qt::Key_S || key == Qt::Key_A || (key == Qt::Key_D && modifiers!= Qt::ControlModifier)
         || key == Qt::Key_Space || key == Qt::Key_Shift)
     {
         if (event->isAutoRepeat())
@@ -217,6 +215,26 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
             editorRenderer->getGizmo()->setEditModel(nullptr); //如果选中物体
         }//如果选中了物体
     }
+    else if (modifiers == Qt::ControlModifier && key == Qt::Key_C) {
+        auto selected = editorRenderer->getSelected();
+        if (selected) {
+            sceneManager->copyModel(selected);
+        }
+    } //复制物体
+    else if (modifiers == Qt::ControlModifier && key == Qt::Key_D) {
+        auto selected = editorRenderer->getSelected();
+        if (selected) {
+            sceneManager->copyModel(selected);
+            sceneManager->pasteModel(selected->transform.getTranslation());
+        }
+        sceneManager->copyModel(nullptr);
+    } //原地复制物体
+    else if (modifiers == Qt::ControlModifier && key == Qt::Key_V) {
+        auto selected = editorRenderer->getSelected();
+        if (selected) {
+            sceneManager->pasteModel(mapFromGlobal(QCursor::pos()));
+        }
+    }
     else {
         ;
     }
@@ -252,11 +270,9 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
     else if (event->button() == Qt::LeftButton) {
         int x = event->pos().x();
         int y = event->pos().y();
-
         if (editorRenderer->getGizmo()->mouseDown(x, y)) {
             isLeftClicked = true;
         } //调整Gizmo
-
         else {
             selected = sceneManager->getSelected(x, y); //计算选中的物体
             editorRenderer->setSelected(selected);

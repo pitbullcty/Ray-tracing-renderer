@@ -118,7 +118,6 @@ struct Ray
 			world.setY(world.y() / world.w());
 			world.setZ(world.z() / world.w());
 		} //转换为标准坐标
-
 		pos = QVector3D(world);
 	};
 

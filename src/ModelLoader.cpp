@@ -62,7 +62,6 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
     nodeCenters.clear();
     center = QVector3D(); //加载前清空
     if (pathLoaded.contains(path)) {
-        emit Info("模型" + path + "已加载！");
         return RELOADED;
     } //若模型已经加载过则直接复制
     pathLoaded.push_back(path);
@@ -74,10 +73,7 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
         emit Error("ASSIMP ERRPR:" + QString(error));
         return FAILED;
     }
-    emit Info("模型网格数量："+ QString::number(scene->mNumMeshes));
-    emit Info("模型材质材质数量："+ QString::number(scene->mNumMaterials));
-    emit Info("模型纹理纹理数量："+ QString::number(scene->mNumTextures));
-    emit Info("模型动画数量："+ QString::number(scene->mNumAnimations));
+    emit Info("模型网格数量："+ QString::number(scene->mNumMeshes)+ " 模型材质数量：" + QString::number(scene->mNumMaterials) + " 模型纹理数量：" + QString::number(scene->mNumTextures));
     processNode(scene->mRootNode, scene);
     for (auto& nodeCenter : nodeCenters) {
         center += nodeCenter;
