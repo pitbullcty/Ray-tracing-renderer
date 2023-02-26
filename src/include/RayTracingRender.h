@@ -11,22 +11,24 @@ enum STRATEGY {
 	ALLAXIS
 };//SAH策略
 
-class RayTracingRender {
+class RayTracingRender:public QObject
+{
+	Q_OBJECT
 public:
 	static QSharedPointer<RayTracingRender>& GetInstance();
 	static void destory(RayTracingRender* builder);
 
 	void buildBVH();
-	bool isBuilding();
 	void setModels(QMap<QString, Model>* models);
+
+signals:
+	void Info(QString info);
 
 private:
 	QMap<QString, Model>* models;
 
 	BVH bvh;
 	QVector<Triangle> triangles;
-
-	bool isbuilding; //是否正在构建BVH
 
 	static QSharedPointer<RayTracingRender> instance;
 	RayTracingRender();

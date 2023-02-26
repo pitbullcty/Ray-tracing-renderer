@@ -101,7 +101,7 @@
    <property name="minimumSize">
     <size>
      <width>200</width>
-     <height>39</height>
+     <height>140</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -113,10 +113,23 @@
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
+   <property name="windowTitle">
+    <string>模型</string>
+   </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_9"/>
+   <widget class="QWidget" name="widget_2">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="ModelListWidget" name="listWidget">
+       <property name="styleSheet">
+        <string notr="true">font: 700 10pt &quot;Microsoft YaHei UI&quot;;</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidgetDetails">
    <property name="minimumSize">
@@ -160,6 +173,9 @@
    </property>
    <property name="allowedAreas">
     <set>Qt::BottomDockWidgetArea|Qt::TopDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>控制台</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -249,6 +265,11 @@
    <class>Console</class>
    <extends>QTextBrowser</extends>
    <header>Console.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ModelListWidget</class>
+   <extends>QListWidget</extends>
+   <header>ModelListWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

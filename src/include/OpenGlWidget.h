@@ -21,7 +21,6 @@ public:
     OpenGLWidget(QWidget* parent = 0);
     ~OpenGLWidget();
     bool closeApp();
-    QFuture<void>* getTask();
     QSharedPointer<EditorRenderer> getEditorRenderer() const;
     QSharedPointer<SceneManager> getSceneManager() const;
 
@@ -56,8 +55,6 @@ private:
 
     float deltaTime; //渲染每帧间隔时间
     float lastFrameTime; //上一帧时间
-
-    QFuture<void> BVHtask;
 
     void initShaders();
     void initRenderer();

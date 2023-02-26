@@ -20,8 +20,10 @@ enum STATE {
 	CREATED,
 }; //保存编辑状态 
 
-class SceneManager
+class SceneManager :public QObject
 {
+	Q_OBJECT
+
 public:
 	static QSharedPointer<SceneManager>& GetInstance();
 	static void destory(SceneManager* sceneManager);
@@ -45,6 +47,11 @@ public:
 	QMap<QString, Model>* getModels(); //返回模型指针
 	STATE getState();
 
+signals:
+	void updateList();
+	void Info(QString info);
+	void Error(QString error);
+	void Clear();
 
 private:
 
@@ -54,8 +61,6 @@ private:
 	QSharedPointer<Skybox> skybox; //天空盒
 	QString sceneFileName; //场景文件名
 	STATE state; //当前编辑状态
-
-	BVH sceneBVH; //场景BVH
 
 	int width; 
 	int height; //窗口大小

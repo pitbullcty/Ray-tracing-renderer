@@ -10,9 +10,8 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindo
     this->setWindowTitle("光线追踪渲染器");
     this->setStyle();
     this->showMaximized();
-    Console::setConsole(ui->console); //加载控制台
     actions.bind(); //绑定actions
-    connect(ui->closeWindow, &QAction::triggered, this, &MainWindow::close);
+    bindSignals(); //绑定其他信号
 }
 
 MainWindow::~MainWindow()//析构函数，关掉ＵＩ界面
@@ -52,6 +51,26 @@ void MainWindow::closeEvent(QCloseEvent* event)
     else {
         event->ignore();
     }
+}
+
+void MainWindow::bindSignals()
+{
+    auto& seceneManager = SceneManager::GetInstance();
+    ui->listWidget->setModels(seceneManager->getModels());
+    connect(seceneManager.data(), &SceneManager::updateList, ui->listWidget, &ModelListWidget::updateList); //关联更新信号
+    connect(seceneManager.data(), &SceneManager::Info, ui->console, &Console::Info);
+    connect(seceneManager.data(), &SceneManager::Error,ui->console, &Console::Error);
+    connect(seceneManager.data(), &SceneManager::Clear,ui->console, &Console::Clear);
+
+    auto& modelLoader = ModelLoader::GetInstance();
+    connect(modelLoader.data(), &ModelLoader::Info, ui->console, &Console::Info);
+    connect(modelLoader.data(), &ModelLoader::Error, ui->console, &Console::Error);
+    connect(modelLoader.data(), &ModelLoader::Warning, ui->console, &Console::Warning);
+
+    auto& rayTracingRender = RayTracingRender::GetInstance();
+    connect(rayTracingRender.data(), &RayTracingRender::Info, ui->console, &Console::Info);
+
+    connect(ui->closeWindow, &QAction::triggered, this, &MainWindow::close);
 }
 
 

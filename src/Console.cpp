@@ -1,7 +1,6 @@
 ﻿#include "Console.h"
 
 
-Console* Console::console = nullptr;
 QString Console::warning = "<div><img src=\":icons/warning.ico\" width=\"15\" height=\"15\">\
 		<font size=\"5\">%1%2</font></div>";
 QString Console::error = "<div><img src=\":icons/error.ico\" width=\"20\" height=\"20\">\
@@ -18,12 +17,9 @@ Console::Console(QWidget* parent):QTextBrowser(parent)
 
 void Console::Warning(const QString& text)
 {
-	if (!console) {
-		return;
-	}
 	QDateTime datetime = QDateTime::currentDateTime();
 	QString now = datetime.toString("[yyyy-MM-dd HH:mm:ss]");
-	console->append(warning.arg(now).arg(text));
+	append(warning.arg(now).arg(text));
 	isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
 	scroll();
@@ -32,13 +28,11 @@ void Console::Warning(const QString& text)
 
 void Console::Info(const QString& text)
 {
-	if (!console) {
-		return;
-	}
 	QDateTime datetime = QDateTime::currentDateTime();
 	QString now = datetime.toString("[yyyy-MM-dd HH:mm:ss]");
-	console->append(info.arg(now).arg(text));
-	isBusy = true;
+	append(info.arg(now).arg(text));
+	if (text.contains("BVH")) isBusy = false; //针对BVH特殊处理，不阻塞绘画事件
+	else isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
 	scroll();
 	isBusy = false;
@@ -46,40 +40,21 @@ void Console::Info(const QString& text)
 
 void Console::Error(const QString& text)
 {
-	if (!console) {
-		return;
-	}
 	QDateTime datetime = QDateTime::currentDateTime();
 	QString now = datetime.toString("[yyyy-MM-dd HH:mm:ss]");
-	console->append(error.arg(now).arg(text));
+	append(error.arg(now).arg(text));
 	isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
 	scroll();
 	isBusy = false;
 }
 
-void Console::setConsole(Console* newconsole)
+void Console::Clear()
 {
-	if (!console) {
-		console = newconsole;
-	}
-}
-
-
-void Console::clear()
-{
-	if (!console) return;
-	console->setText("");
+	setText("");
 }
 
 void Console::scroll()
 {
-	if (console) {
-		console->moveCursor(QTextCursor::End);
-	}
-}
-
-void Console::destroy()
-{
-	console = nullptr;
+	moveCursor(QTextCursor::End);
 }

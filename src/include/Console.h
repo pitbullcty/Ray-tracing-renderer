@@ -11,22 +11,22 @@ class Console :public QTextBrowser {
 	Q_OBJECT
 
 public:
-	static Console* console;
 	static QString info;
 	static QString warning;
 	static QString error;
 
 	Console(QWidget* parent = 0);
-	static void Warning(const QString& text);
-	static void Info(const QString& text);
-	static void Error(const QString& text);
-	static void setConsole(Console* newconsole);
-	static void clear();
+
+
+public slots:
+	void Warning(const QString& text);
+	void Info(const QString& text);
+	void Error(const QString& text);
+	void Clear();
 	
 
 private:
-	static void destroy();
-	static void scroll();
+	void scroll();
 };
 
 

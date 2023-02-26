@@ -14,7 +14,7 @@ public:
 private:
     Ui::MainWindow* ui;
     WindowActions actions;
-
+    void bindSignals();
 };
 
 

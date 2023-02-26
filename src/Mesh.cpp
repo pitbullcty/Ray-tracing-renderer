@@ -15,6 +15,8 @@ Mesh::~Mesh()
 {
 	VBO.destroy();
 	EBO.destroy();
+	functions = nullptr;
+	shaderProgram = nullptr;
 }
 
 void Mesh::destoryTextures()

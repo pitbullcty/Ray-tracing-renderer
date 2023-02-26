@@ -1,5 +1,4 @@
 ﻿#include "RayTracingRender.h"
-#include <omp.h>
 
 bool cmpx(const Triangle& t1, const Triangle& t2) {
 	return t1.bound.getCenter().x() < t2.bound.getCenter().x();
@@ -32,13 +31,11 @@ void RayTracingRender::buildBVH() {
 
 	QElapsedTimer timer;
 	timer.start();
-	isbuilding = true;
-	Console::Info("正在构建BVH...");
+	emit Info("正在构建BVH...");
 	buildTriangles();
 	int maxcount = int(log2(triangles.size())) + 1;
 	buildBVHHelp(0, triangles.size() - 1, maxcount);
-	isbuilding = false;
-	Console::Info("BVH建立完成，耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms");
+	emit Info("BVH建立完成，耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms");
 }
 
 int RayTracingRender::buildBVHHelp(int l, int r, int maxCount, int parent, STRATEGY stratgey)
@@ -138,17 +135,13 @@ void RayTracingRender::buildTriangles()
 	}
 }
 
-bool RayTracingRender::isBuilding()
-{
-	return isbuilding;
-}
 
 void RayTracingRender::setModels(QMap<QString, Model>* models)
 {
 	this->models = models;
 }
 
-RayTracingRender::RayTracingRender():models(nullptr), isbuilding(false)
+RayTracingRender::RayTracingRender():models(nullptr)
 {
 
 }

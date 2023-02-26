@@ -14,7 +14,8 @@ enum LOADRESULT {
 	RELOADED
 }; //模型加载结果
 
-class ModelLoader {
+class ModelLoader:public QObject{
+	Q_OBJECT
 public:
 	static QSharedPointer<ModelLoader>& GetInstance();
 	static void destory(ModelLoader* modelLoader);
@@ -22,6 +23,11 @@ public:
 	void clearPathes();
 	void setContext(QOpenGLExtraFunctions* functions, QOpenGLShaderProgram* shaderProgram);
 	LOADRESULT loadModel(const QString& path, Model& model);
+
+signals:
+	void Info(QString info);
+	void Warning(QString warning);
+	void Error(QString error);
 
 private:
 	QString path; //当前加载路径
@@ -35,8 +41,8 @@ private:
 	QOpenGLShaderProgram* shaderProgram; //上下文
 
 	static QSharedPointer<ModelLoader> instance;
-	~ModelLoader() = default;
-	ModelLoader() = default;
+	~ModelLoader();
+	ModelLoader();
 	
 	void processNode(aiNode* node, const aiScene* scene);
 	QSharedPointer<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);

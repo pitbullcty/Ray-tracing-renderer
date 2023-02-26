@@ -57,11 +57,13 @@ void SceneManager::addModel(const QString& path, const QString& modelName)
 	auto loadRes = modelLoader->loadModel(path, models[newname]);
 	if (loadRes == RELOADED) {
 		models[newname].setCopy(&models[modelLoaded]); //如果已经加载过则直接复制
+		emit updateList();
 	}
 	else if(loadRes == SUCCESS){
 		models[newname].updateBound();
 		QString loadModelTime = "模型" + newname + "加载耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms";
-		Console::Info(loadModelTime);
+		emit Info(loadModelTime);
+		emit updateList();
 		return;
 	}
 	return;
@@ -95,6 +97,7 @@ void SceneManager::removeModel(const QString& name)
 
 	} //如果要删除的是原始数据
 	models.remove(name);
+	emit updateList();
 }
 
 void SceneManager::removeModel(Model* model)
@@ -113,6 +116,7 @@ void SceneManager::clearModels()
 		it->destroyTextures();
 	}
 	models.clear();
+
 }
 
 
@@ -172,7 +176,7 @@ void SceneManager::loadScene(const QString& path)
 {
 
 	if (!dealDifference()) return;
-	Console::clear();
+	emit Clear();
 
 	sceneFileName = path;
 	bool res = true;
@@ -243,12 +247,12 @@ void SceneManager::loadScene(const QString& path)
 		res = false;
 	}
 	if (!res) {
-		Console::Error("场景加载失败！请检查json格式");
+		emit Error("场景加载失败！请检查json格式");
 		return;
 	}
 	else {
 		QString loadSceneTime = "场景加载成功！耗时：" + QString::number(timer.elapsed(), 'f', 2) + "ms";
-		Console::Info(loadSceneTime);
+		emit Info(loadSceneTime);
 	}
 	state = CREATED;
 }
@@ -271,7 +275,7 @@ bool SceneManager::saveScene()
 	file.open(QFile::WriteOnly);
 	file.write(doc.toJson());
 	file.close(); //写入json
-	Console::Info("场景保存至" + sceneFileName);
+	emit Info("场景保存至" + sceneFileName);
 	qDebug() << "场景保存至" + sceneFileName;
 	return true;
 }
@@ -283,7 +287,7 @@ void SceneManager::saveSceneAs(const QString& path)
 	QFile file(sceneFileName);
 	file.open(QFile::WriteOnly);
 	file.write(doc.toJson());
-	Console::Info("场景保存至" + sceneFileName);
+	emit Info("场景保存至" + sceneFileName);
 	qDebug() << "场景保存至" + sceneFileName;
 	file.close(); //写入json
 }
@@ -291,22 +295,24 @@ void SceneManager::saveSceneAs(const QString& path)
 void SceneManager::createScene()
 {
 	if (!dealDifference()) return;
-	Console::clear();
+	emit Clear();
 	sceneFileName = ""; //清除保存文件名
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();
+	emit updateList();
 	state = CREATED;
 }
 
 void SceneManager::closeScene()
 {
 	if (!dealDifference()) return;
-	Console::clear();
+	emit Clear();
 	sceneFileName = ""; //清除保存文件名
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();
+	emit updateList();
 	state = NONE;
 }
 
@@ -321,7 +327,8 @@ SceneManager::SceneManager() :
 	skybox(Skybox::GetInstance()),
 	width(0),height(0),
 	state(NONE)
-{};
+{
+};
 
 QJsonObject SceneManager::toJsonObeject()
 {

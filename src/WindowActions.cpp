@@ -34,12 +34,7 @@ void WindowActions::loadModel()
 		sceneManager->createScene();
 	}
 	sceneManager->addModel(fileName);
-	auto buildTask = ui->openGLWidget->getTask();
-	if (buildTask->isRunning()) {
-		buildTask->waitForFinished();
-	}
-	*buildTask = QtConcurrent::run(&RayTracingRender::buildBVH, RayTracingRender::GetInstance().data());
-
+	auto buildTask = QtConcurrent::run(&RayTracingRender::buildBVH, RayTracingRender::GetInstance().data());
 }
 
 void WindowActions::crateScene()
@@ -62,11 +57,7 @@ void WindowActions::loadScene()
 	editorRenderer->setSelected(nullptr);
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	sceneManager->loadScene(fileName);
-	auto buildTask = ui->openGLWidget->getTask();
-	if (buildTask->isRunning()) {
-		buildTask->waitForFinished();
-	}
-	*buildTask = QtConcurrent::run(&RayTracingRender::buildBVH, RayTracingRender::GetInstance().data());
+	auto buildTask = QtConcurrent::run(&RayTracingRender::buildBVH, RayTracingRender::GetInstance().data());
 }
 
 void WindowActions::saveScene()

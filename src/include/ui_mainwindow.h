@@ -1,4 +1,4 @@
-﻿/********************************************************************************
+/********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
 ** Created by: Qt User Interface Compiler version 6.2.4
@@ -22,6 +22,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "Console.h"
+#include "ModelListWidget.h"
 #include "OpenGLWidget.h"
 
 QT_BEGIN_NAMESPACE
@@ -49,7 +50,9 @@ public:
     QStatusBar *statusbar;
     QToolBar *toolBar;
     QDockWidget *dockWidgetInfos;
-    QWidget *dockWidgetContents_9;
+    QWidget *widget_2;
+    QVBoxLayout *verticalLayout_2;
+    ModelListWidget *listWidget;
     QDockWidget *dockWidgetDetails;
     QWidget *dockWidgetContents_10;
     QDockWidget *dockWidgetConsole;
@@ -119,12 +122,20 @@ public:
         MainWindow->addToolBar(Qt::TopToolBarArea, toolBar);
         dockWidgetInfos = new QDockWidget(MainWindow);
         dockWidgetInfos->setObjectName(QString::fromUtf8("dockWidgetInfos"));
-        dockWidgetInfos->setMinimumSize(QSize(200, 39));
+        dockWidgetInfos->setMinimumSize(QSize(200, 140));
         dockWidgetInfos->setMaximumSize(QSize(500, 524287));
         dockWidgetInfos->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
-        dockWidgetContents_9 = new QWidget();
-        dockWidgetContents_9->setObjectName(QString::fromUtf8("dockWidgetContents_9"));
-        dockWidgetInfos->setWidget(dockWidgetContents_9);
+        widget_2 = new QWidget();
+        widget_2->setObjectName(QString::fromUtf8("widget_2"));
+        verticalLayout_2 = new QVBoxLayout(widget_2);
+        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+        listWidget = new ModelListWidget(widget_2);
+        listWidget->setObjectName(QString::fromUtf8("listWidget"));
+        listWidget->setStyleSheet(QString::fromUtf8("font: 700 10pt \"Microsoft YaHei UI\";"));
+
+        verticalLayout_2->addWidget(listWidget);
+
+        dockWidgetInfos->setWidget(widget_2);
         MainWindow->addDockWidget(Qt::LeftDockWidgetArea, dockWidgetInfos);
         dockWidgetDetails = new QDockWidget(MainWindow);
         dockWidgetDetails->setObjectName(QString::fromUtf8("dockWidgetDetails"));
@@ -212,7 +223,10 @@ public:
         menu_2->setTitle(QCoreApplication::translate("MainWindow", "\345\270\256\345\212\251(&H)", nullptr));
         menu_4->setTitle(QCoreApplication::translate("MainWindow", "\347\252\227\345\217\243(&W)", nullptr));
         toolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar", nullptr));
+        dockWidgetInfos->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\250\241\345\236\213", nullptr));
+        dockWidgetConsole->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\216\247\345\210\266\345\217\260", nullptr));
     } // retranslateUi
+
 };
 
 namespace Ui {

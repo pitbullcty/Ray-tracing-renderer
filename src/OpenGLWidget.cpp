@@ -29,7 +29,6 @@ OpenGLWidget::OpenGLWidget(QWidget* parent)
 
 OpenGLWidget::~OpenGLWidget()
 {
-    BVHtask.cancel();
     sceneManager->clearModels();
 }
 
@@ -38,10 +37,6 @@ bool OpenGLWidget::closeApp()
     return sceneManager->closeApp();
 }
 
-QFuture<void>* OpenGLWidget::getTask()
-{
-    return &BVHtask;
-}
 
 QSharedPointer<EditorRenderer> OpenGLWidget::getEditorRenderer() const
 {
@@ -76,6 +71,7 @@ void OpenGLWidget::resizeGL(int w, int h)
 
 void OpenGLWidget::paintGL()
 {
+    if (isBusy) return; //忙碌时不处理绘制事件
 
     if (sceneManager->getState() == NONE) {
         drawTips("请新建或打开文件！");
@@ -219,10 +215,6 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
             sceneManager->removeModel(selected);
             editorRenderer->setSelected(nullptr);
             editorRenderer->getGizmo()->setEditModel(nullptr); //如果选中物体
-            if (BVHtask.isRunning()) {
-                BVHtask.waitForFinished();
-            } 
-            BVHtask = QtConcurrent::run(&RayTracingRender::buildBVH, rayTracingRender.data()); //异步构建
         }//如果选中了物体
     }
     else {
@@ -287,10 +279,6 @@ void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
     int y = event->pos().y();
     if (isLeftClicked) {
         editorRenderer->getGizmo()->mouseUp(x, y);
-        if (BVHtask.isRunning()) {
-            BVHtask.waitForFinished();
-        } //如果上次重建任务
-        BVHtask = QtConcurrent::run(&RayTracingRender::buildBVH, rayTracingRender.data()); //异步构建
         isLeftClicked = false;
     }
     else if (isRightClicked)
