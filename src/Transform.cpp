@@ -80,4 +80,18 @@ QJsonObject Transform::toJson()
 
 }
 
+void Transform::prase(const QJsonObject& transform)
+{
+	this->translationX = transform["translationX"].toVariant().toFloat();
+	this->translationY = transform["translationY"].toVariant().toFloat();
+	this->translationZ = transform["translationZ"].toVariant().toFloat();
+	this->rotationX = transform["rotationX"].toVariant().toFloat();
+	this->rotationY = transform["rotationY"].toVariant().toFloat();
+	this->rotationZ = transform["rotationZ"].toVariant().toFloat();
+	this->scaleX = transform["scaleX"].toVariant().toFloat();
+	this->scaleY = transform["scaleY"].toVariant().toFloat();
+	this->scaleZ = transform["scaleZ"].toVariant().toFloat();
+	calcModel();
+}
+
 

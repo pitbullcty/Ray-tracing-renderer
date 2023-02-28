@@ -54,7 +54,7 @@ static QSharedPointer<QOpenGLTexture> textureFromFile(const QString& path)
 }
 
 
-LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
+LOADRESULT ModelLoader::loadModel(const QString& path, Model &model, bool isLight) {
     
     this->path = path;
     meshes.clear();
@@ -66,14 +66,15 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model) {
     } //若模型已经加载过则直接复制
     pathLoaded.push_back(path);
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(path.toStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals); //读入场景,基于y轴翻转纹理坐标,换所有的模型的原始几何形状为三角形
+    const aiScene* scene = import.ReadFile(path.toStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals| aiProcess_CalcTangentSpace); //读入场景,基于y轴翻转纹理坐标,换所有的模型的原始几何形状为三角形
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)//检查场景和其根节点不为null，并且检查了标记(Flag)，查看返回的数据完整性。
     {
         auto error = import.GetErrorString();
         emit Error("ASSIMP ERRPR:" + QString(error));
         return FAILED;
     }
-    emit Info("模型网格数量："+ QString::number(scene->mNumMeshes)+ " 模型材质数量：" + QString::number(scene->mNumMaterials) + " 模型纹理数量：" + QString::number(scene->mNumTextures));
+    if(!isLight)
+        emit Info(QString("模型%1网格数量：").arg(path) + QString::number(scene->mNumMeshes) + " 模型材质数量：" + QString::number(scene->mNumMaterials) + " 模型纹理数量：" + QString::number(scene->mNumTextures));
     processNode(scene->mRootNode, scene);
     for (auto& nodeCenter : nodeCenters) {
         center += nodeCenter;
@@ -181,9 +182,9 @@ QSharedPointer<Mesh> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene
     for (auto& texture : diffuseMaps)
         m->textures.emplace_back(texture);
 
-    // 2. 镜面贴图
-    QVector<Texture> specularMaps = loadTexture(material, aiTextureType_SPECULAR, "texture_specular");
-    for (auto& texture : specularMaps)
+    // 2. 金属度贴图
+    QVector<Texture> mentalnessMaps = loadTexture(material, aiTextureType_METALNESS, "texture_metalness");
+    for (auto& texture : mentalnessMaps)
         m->textures.emplace_back(texture);
 
     // 3. 法向量图
@@ -191,9 +192,9 @@ QSharedPointer<Mesh> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene
     for (auto& texture : normalMaps)
         m->textures.emplace_back(texture);
 
-    // 4. 高度图
-    QVector<Texture> heightMaps = loadTexture(material, aiTextureType_AMBIENT, "texture_height");
-    for (auto& texture : heightMaps)
+    // 4. 自发光图
+    QVector<Texture> emissiveMaps = loadTexture(material, aiTextureType_EMISSIVE, "texture_emissive");
+    for (auto& texture : emissiveMaps)
         m->textures.emplace_back(texture);
 
     QVector3D center = assimp2QVector(meshCenter);
@@ -234,7 +235,6 @@ QVector<Texture> ModelLoader::loadTexture(aiMaterial* material, aiTextureType ty
                 tex.path = texpath;
                 textures.emplace_back(tex);
                 textures_loaded.emplace_back(tex);
-                emit Info("纹理" + texpath + "加载成功!");
             }
             else {
                 emit Warning("未能加载纹理" + texpath);

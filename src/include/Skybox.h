@@ -16,7 +16,7 @@ public:
 	QMap<QString, QString> pathes;
 	void setPath(const QString& location, const QString& path);
 	QJsonObject toJson();
-	void prase(QJsonObject skybox);
+	void prase(const QJsonObject& skybox);
 
 private:
 	static QSharedPointer<Skybox> instance;

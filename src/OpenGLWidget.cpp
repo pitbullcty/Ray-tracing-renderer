@@ -112,8 +112,8 @@ void OpenGLWidget::initRenderer()
     editorRenderer->setModels(sceneManager->getModels());
     connect(sceneManager.data(), &SceneManager::sendEditModel, editorRenderer.data(), &EditorRenderer::setSelected);
 
-    rayTracingRender = RayTracingRender::GetInstance();
-    rayTracingRender->setModels(sceneManager->getModels());
+    rayTracingRenderer = RayTracingRenderer::GetInstance();
+    rayTracingRenderer->setModels(sceneManager->getModels());
 
     auto& modelLoader = ModelLoader::GetInstance();
     modelLoader->setContext(QOpenGLContext::currentContext()->extraFunctions(), &modelShaderProgram);

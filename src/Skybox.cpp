@@ -31,7 +31,7 @@ QJsonObject Skybox::toJson()
     return skybox;
 }
 
-void Skybox::prase(QJsonObject skybox)
+void Skybox::prase(const QJsonObject& skybox)
 {
     auto keys = skybox.keys();
     for (int i = 0; i < keys.size(); i++) {

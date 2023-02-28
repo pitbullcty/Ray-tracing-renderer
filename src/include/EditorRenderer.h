@@ -1,5 +1,5 @@
-﻿#ifndef __RENDERER__
-#define __RENDERER__
+﻿#ifndef __EDITOR_RENDERER__
+#define __EDITOR_RENDERER__
 
 #include "Model.h"
 #include "Camera.h"

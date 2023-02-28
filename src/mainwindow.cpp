@@ -61,7 +61,7 @@ void MainWindow::bindSignals()
     connect(ui->listWidget, &ModelListWidget::sendRemoveName, seceneManager.data(), &SceneManager::removeModelByName);
     connect(ui->listWidget, &ModelListWidget::sendCopyName, seceneManager.data(), &SceneManager::pasteByName);
     connect(ui->listWidget, &ModelListWidget::sendAddPath, &actions, &WindowActions::loadModel);
-    connect(ui->listWidget, &ModelListWidget::itemClicked, ui->listWidget, &ModelListWidget::lookAt);
+    connect(ui->listWidget, &ModelListWidget::itemDoubleClicked, ui->listWidget, &ModelListWidget::lookAt);
     connect(ui->listWidget, &ModelListWidget::sendLookAtName, seceneManager.data(), &SceneManager::lookAtModel);
 
     connect(seceneManager.data(), &SceneManager::Info, ui->console, &Console::Info);
@@ -73,12 +73,10 @@ void MainWindow::bindSignals()
     connect(modelLoader.data(), &ModelLoader::Error, ui->console, &Console::Error);
     connect(modelLoader.data(), &ModelLoader::Warning, ui->console, &Console::Warning);
 
-    auto& rayTracingRender = RayTracingRender::GetInstance();
-    connect(rayTracingRender.data(), &RayTracingRender::Info, ui->console, &Console::Info);
+    auto& rayTracingRenderer = RayTracingRenderer::GetInstance();
+    connect(rayTracingRenderer.data(), &RayTracingRenderer::Info, ui->console, &Console::Info);
 
     connect(ui->closeWindow, &QAction::triggered, this, &MainWindow::close);
     
 }
-
-
 

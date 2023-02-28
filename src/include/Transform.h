@@ -23,7 +23,9 @@ public:
 	QVector3D getTranslation();
 	QMatrix4x4 getModel();  //获取模型
 	void setModel(const QMatrix4x4& _model);  //设置模型,反过来计算对应系数
+
 	QJsonObject toJson();
+	void prase(const QJsonObject& transform);
 	
 private:
 	QMatrix4x4 model; //模型矩阵

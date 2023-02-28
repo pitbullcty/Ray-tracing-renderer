@@ -3,6 +3,12 @@
 
 #include "Mesh.h"
 #include "Transform.h"
+#include "Material.h"
+
+enum MODELTYPE {
+	LIGHT,
+	NORMAL
+};
 
 class Model {
 public:
@@ -13,23 +19,30 @@ public:
 	void destroyTextures();
 
 	void setCopy(Model* copy, bool needUpdate = true);
-	Model* getCopy();
+	void setType(MODELTYPE type);
+
 	bool isCopy(); 
 
 	QVector<QSharedPointer<Mesh>>& getMeshes();
 	QVector3D getCenter() const;
 	QString getPath() const;
+	Model* getCopy();
+	MODELTYPE getType();
 
 	AABB& getBound();
 	AABB& getDectionBound();
 	void updateBound();
 
 	QJsonObject toJson();
-	void prase(QJsonObject transform);
+	void prase(const QJsonObject& transform, const QJsonObject& material);
+
 	void setData(const QVector<QSharedPointer<Mesh>>& _meshes, const QString& _path, QVector3D _center);
 
 	Transform transform; //变换组件
 
+	ModelMaterial modelMaterial;
+	LightMaterial lightMaterial;
+		
 
 private:
 	QString path;
@@ -41,6 +54,7 @@ private:
 	AABB bound; //用来显示的bound
 	AABB boundDetect; //用来碰撞计算的Bound
 	
+	MODELTYPE type;
 };
 
 

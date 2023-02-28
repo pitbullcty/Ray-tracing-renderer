@@ -22,7 +22,7 @@ public:
 	void removePath(const QString& path);
 	void clearPathes();
 	void setContext(QOpenGLExtraFunctions* functions, QOpenGLShaderProgram* shaderProgram);
-	LOADRESULT loadModel(const QString& path, Model& model);
+	LOADRESULT loadModel(const QString& path, Model& model, bool isLight = false);
 
 signals:
 	void Info(QString info);

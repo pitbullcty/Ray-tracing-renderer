@@ -170,7 +170,7 @@ QJsonObject Camera::toJson()
     return camera;
 }
 
-void Camera::prase(QJsonObject camera)
+void Camera::prase(const QJsonObject& camera)
 {
     float x = camera["x"].toVariant().toFloat();
     float y = camera["y"].toVariant().toFloat();

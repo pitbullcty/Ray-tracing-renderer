@@ -28,7 +28,7 @@ public:
     void updateState();
     void reSet();
     QJsonObject toJson();
-    void prase(QJsonObject camera);
+    void prase(const QJsonObject& camera);
 
 private:
 	static QSharedPointer<Camera> instance;

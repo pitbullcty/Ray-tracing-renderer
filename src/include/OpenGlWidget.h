@@ -1,5 +1,5 @@
-﻿#ifndef TESTWINDOW_H
-#define TESTWINDOW_H
+﻿#ifndef __OPENGL_WIDGET__
+#define __OPENGL_WIDGET__
 
 #include <QOpenGLWidget>
 #include <QOpenGLExtraFunctions>
@@ -8,7 +8,7 @@
 #include <QTime>
 #include "EditorRenderer.h"
 #include "SceneManager.h"
-#include "RayTracingRender.h"
+#include "RayTracingRenderer.h"
 #include <QTimer>
 #include <QPainter>
 
@@ -43,7 +43,7 @@ private:
     QOpenGLShaderProgram gizmoShaderProgram;
 
     QSharedPointer<EditorRenderer> editorRenderer; //编辑器所用渲染器
-    QSharedPointer<RayTracingRender> rayTracingRender; //光线追踪渲染器
+    QSharedPointer<RayTracingRenderer> rayTracingRenderer; //光线追踪渲染器
     QSharedPointer<SceneManager> sceneManager; //场景管理器
 
     bool isRightClicked; //右键是否按下

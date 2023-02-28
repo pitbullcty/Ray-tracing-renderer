@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/light">
+        <file>rectlight.obj</file>
+        <file>spherelight.obj</file>
+    </qresource>
+</RCC>

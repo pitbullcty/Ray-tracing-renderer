@@ -9,6 +9,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QTemporaryDir>
 
 class ModelListWidget:public QListWidget {
 	Q_OBJECT
@@ -25,7 +26,7 @@ signals:
 	void sendNewname(const QString& oldname, const QString& newname);
 	void sendRemoveName(const QString& name);
 	void sendCopyName(const QString& name);
-	void sendAddPath();
+	void sendAddPath(const QString& path);
 	void sendLookAtName(const QString& name);
 
 public slots:
@@ -36,10 +37,15 @@ public slots:
 	void paste();
 	void add();
 	void lookAt();
+	void addRectLight();
+	void addSphereLight();
 
 private:
 	QListWidgetItem* current;
-	QString copyName;
+	QString lightPath;
+	QString copyName; //复制文件名
+	QString tempRectFile; //临时文件名
+	QString tempSphereFile; //临时文件名
 };
 
 #endif

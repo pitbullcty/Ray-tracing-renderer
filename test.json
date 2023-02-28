@@ -1,69 +1,131 @@
-﻿{
+{
     "camera": {
-        "pitch": -24.900238037109375,
-        "x": -12.67631721496582,
-        "y": 27.908214569091797,
-        "yaw": -790.4972534179688,
-        "z": 47.53754806518555
+        "pitch": -6.8000054359436035,
+        "x": -11.957038879394531,
+        "y": 13.245391845703125,
+        "yaw": -82.79986572265625,
+        "z": 32.72340393066406
     },
+    "lights": [
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/out/build/x64-debug/lights/rectlight.obj",
+            "name": "rectlight",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 72.03423309326172,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": -6.278600692749023,
+                "translationY": 0,
+                "translationZ": 0
+            }
+        },
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/out/build/x64-debug/lights/rectlight.obj",
+            "name": "rectlight01",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": -80.3495864868164,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": -18.485801696777344,
+                "translationY": 0,
+                "translationZ": 0
+            }
+        },
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
+                }
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/out/build/x64-debug/lights/spherelight.obj",
+            "name": "spherelight",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": 0,
+                "translationY": 11.220632553100586,
+                "translationZ": 0
+            }
+        }
+    ],
     "models": [
         {
-            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
+            "material": {
+                "IOR": 1,
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0,
+                "transmission": 0
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/resources/Model/2/nanosuit.obj",
             "name": "nanosuit",
             "transform": {
                 "rotationX": 0,
                 "rotationY": 0,
                 "rotationZ": 0,
-                "scaleX": 0.9999997615814209,
-                "scaleY": 0.9999997615814209,
-                "scaleZ": 0.9999998211860657,
-                "translationX": 0.6680102348327637,
-                "translationY": -0.7309370040893555,
-                "translationZ": 11.386096954345703
-            }
-        },
-        {
-            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
-            "name": "nanosuit01",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
                 "scaleX": 1,
                 "scaleY": 1,
                 "scaleZ": 1,
-                "translationX": 10,
-                "translationY": 4.585731506347656,
-                "translationZ": 21.45227813720703
-            }
-        },
-        {
-            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
-            "name": "nanosuit03",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 1,
-                "scaleY": 1,
-                "scaleZ": 1,
-                "translationX": 10.172609329223633,
-                "translationY": 5.371585845947266,
-                "translationZ": 18.697956085205078
-            }
-        },
-        {
-            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray tracing renderer/resources/Model/2/nanosuit.obj",
-            "name": "nanosuit05",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 1,
-                "scaleY": 1,
-                "scaleZ": 1,
-                "translationX": -20.156082153320312,
-                "translationY": 0,
+                "translationX": -11.955276489257812,
+                "translationY": -0.7050743103027344,
                 "translationZ": 0
             }
         }

@@ -15,7 +15,7 @@ void SceneManager::destory(SceneManager* sceneManager)
 	delete sceneManager;
 }
 
-QString SceneManager::addModel(const QString& path, const QString& modelName, bool isCopy)
+QString SceneManager::addModel(const QString& path, const QString& modelName, bool isCopy, bool isLight)
 {
 	QString newname;
 	QString pathSep = path.right(path.size() - path.lastIndexOf('/') - 1);
@@ -23,6 +23,10 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 	QString modelLoaded;
 	QRegularExpression exp("\\d*$");
 	QString maxNum = "-1";
+
+	if (models.contains(modelName)) {
+		return "";
+	} //不能加载重名
 
 	for (auto it = models.begin(); it != models.end(); it++) {
 		QString key = it.key();
@@ -55,16 +59,21 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 	
 	QElapsedTimer timer;
 	timer.start();
-	auto loadRes = modelLoader->loadModel(path, models[newname]);
+	auto loadRes = modelLoader->loadModel(path, models[newname], isLight);
 	if (loadRes == RELOADED) {
 		models[newname].setCopy(&models[modelLoaded]); //如果已经加载过则直接复制
-		if(!isCopy)  emit Info("模型" + path + "已加载！");
+		if(!isCopy && !isLight)  emit Info("模型" + path + "已加载！"); 
 		emit updateList(&models);
 	}
 	else if (loadRes == SUCCESS) {
 		models[newname].updateBound();
-		QString loadModelTime = "模型" + newname + "加载耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms";
-		emit Info(loadModelTime);
+		if (!isLight) {
+			QString loadModelTime = "模型" + newname + "加载耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms";
+			emit Info(loadModelTime);
+		}
+		else {
+			models[newname].setType(LIGHT);
+		}
 		emit updateList(&models);
 	}
 	else newname = "";
@@ -144,9 +153,10 @@ void SceneManager::copyModel(const QString& name)
 
 void SceneManager::lookAtModel(const QString& name)
 {
-	QVector3D trans = models[name].transform.getTranslation();
-	camera->setPos(trans - QVector3D(10.0f,0.0f,10.0f));
-	emit sendEditModel(&models[name]);
+	auto& model = models[name];
+	QVector3D trans = model.transform.getTranslation();
+	camera->setPos(trans + model.getCenter());
+	emit sendEditModel(&model);
 }
 
 void SceneManager::pasteModel(QVector3D pos)
@@ -267,7 +277,7 @@ void SceneManager::loadScene(const QString& path)
 	if (doc.isObject()) {
 		QJsonObject obj = doc.object(); //得到Json对象
 		QStringList keys = obj.keys(); //得到所有key
-		for (int i = 0; i < keys.size(); i++)
+		for (int i = 0; i < keys.size() && res; i++)
 		{
 			QString key = keys.at(i);
 			QJsonValue value = obj[key];
@@ -277,13 +287,21 @@ void SceneManager::loadScene(const QString& path)
 				for (int j = 0; j < array.size(); j++) {
 					if (array[j].isObject()) {
 						QJsonObject subobj = array[j].toObject();
-						if (subobj.contains("modelPath")) {
-							QJsonObject transform = subobj["transform"].toObject();
-							QString path = subobj["modelPath"].toString();
-							QString modelName = subobj["name"].toString();
-							addModel(path, modelName);
-							models[modelName].prase(transform);
-						} //已知为模型类型，解析模型
+						QJsonObject modelMaterial = subobj["material"].toObject();
+						QJsonObject transform = subobj["transform"].toObject();
+						QString path = subobj["modelPath"].toString();
+						QString modelName = subobj["name"].toString();
+						QString loadRes;
+						if(key=="lights")
+							loadRes = addModel(path, modelName, false, true);
+						else
+							loadRes = addModel(path, modelName);
+
+						if (loadRes.isEmpty()) {
+							res = false;
+							break;
+						}
+						models[modelName].prase(transform, modelMaterial);
 					}
 					else {
 						res = false;
@@ -319,6 +337,10 @@ void SceneManager::loadScene(const QString& path)
 	}
 	if (!res) {
 		emit Error("场景加载失败！请检查json格式");
+		clearModels();
+		modelLoader->clearPathes(); //清除现有模型
+		camera->reSet();
+		state = NONE;
 		return;
 	}
 	else {
@@ -406,13 +428,21 @@ QJsonObject SceneManager::toJsonObeject()
 {
 	QJsonObject json;
 	QJsonArray modelsJsons;
+	QJsonArray LightsJsons;
 
 	for (auto it = models.begin(); it != models.end(); it++) {
+		auto& model = it.value();
 		auto modelJson = it.value().toJson();
 		modelJson.insert("name", it.key());
-		modelsJsons.append(modelJson);
+		if (model.getType() == NORMAL) {
+			modelsJsons.append(modelJson);
+		}
+		else {
+			LightsJsons.append(modelJson);
+		}
 	}
 	json.insert("models", modelsJsons); //保存模型
+	json.insert("lights", LightsJsons); //保存灯光
 
 	json.insert("camera", camera->toJson()); //保存相机参数
 	json.insert("skybox", skybox->toJson()); //保存天空盒

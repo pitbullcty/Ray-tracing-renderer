@@ -38,21 +38,20 @@ QJsonObject Model::toJson()
     QJsonObject model;
     model.insert("modelPath", path);
     model.insert("transform", transform.toJson());
+    if (type == LIGHT) {
+        model.insert("material", lightMaterial.toJson());
+    }
+    else {
+        model.insert("material", modelMaterial.toJson());
+    }
     return model;
 }
 
-void Model::prase(QJsonObject transform)
+void Model::prase(const QJsonObject& transform, const QJsonObject& material)
 {
-    this->transform.translationX = transform["translationX"].toVariant().toFloat();
-    this->transform.translationY = transform["translationY"].toVariant().toFloat();
-    this->transform.translationZ = transform["translationZ"].toVariant().toFloat();
-    this->transform.rotationX = transform["rotationX"].toVariant().toFloat();
-    this->transform.rotationY = transform["rotationY"].toVariant().toFloat();
-    this->transform.rotationZ = transform["rotationZ"].toVariant().toFloat();
-    this->transform.scaleX = transform["scaleX"].toVariant().toFloat();
-    this->transform.scaleY = transform["scaleY"].toVariant().toFloat();
-    this->transform.scaleZ = transform["scaleZ"].toVariant().toFloat();
-    this->transform.calcModel();
+    this->transform.prase(transform);
+    if (type == NORMAL) modelMaterial.prase(material);
+    else lightMaterial.prase(material);
     updateBound();
 }
 
@@ -78,15 +77,26 @@ void Model::setCopy(Model* copy, bool needUpdate)
     bound = copy->getBound();
     center = copy->getCenter(); //复制bound以及center
     path = copy->getPath();
+    type = copy->getType();
     if (needUpdate) {
         transform.reSet();
         updateBound();
     }
 }
 
+void Model::setType(MODELTYPE type)
+{
+    this->type = type;
+}
+
 Model* Model::getCopy()
 {
     return data;
+}
+
+MODELTYPE Model::getType()
+{
+    return type;
 }
 
 bool Model::isCopy()
@@ -97,7 +107,8 @@ bool Model::isCopy()
 Model::Model(const QVector<QSharedPointer<Mesh>>& _meshes, QVector3D _center) :
     meshes(_meshes),
     center(_center), 
-    data(nullptr)
+    data(nullptr),
+    type(NORMAL)
 {
     
 }
@@ -106,13 +117,15 @@ Model::Model(const QVector<QSharedPointer<Mesh>>& _meshes, const QString& _path,
     meshes(_meshes), 
     center(_center),
     path(_path),
-    data(nullptr)
+    data(nullptr),
+    type(NORMAL)
 {
 
 }
 
 Model::Model():
-    data(nullptr)
+    data(nullptr),
+    type(NORMAL)
 {
 }
 

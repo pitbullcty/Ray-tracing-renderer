@@ -66,11 +66,11 @@ void Mesh::render()
 		QString name = textures[i].type;
 		if (name == "texture_diffuse")
 			number = QString::number(diffuseNr++);
-		else if (name == "texture_specular")
+		else if (name == "texture_metalness")
 			number = QString::number(specularNr++);
 		else if (name == "texture_normal")
 			number = QString::number(normalNr++);
-		else if (name == "texture_height")
+		else if (name == "texture_emissive")
 			number = QString::number(heightNr++);
 		textures[i].texture->bind(i);
 		shaderProgram->setUniformValue((name + number).toStdString().c_str(), i); //传输不同材质值

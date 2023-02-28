@@ -61,7 +61,7 @@ public slots:
 	Model* removeModelByName(const QString& name);
 	void pasteByName(const QString& name);
 	void rename(const QString& oldname, const QString& newname);
-	QString addModel(const QString& path, const QString& modelName = "", bool isCopy = false);
+	QString addModel(const QString& path, const QString& modelName = "", bool isCopy = false, bool isLight = false);
 
 private:
 

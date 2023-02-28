@@ -1,8 +1,11 @@
 ﻿#include "ModelListWidget.h"
 
-ModelListWidget::ModelListWidget(QWidget* parent):QListWidget(parent), current(nullptr)
+ModelListWidget::ModelListWidget(QWidget* parent):QListWidget(parent), current(nullptr),copyName(""), lightPath(QDir::currentPath() + "/lights")
 {
-	
+    QDir dir;
+    if (!dir.exists(lightPath)) {
+        dir.mkdir(lightPath);
+    }
 }
 
 ModelListWidget::~ModelListWidget()
@@ -13,12 +16,35 @@ ModelListWidget::~ModelListWidget()
 void ModelListWidget::contextMenuEvent(QContextMenuEvent* event)
 {
     QMenu* popMenu = new QMenu(this);
+    QMenu* subMenu = new QMenu(popMenu);
+    subMenu->setTitle("新建");
+    QMenu* lightMenu = new QMenu(subMenu);
+    lightMenu->setTitle("新建光源");
     QAction* renameAction = nullptr;
     QAction* copyAction = nullptr;
     QAction* deleteAction = nullptr;
+    QAction* addModelAction = nullptr;
+    QAction* addRectLightAction = nullptr;
+    QAction* addSphereLightAction = nullptr;
     QAction* addAction = nullptr;
     QAction* pasteAction = nullptr;
+
     current = itemAt(event->pos());
+    popMenu->addMenu(subMenu);
+    subMenu->addMenu(lightMenu);
+
+    addModelAction = new QAction("新建模型", subMenu);
+    subMenu->addAction(addModelAction);
+   
+    addRectLightAction = new QAction("新建平面光", subMenu);
+    addSphereLightAction = new QAction("新建球形光", subMenu);
+    lightMenu->addAction(addRectLightAction);
+    lightMenu->addAction(addSphereLightAction);
+
+    connect(addModelAction, &QAction::triggered, this, &ModelListWidget::add);
+    connect(addRectLightAction, &QAction::triggered, this, &ModelListWidget::addRectLight);
+    connect(addSphereLightAction, &QAction::triggered, this, &ModelListWidget::addSphereLight);
+
     if (current != nullptr) //如果有item则添加
     {
         copyAction = new QAction("复制", this);
@@ -27,8 +53,8 @@ void ModelListWidget::contextMenuEvent(QContextMenuEvent* event)
             popMenu->addAction(pasteAction);
             connect(pasteAction, &QAction::triggered, this, &ModelListWidget::paste);
         }
-        deleteAction = new QAction("删除", this);
-        renameAction = new QAction("重命名", this);
+        deleteAction = new QAction("删除", popMenu);
+        renameAction = new QAction("重命名", popMenu);
         popMenu->addAction(copyAction);
         popMenu->addAction(deleteAction);
         popMenu->addAction(renameAction);
@@ -37,23 +63,15 @@ void ModelListWidget::contextMenuEvent(QContextMenuEvent* event)
         connect(copyAction, &QAction::triggered, this, &ModelListWidget::copy);
     }
     else {
-        currentItem()->setSelected(false);//取消选中状态
-        addAction = new QAction("新建", this);
+        if(currentItem()) currentItem()->setSelected(false);//取消选中状态
         if (!copyName.isEmpty()) {
-            pasteAction = new QAction("粘贴", this);
+            pasteAction = new QAction("粘贴", popMenu);
             popMenu->addAction(pasteAction);
             connect(pasteAction, &QAction::triggered, this, &ModelListWidget::paste);
         }
-        popMenu->addAction(addAction);
-        connect(addAction, &QAction::triggered, this, &ModelListWidget::add);
     }
     popMenu->exec((QCursor::pos())); // 菜单出现的位置为当前鼠标的位置
-    if(!renameAction) delete renameAction;
-    if (!copyAction) delete copyAction;
-    if (!deleteAction) delete deleteAction;
-    if (!addAction) delete addAction;
-    if (!pasteAction) delete pasteAction;
-    delete popMenu;
+    delete popMenu; //设置好父对象可以析构所有子对象
 }
 
 void ModelListWidget::keyPressEvent(QKeyEvent* event)
@@ -117,7 +135,7 @@ void ModelListWidget::paste()
 
 void ModelListWidget::add()
 {
-   emit sendAddPath();
+   emit sendAddPath("");
 }
 
 void ModelListWidget::lookAt()
@@ -125,6 +143,27 @@ void ModelListWidget::lookAt()
     emit sendLookAtName(currentItem()->text());
 }
 
+void ModelListWidget::addRectLight()
+{
+    if (tempRectFile.isEmpty()) {
+        tempRectFile = lightPath + "/rectlight.obj";
+        if(!QFile::exists(tempRectFile))
+            QFile::copy(":/light/rectlight.obj", tempRectFile);
+    }
+    emit sendAddPath(tempRectFile); 
+}
+
+void ModelListWidget::addSphereLight()
+{
+    
+    if (tempSphereFile.isEmpty()) {
+        tempSphereFile = lightPath + "/spherelight.obj";
+        if (!QFile::exists(tempSphereFile))
+            QFile::copy(":/light/spherelight.obj", tempSphereFile);
+    }
+    emit sendAddPath(tempSphereFile);
+    
+}
 
 void ModelListWidget::updateList(QMap<QString, Model>* models) {
 	if (!models) return;
