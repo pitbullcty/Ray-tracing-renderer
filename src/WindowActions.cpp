@@ -1,5 +1,7 @@
 ﻿#include "WindowActions.h"
 
+extern bool isBusy;
+
 WindowActions::WindowActions(Ui::MainWindow* ui) : ui(ui)
 {
 }
@@ -41,7 +43,9 @@ void WindowActions::loadModel(const QString& path)
 	}
 	if(path.contains(":")) sceneManager->addModel(fileName,"",false,true); //包含:则为添加灯光
 	else {
+		isBusy = true;
 		sceneManager->addModel(fileName);
+		isBusy = false;
 		auto buildTask = QtConcurrent::run(&RayTracingRenderer::buildBVH, RayTracingRenderer::GetInstance().data());
 	}
 }
@@ -65,7 +69,9 @@ void WindowActions::loadScene()
 	auto editorRenderer = ui->openGLWidget->getEditorRenderer();
 	editorRenderer->setSelected(nullptr);
 	editorRenderer->getGizmo()->setEditModel(nullptr);
+	isBusy = true;
 	sceneManager->loadScene(fileName);
+	isBusy = false;
 	auto buildTask = QtConcurrent::run(&RayTracingRenderer::buildBVH, RayTracingRenderer::GetInstance().data());
 }
 

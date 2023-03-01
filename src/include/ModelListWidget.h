@@ -28,9 +28,10 @@ signals:
 	void sendCopyName(const QString& name);
 	void sendAddPath(const QString& path);
 	void sendLookAtName(const QString& name);
+	void sendSelectedName(const QString& name);
 
 public slots:
-	void updateList(QMap<QString, Model>* models);
+	void updateList(QMap<QString, Model>* models, Model* model);
 	void rename();
 	void remove();
 	void copy();
@@ -39,6 +40,7 @@ public slots:
 	void lookAt();
 	void addRectLight();
 	void addSphereLight();
+	void getSelectedName();
 
 private:
 	QListWidgetItem* current;

@@ -41,7 +41,7 @@ public:
 	Transform transform; //变换组件
 
 	ModelMaterial modelMaterial;
-	LightMaterial lightMaterial;
+	LightMaterial lightMaterial; //两种不同材质
 		
 
 private:

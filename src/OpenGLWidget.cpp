@@ -277,7 +277,6 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
         else {
             selected = sceneManager->getSelected(x, y); //计算选中的物体
             editorRenderer->setSelected(selected);
-            editorRenderer->getGizmo()->setEditModel(selected); //如果选中物体
         }
     }
     else {

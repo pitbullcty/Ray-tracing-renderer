@@ -63,7 +63,7 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 	if (loadRes == RELOADED) {
 		models[newname].setCopy(&models[modelLoaded]); //如果已经加载过则直接复制
 		if(!isCopy && !isLight)  emit Info("模型" + path + "已加载！"); 
-		emit updateList(&models);
+		emit updateList(&models, nullptr);
 	}
 	else if (loadRes == SUCCESS) {
 		models[newname].updateBound();
@@ -74,10 +74,15 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 		else {
 			models[newname].setType(LIGHT);
 		}
-		emit updateList(&models);
+		emit updateList(&models, nullptr);
 	}
 	else newname = "";
 	return newname;
+}
+
+void SceneManager::getEditModel(const QString& name)
+{
+	emit sendEditModel(&models[name]);
 }
 
 void SceneManager::pasteModel(QPoint pos)
@@ -131,7 +136,7 @@ Model* SceneManager::removeModelByName(const QString& name)
 
 	} //如果要删除的是原始数据
 	models.remove(name);
-	emit updateList(&models);
+	emit updateList(&models, nullptr);
 	emit sendEditModel(nullptr);
 	return change;
 }
@@ -189,7 +194,7 @@ void SceneManager::rename(const QString& oldname, const QString& newname)
 	} //如果需要
 	models.insert(newname, model);
 	emit sendEditModel(&models[newname]);
-	emit updateList(&models);
+	emit updateList(&models, nullptr);
 }
 
 void SceneManager::clearModels()
@@ -227,7 +232,7 @@ Model* SceneManager::getSelected(int posx, int posy)
 			}
 		} //寻找最近交点
 	}
-
+	emit updateList(&models, selected);
 	return selected;
 }
 
@@ -393,7 +398,7 @@ void SceneManager::createScene()
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();
-	emit updateList(&models);
+	emit updateList(&models, nullptr);
 	state = CREATED;
 }
 
@@ -405,7 +410,7 @@ void SceneManager::closeScene()
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();
-	emit updateList(&models);
+	emit updateList(&models, nullptr);
 	state = NONE;
 }
 

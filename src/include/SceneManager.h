@@ -51,7 +51,7 @@ public:
 	void lookAtModel(const QString& name);
 
 signals:
-	void updateList(QMap<QString, Model>* models);
+	void updateList(QMap<QString, Model>* models, Model* model);
 	void Info(QString info);
 	void Error(QString error);
 	void Clear();
@@ -62,6 +62,7 @@ public slots:
 	void pasteByName(const QString& name);
 	void rename(const QString& oldname, const QString& newname);
 	QString addModel(const QString& path, const QString& modelName = "", bool isCopy = false, bool isLight = false);
+	void getEditModel(const QString& name);
 
 private:
 

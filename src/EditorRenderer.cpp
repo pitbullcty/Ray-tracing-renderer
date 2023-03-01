@@ -72,6 +72,10 @@ void EditorRenderer::renderModels()
 	for (auto it = models->begin(); it != models->end(); it++) {
 		auto& model = it.value();
 		shaderProgram["model"]->bind();
+		if (model.getType() == NORMAL) 
+			shaderProgram["model"]->setUniformValue("color", model.modelMaterial.baseColor);
+		else 
+			shaderProgram["model"]->setUniformValue("color", model.lightMaterial.emissive / 255.0f);
 		shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
 		QVector<QSharedPointer<Mesh>> meshes;
 		if (model.isCopy()) {

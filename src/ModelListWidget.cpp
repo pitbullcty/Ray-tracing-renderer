@@ -165,12 +165,23 @@ void ModelListWidget::addSphereLight()
     
 }
 
-void ModelListWidget::updateList(QMap<QString, Model>* models) {
+void ModelListWidget::getSelectedName()
+{
+    emit sendSelectedName(currentItem()->text());
+}
+
+void ModelListWidget::updateList(QMap<QString, Model>* models, Model* model) {
 	if (!models) return;
 	clear();
+    int index = 0, resIndex = 0;
 	for (auto it = models->begin(); it != models->end(); it++) {
+        if (&it.value() == model) {
+            resIndex = index;
+        }
+        index++;
 		addItem(it.key());
 	}
+    if (model) item(resIndex)->setSelected(true); //选中物体
 }
 
 

@@ -60,6 +60,11 @@ void Mesh::render()
 	unsigned int normalNr = 1;
 	unsigned int heightNr = 1; //各类材质数量
 
+	if(textures.isEmpty()) 
+		shaderProgram->setUniformValue("hasTexture", false);
+	else
+		shaderProgram->setUniformValue("hasTexture", true);
+
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
 		QString number;

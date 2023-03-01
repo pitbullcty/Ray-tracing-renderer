@@ -183,12 +183,17 @@ QSharedPointer<Mesh> ModelLoader::processMesh(aiMesh* mesh, const aiScene* scene
         m->textures.emplace_back(texture);
 
     // 2. 金属度贴图
+
     QVector<Texture> mentalnessMaps = loadTexture(material, aiTextureType_METALNESS, "texture_metalness");
     for (auto& texture : mentalnessMaps)
         m->textures.emplace_back(texture);
 
     // 3. 法向量图
-    QVector<Texture> normalMaps = loadTexture(material, aiTextureType_HEIGHT, "texture_normal");
+    QVector<Texture> normalMaps;
+    if (path.contains(".obj")) //针对obj文件采用另外方式读取法线贴图
+        normalMaps = loadTexture(material, aiTextureType_HEIGHT, "texture_normal");
+    else
+        normalMaps = loadTexture(material, aiTextureType_NORMALS, "texture_normal");
     for (auto& texture : normalMaps)
         m->textures.emplace_back(texture);
 

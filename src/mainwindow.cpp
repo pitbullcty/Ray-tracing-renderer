@@ -62,6 +62,8 @@ void MainWindow::bindSignals()
     connect(ui->listWidget, &ModelListWidget::sendCopyName, seceneManager.data(), &SceneManager::pasteByName);
     connect(ui->listWidget, &ModelListWidget::sendAddPath, &actions, &WindowActions::loadModel);
     connect(ui->listWidget, &ModelListWidget::itemDoubleClicked, ui->listWidget, &ModelListWidget::lookAt);
+    connect(ui->listWidget, &ModelListWidget::itemClicked, ui->listWidget, &ModelListWidget::getSelectedName);
+    connect(ui->listWidget, &ModelListWidget::sendSelectedName, seceneManager.data(), &SceneManager::getEditModel);
     connect(ui->listWidget, &ModelListWidget::sendLookAtName, seceneManager.data(), &SceneManager::lookAtModel);
 
     connect(seceneManager.data(), &SceneManager::Info, ui->console, &Console::Info);

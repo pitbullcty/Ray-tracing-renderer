@@ -1,0 +1,321 @@
+{
+    "camera": {
+        "pitch": -3.000006675720215,
+        "x": 0.2033839076757431,
+        "y": 0.32821857929229736,
+        "yaw": -272.49993896484375,
+        "z": -1.1452618837356567
+    },
+    "lights": [
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 17,
+                    "y": 12,
+                    "z": 4
+                }
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/out/build/x64-debug/lights/rectlight.obj",
+            "name": "rectlight",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 0.009999999776482582,
+                "scaleY": 0.009999999776482582,
+                "scaleZ": 0.009999999776482582,
+                "translationX": 0.34299999475479126,
+                "translationY": 0.5477999448776245,
+                "translationZ": 0.22700010240077972
+            }
+        }
+    ],
+    "models": [
+        {
+            "material": {
+                "IOR": 1,
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.7250000238418579,
+                    "g": 0.7099999785423279,
+                    "r": 0.6800000071525574
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0,
+                "transmission": 0
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/resources/Model/test/cbox_back.obj",
+            "name": "cbox_back",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 0.009999999776482582,
+                "scaleY": 0.009999999776482582,
+                "scaleZ": 0.009999999776482582,
+                "translationX": 0.2767006456851959,
+                "translationY": 0.274399995803833,
+                "translationZ": 0.5591999888420105
+            }
+        },
+        {
+            "material": {
+                "IOR": 1,
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.7250000238418579,
+                    "g": 0.7099999785423279,
+                    "r": 0.6800000071525574
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0,
+                "transmission": 0
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/resources/Model/test/cbox_ceiling.obj",
+            "name": "cbox_ceiling",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 0.009999999776482582,
+                "scaleY": 0.009999999776482582,
+                "scaleZ": 0.009999999776482582,
+                "translationX": 0.27799999713897705,
+                "translationY": 0.548799991607666,
+                "translationZ": 0.2795499861240387
+            }
+        },
+        {
+            "material": {
+                "IOR": 1,
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.7250000238418579,
+                    "g": 0.7099999785423279,
+                    "r": 0.6800000071525574
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0,
+                "transmission": 0
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/resources/Model/test/cbox_floor.obj",
+            "name": "cbox_floor",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 0.009999999776482582,
+                "scaleY": 0.009999999776482582,
+                "scaleZ": 0.009999999776482582,
+                "translationX": 0.27559998631477356,
+                "translationY": 0,
+                "translationZ": 0.27959999442100525
+            }
+        },
+        {
+            "material": {
+                "IOR": 1,
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.14000000059604645,
+                    "g": 0.44999998807907104,
+                    "r": 0.09099999815225601
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0,
+                "transmission": 0
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/resources/Model/test/cbox_greenwall.obj",
+            "name": "cbox_greenwall",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 0.009999999776482582,
+                "scaleY": 0.009999999776482582,
+                "scaleZ": 0.009999999776482582,
+                "translationX": 0,
+                "translationY": 0.274399995803833,
+                "translationZ": 0.27959999442100525
+            }
+        },
+        {
+            "material": {
+                "IOR": 1,
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.7250000238418579,
+                    "g": 0.7099999785423279,
+                    "r": 0.6800000071525574
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0,
+                "transmission": 0
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/resources/Model/test/cbox_largebox.obj",
+            "name": "cbox_largebox",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 0.009999999776482582,
+                "scaleY": 0.009999999776482582,
+                "scaleZ": 0.009999999776482582,
+                "translationX": 0.3684999942779541,
+                "translationY": 0.16599999368190765,
+                "translationZ": 0.3512499928474426
+            }
+        },
+        {
+            "material": {
+                "IOR": 1,
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.6299999952316284,
+                    "g": 0.06499999761581421,
+                    "r": 0.05000000074505806
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0,
+                "transmission": 0
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/resources/Model/test/cbox_redwall.obj",
+            "name": "cbox_redwall",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 0.009999999776482582,
+                "scaleY": 0.009999999776482582,
+                "scaleZ": 0.009999999776482582,
+                "translationX": 0.5536000728607178,
+                "translationY": 0.274399995803833,
+                "translationZ": 0.27959999442100525
+            }
+        },
+        {
+            "material": {
+                "IOR": 1,
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.7250000238418579,
+                    "g": 0.7099999785423279,
+                    "r": 0.6800000071525574
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0,
+                "transmission": 0
+            },
+            "modelPath": "C:/Users/admin/OneDrive/C and C++ Programs/Ray-tracing-renderer/resources/Model/test/cbox_smallbox.obj",
+            "name": "cbox_smallbox",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 0.009999999776482582,
+                "scaleY": 0.009999999776482582,
+                "scaleZ": 0.009999999776482582,
+                "translationX": 0.18549999594688416,
+                "translationY": 0.08349999785423279,
+                "translationZ": 0.16899999976158142
+            }
+        }
+    ],
+    "skybox": {
+        "+x": ":/skybox/px.png",
+        "+y": ":/skybox/py.png",
+        "+z": ":/skybox/pz.png",
+        "-x": ":/skybox/nx.png",
+        "-y": ":/skybox/ny.png",
+        "-z": ":/skybox/nz.png"
+    }
+}
