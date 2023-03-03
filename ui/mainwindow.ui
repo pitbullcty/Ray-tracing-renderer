@@ -72,6 +72,14 @@
     <addaction name="closeWindow"/>
    </widget>
    <widget class="QMenu" name="menu_2">
+    <property name="geometry">
+     <rect>
+      <x>477</x>
+      <y>126</y>
+      <width>117</width>
+      <height>44</height>
+     </rect>
+    </property>
     <property name="title">
      <string>帮助(&amp;H)</string>
     </property>
@@ -81,7 +89,13 @@
      <string>窗口(&amp;W)</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu_5">
+    <property name="title">
+     <string>设置(&amp;S)</string>
+    </property>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_5"/>
    <addaction name="menu_4"/>
    <addaction name="menu_2"/>
   </widget>
@@ -146,6 +160,9 @@
    </property>
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>模型编辑器</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>

@@ -17,6 +17,7 @@ public:
 	Model();
 	~Model();
 	void destroyTextures();
+	void copyFrom(Model* copy);
 
 	void setCopy(Model* copy, bool needUpdate = true);
 	void setType(MODELTYPE type);

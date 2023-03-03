@@ -21,6 +21,8 @@ public:
 	static void destory(ModelLoader* modelLoader);
 	void removePath(const QString& path);
 	void clearPathes();
+	void addPath(const QString& path);
+	bool checkPath(const QString& path);
 	void setContext(QOpenGLExtraFunctions* functions, QOpenGLShaderProgram* shaderProgram);
 	LOADRESULT loadModel(const QString& path, Model& model, bool isLight = false);
 

@@ -47,6 +47,7 @@ public:
     QMenu *menu_3;
     QMenu *menu_2;
     QMenu *menu_4;
+    QMenu *menu_5;
     QStatusBar *statusbar;
     QToolBar *toolBar;
     QDockWidget *dockWidgetInfos;
@@ -111,8 +112,11 @@ public:
         menu_3->setObjectName(QString::fromUtf8("menu_3"));
         menu_2 = new QMenu(menubar);
         menu_2->setObjectName(QString::fromUtf8("menu_2"));
+        menu_2->setGeometry(QRect(477, 126, 117, 44));
         menu_4 = new QMenu(menubar);
         menu_4->setObjectName(QString::fromUtf8("menu_4"));
+        menu_5 = new QMenu(menubar);
+        menu_5->setObjectName(QString::fromUtf8("menu_5"));
         MainWindow->setMenuBar(menubar);
         statusbar = new QStatusBar(MainWindow);
         statusbar->setObjectName(QString::fromUtf8("statusbar"));
@@ -169,6 +173,7 @@ public:
         MainWindow->addDockWidget(Qt::BottomDockWidgetArea, dockWidgetConsole);
 
         menubar->addAction(menu->menuAction());
+        menubar->addAction(menu_5->menuAction());
         menubar->addAction(menu_4->menuAction());
         menubar->addAction(menu_2->menuAction());
         menu->addAction(createScene);
@@ -222,8 +227,10 @@ public:
         menu_3->setTitle(QCoreApplication::translate("MainWindow", "\346\211\223\345\274\200(&O)", nullptr));
         menu_2->setTitle(QCoreApplication::translate("MainWindow", "\345\270\256\345\212\251(&H)", nullptr));
         menu_4->setTitle(QCoreApplication::translate("MainWindow", "\347\252\227\345\217\243(&W)", nullptr));
+        menu_5->setTitle(QCoreApplication::translate("MainWindow", "\350\256\276\347\275\256(&S)", nullptr));
         toolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar", nullptr));
         dockWidgetInfos->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\250\241\345\236\213", nullptr));
+        dockWidgetDetails->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\250\241\345\236\213\347\274\226\350\276\221\345\231\250", nullptr));
         dockWidgetConsole->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\216\247\345\210\266\345\217\260", nullptr));
     } // retranslateUi
 

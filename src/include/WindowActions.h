@@ -14,17 +14,19 @@ public:
 	void bind();
 	void loadModel(const QString& path);
 	void crateScene();
-	void loadScene();
+	void loadScene(const QString& path);
 	void saveScene();
 	void saveSceneAS();
 	void closeScene();
 
 public slots:
 	void loadModelFromAction();
+	void loadSceneFromAction();
 
 private:
 	Ui::MainWindow* ui;
-	
+	QString lastModelPath;
+	QString lastScenePath;
 };
 
 #endif

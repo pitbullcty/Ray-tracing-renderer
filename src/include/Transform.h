@@ -13,6 +13,9 @@ public:
 	float rotationX;
 	float rotationY;
 	float rotationZ; //旋转角度
+	float initScaleX;
+	float initScaleY;
+	float initScaleZ; //初始放大系数，用于检查旋转
 	float translationX;
 	float translationY;
 	float translationZ; //模型平移

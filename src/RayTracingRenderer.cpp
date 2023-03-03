@@ -28,7 +28,6 @@ void RayTracingRenderer::destory(RayTracingRenderer* builder)
 void RayTracingRenderer::buildBVH() {
 
 	if (models->empty()) return; //没有模型直接返回
-
 	QElapsedTimer timer;
 	timer.start();
 	emit Info("正在构建BVH...");

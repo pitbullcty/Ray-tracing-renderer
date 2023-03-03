@@ -29,6 +29,7 @@ signals:
 	void sendAddPath(const QString& path);
 	void sendLookAtName(const QString& name);
 	void sendSelectedName(const QString& name);
+	void sendRevert();
 
 public slots:
 	void updateList(QMap<QString, Model>* models, Model* model);
@@ -44,10 +45,7 @@ public slots:
 
 private:
 	QListWidgetItem* current;
-	QString lightPath;
 	QString copyName; //复制文件名
-	QString tempRectFile; //临时文件名
-	QString tempSphereFile; //临时文件名
 };
 
 #endif

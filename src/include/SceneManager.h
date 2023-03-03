@@ -14,11 +14,21 @@
 #include <QFileDialog>
 #include <QMessagebox>
 #include <QIcon>
+#include <QStack>
+
+const int MAXSIZE = 1000; //默认保存1000次操作
 
 enum STATE {
 	NONE,
 	CREATED,
 }; //保存编辑状态 
+
+enum ACITIONTYPE {
+	ADD,
+	REMOVE,
+	RENAME,
+	MOVEPOS
+}; //记录还原需要的操作类型
 
 class SceneManager :public QObject
 {
@@ -37,7 +47,7 @@ public:
 	void createScene(); //创建场景
 	void closeScene(); //关闭场景
 	bool closeApp(); //关闭app
-
+	
 	QSharedPointer<Camera> getCamera();
 	QMap<QString, Model>* getModels(); //返回模型指针
 	STATE getState();
@@ -49,6 +59,7 @@ public:
 	void pasteModel(QVector3D pos);
 	void copyModel(const QString& name);
 	void lookAtModel(const QString& name);
+	void addRevertModel(const ACITIONTYPE& action, const Model& model, const QString& name);
 
 signals:
 	void updateList(QMap<QString, Model>* models, Model* model);
@@ -61,8 +72,9 @@ public slots:
 	Model* removeModelByName(const QString& name);
 	void pasteByName(const QString& name);
 	void rename(const QString& oldname, const QString& newname);
-	QString addModel(const QString& path, const QString& modelName = "", bool isCopy = false, bool isLight = false);
+	QString addModel(const QString& path, const QString& modelName = "", bool isCopy = false, bool isLight = false, bool isLoadScene=false);
 	void getEditModel(const QString& name);
+	void revertAction(); //撤回
 
 private:
 
@@ -71,6 +83,7 @@ private:
 	QSharedPointer<Camera> camera; //摄像机
 	QSharedPointer<Skybox> skybox; //天空盒
 	QString sceneFileName; //场景文件名
+	QStack<QPair<QPair<ACITIONTYPE, Model>,QString>> revertActions;
 	STATE state; //当前编辑状态
 
 	int width; 

@@ -68,6 +68,7 @@ void OpenGLWidget::resizeGL(int w, int h)
 
 void OpenGLWidget::paintGL()
 {
+    if (isBusy) return;
 
     if (sceneManager->getState() == NONE) {
         drawTips("请新建或打开文件！");
@@ -236,6 +237,9 @@ void OpenGLWidget::keyPressEvent(QKeyEvent* event)
             sceneManager->pasteModel(mapFromGlobal(QCursor::pos()));
         }
     }
+    else if (modifiers == Qt::ControlModifier && key == Qt::Key_Z) {
+        sceneManager->revertAction();
+    }
     else {
         ;
     }
@@ -265,7 +269,6 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
 
     if (event->button() == Qt::RightButton) {
         isRightClicked = true; //右键激活
-
         lastPos = event->pos();
     }
     else if (event->button() == Qt::LeftButton) {
@@ -273,11 +276,16 @@ void OpenGLWidget::mousePressEvent(QMouseEvent* event)
         int y = event->pos().y();
         if (editorRenderer->getGizmo()->mouseDown(x, y)) {
             isLeftClicked = true;
+            selected = editorRenderer->getSelected();
         } //调整Gizmo
         else {
             selected = sceneManager->getSelected(x, y); //计算选中的物体
             editorRenderer->setSelected(selected);
         }
+        if (selected) {
+            modelToRevert = *selected;
+            lastEdit = selected->transform.getModel();
+        } //选中则保存编辑的模型矩阵
     }
     else {
         ;
@@ -290,17 +298,31 @@ void OpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
         event->ignore();
         return;
     }
-
     int x = event->pos().x();
     int y = event->pos().y();
     if (isLeftClicked) {
         editorRenderer->getGizmo()->mouseUp(x, y);
+        if (editorRenderer->getGizmo()->isChange(lastEdit)) {
+            auto models = sceneManager->getModels();
+            auto selected = editorRenderer->getSelected();
+            QString name;
+            for (auto it = models->begin(); it != models->end(); it++) {
+                if (&it.value() == selected) {
+                    name = it.key();
+                    break;
+                }
+            }
+            sceneManager->addRevertModel(MOVEPOS, modelToRevert, name);
+            modelToRevert = *selected;
+        }
         isLeftClicked = false;
     }
-    else if (isRightClicked)
+    else if (isRightClicked) {
         isRightClicked = false;
-    else
+    }
+    else {
         ;
+    }
 }
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
@@ -309,7 +331,6 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent* event)
         event->ignore();
         return;
     }
-
     int x = event->pos().x();
     int y = event->pos().y();
     if (isRightClicked) {

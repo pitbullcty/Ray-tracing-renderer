@@ -14,7 +14,7 @@ WindowActions::~WindowActions()
 void WindowActions::bind()
 {
 	connect(ui->saveSceneJson, &QAction::triggered, this, &WindowActions::saveScene);
-	connect(ui->loadSceneJson, &QAction::triggered, this, &WindowActions::loadScene);
+	connect(ui->loadSceneJson, &QAction::triggered, this, &WindowActions::loadSceneFromAction);
 	connect(ui->loadModel, &QAction::triggered, this, &WindowActions::loadModelFromAction);
 	connect(ui->saveAsSceneJson, &QAction::triggered, this, &WindowActions::saveSceneAS);
 	connect(ui->createScene, &QAction::triggered, this, &WindowActions::crateScene);
@@ -26,10 +26,13 @@ void WindowActions::loadModel(const QString& path)
 {
 	QString fileName;
 	if (path.isEmpty()) {
-		fileName = QFileDialog::getOpenFileName(nullptr, "打开模型文件", QDir::currentPath(), tr("模型文件 (*.fbx *.obj *.3ds *.gltf *.blend)"));
+		if (lastModelPath.isEmpty()) lastModelPath = QDir::currentPath();
+		fileName = QFileDialog::getOpenFileName(nullptr, "打开模型文件", lastModelPath, tr("模型文件 (*.fbx *.obj *.3ds *.gltf *.blend)"));
+		QFileInfo fileInfo(fileName);
 		if (fileName.isEmpty()) {
 			return;
 		}
+		lastModelPath = fileInfo.absolutePath();
 	}
 	else {
 		fileName = path;
@@ -41,7 +44,7 @@ void WindowActions::loadModel(const QString& path)
 	if (sceneManager->getState() == NONE) {
 		sceneManager->createScene();
 	}
-	if(path.contains(":")) sceneManager->addModel(fileName,"",false,true); //包含:则为添加灯光
+	if(path.contains("/lights/rectlight.obj") || path.contains("/lights/spherelight.obj")) sceneManager->addModel(fileName, "", false, true); //路径为添加灯光
 	else {
 		isBusy = true;
 		sceneManager->addModel(fileName);
@@ -59,12 +62,22 @@ void WindowActions::crateScene()
 	sceneManager->createScene();
 }
 
-void WindowActions::loadScene()
+void WindowActions::loadScene(const QString& path)
 {
-	QString fileName = QFileDialog::getOpenFileName(nullptr, "打开场景文件", QDir::currentPath(), tr("场景文件 (*.json)"));
+	QString fileName;
+	if (path.isEmpty()) {
+		if (lastScenePath.isEmpty()) lastScenePath = QDir::currentPath();
+		fileName = QFileDialog::getOpenFileName(nullptr, "打开场景文件", lastScenePath, tr("场景文件 (*.json)"));
+	}
+	else {
+		fileName = path;
+	}
+	QFileInfo fileInfo(fileName);
 	if (fileName.isEmpty()) {
 		return;
 	}
+	lastScenePath = fileInfo.absolutePath();
+
 	auto sceneManager = ui->openGLWidget->getSceneManager();
 	auto editorRenderer = ui->openGLWidget->getEditorRenderer();
 	editorRenderer->setSelected(nullptr);
@@ -105,6 +118,11 @@ void WindowActions::closeScene()
 	auto sceneManager = ui->openGLWidget->getSceneManager();
 	if (sceneManager->getState() == NONE) return;
 	sceneManager->closeScene();
+}
+
+void WindowActions::loadSceneFromAction()
+{
+	loadScene("");
 }
 
 

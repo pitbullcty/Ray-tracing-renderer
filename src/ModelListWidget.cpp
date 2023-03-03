@@ -1,11 +1,8 @@
 ﻿#include "ModelListWidget.h"
 
-ModelListWidget::ModelListWidget(QWidget* parent):QListWidget(parent), current(nullptr),copyName(""), lightPath(QDir::currentPath() + "/lights")
+ModelListWidget::ModelListWidget(QWidget* parent):QListWidget(parent), current(nullptr),copyName("")
 {
-    QDir dir;
-    if (!dir.exists(lightPath)) {
-        dir.mkdir(lightPath);
-    }
+   
 }
 
 ModelListWidget::~ModelListWidget()
@@ -88,6 +85,9 @@ void ModelListWidget::keyPressEvent(QKeyEvent* event)
     else if (modifiers == Qt::ControlModifier && key == Qt::Key_V) {
         paste();
     }
+    else if (modifiers == Qt::ControlModifier && key == Qt::Key_Z) {
+        emit sendRevert();
+    }
     else if (key == Qt::Key_F2) {
         rename();
     }
@@ -99,6 +99,7 @@ void ModelListWidget::keyPressEvent(QKeyEvent* event)
 
 void ModelListWidget::rename()
 {
+    if (!current) return;
     QString oldname = current->text();
     bool res;
     QString newname = QInputDialog::getText(this, "重命名","请输入模型新名",QLineEdit::Normal,oldname,&res);
@@ -118,19 +119,20 @@ void ModelListWidget::rename()
 
 void ModelListWidget::remove()
 {
+    if (!current) return;
     QString name = current->text();
     emit sendRemoveName(name);
 }
 
 void ModelListWidget::copy()
 {
+    if (!current) return;
     copyName = current->text();
 }
 
 void ModelListWidget::paste()
 {
     if (!copyName.isEmpty()) emit sendCopyName(copyName);
-    copyName = "";
 }
 
 void ModelListWidget::add()
@@ -145,23 +147,14 @@ void ModelListWidget::lookAt()
 
 void ModelListWidget::addRectLight()
 {
-    if (tempRectFile.isEmpty()) {
-        tempRectFile = lightPath + "/rectlight.obj";
-        if(!QFile::exists(tempRectFile))
-            QFile::copy(":/light/rectlight.obj", tempRectFile);
-    }
-    emit sendAddPath(tempRectFile); 
+    
+    emit sendAddPath(QDir::currentPath() + "/lights/rectlight.obj");
 }
 
 void ModelListWidget::addSphereLight()
 {
     
-    if (tempSphereFile.isEmpty()) {
-        tempSphereFile = lightPath + "/spherelight.obj";
-        if (!QFile::exists(tempSphereFile))
-            QFile::copy(":/light/spherelight.obj", tempSphereFile);
-    }
-    emit sendAddPath(tempSphereFile);
+    emit sendAddPath(QDir::currentPath() + "/lights/spherelight.obj");
     
 }
 

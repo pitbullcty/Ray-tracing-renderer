@@ -3,15 +3,17 @@
 
 extern bool isBusy;
 
-MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindow),actions(WindowActions(ui))
+MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindow),actions(ui)
 {
 	ui->setupUi(this);
     this->setWindowIcon(QIcon(":icons/title.ico"));
     this->setWindowTitle("光线追踪渲染器");
     this->setStyle();
     this->showMaximized();
+    this->setAcceptDrops(true); //接受拖拽
     actions.bind(); //绑定actions
     bindSignals(); //绑定其他信号
+    copyLightsModel();
 }
 
 MainWindow::~MainWindow()//析构函数，关掉ＵＩ界面
@@ -53,6 +55,32 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
 }
 
+void MainWindow::dragEnterEvent(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasUrls()) {
+        event->acceptProposedAction();
+    }
+    else {
+        event->ignore();
+    }
+ 
+}
+
+void MainWindow::dropEvent(QDropEvent* event)
+{
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls()) {
+        auto urlList = mimeData->urls();
+        QString filename = urlList.at(0).toLocalFile(); 
+        if (filename.contains(".obj") || filename.contains(".fbx") || filename.contains(".gltf")) {
+            actions.loadModel(filename);
+        }
+        else if (filename.contains(".json")) {
+            actions.loadScene(filename);
+        }
+    }
+}
+
 void MainWindow::bindSignals()
 {
     auto& seceneManager = SceneManager::GetInstance();
@@ -65,6 +93,7 @@ void MainWindow::bindSignals()
     connect(ui->listWidget, &ModelListWidget::itemClicked, ui->listWidget, &ModelListWidget::getSelectedName);
     connect(ui->listWidget, &ModelListWidget::sendSelectedName, seceneManager.data(), &SceneManager::getEditModel);
     connect(ui->listWidget, &ModelListWidget::sendLookAtName, seceneManager.data(), &SceneManager::lookAtModel);
+    connect(ui->listWidget, &ModelListWidget::sendRevert, seceneManager.data(), &SceneManager::revertAction);
 
     connect(seceneManager.data(), &SceneManager::Info, ui->console, &Console::Info);
     connect(seceneManager.data(), &SceneManager::Error,ui->console, &Console::Error);
@@ -80,5 +109,24 @@ void MainWindow::bindSignals()
 
     connect(ui->closeWindow, &QAction::triggered, this, &MainWindow::close);
     
+}
+
+void MainWindow::copyLightsModel()
+{
+    QDir dir;
+    QString lightPath(QDir::currentPath() + "/lights");
+    if (!dir.exists(lightPath)) {
+        dir.mkdir(lightPath);
+    }
+
+    QString spherePath(lightPath + "/spherelight.obj");
+    QString rectPath(lightPath + "/rectlight.obj");
+
+    if (!QFile::exists(spherePath))
+        QFile::copy(":/light/spherelight.obj", spherePath);
+
+    if (!QFile::exists(rectPath))
+        QFile::copy(":/light/rectlight.obj", rectPath);
+
 }
 

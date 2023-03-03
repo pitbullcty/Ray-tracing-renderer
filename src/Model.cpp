@@ -84,6 +84,13 @@ void Model::setCopy(Model* copy, bool needUpdate)
     }
 }
 
+void Model::copyFrom(Model* copy)
+{
+    transform = copy->transform;
+    if (type == NORMAL) modelMaterial = copy->modelMaterial;
+    else lightMaterial = copy->lightMaterial;
+}
+
 void Model::setType(MODELTYPE type)
 {
     this->type = type;

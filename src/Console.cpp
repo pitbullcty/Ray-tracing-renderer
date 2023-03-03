@@ -31,7 +31,7 @@ void Console::Info(const QString& text)
 	QDateTime datetime = QDateTime::currentDateTime();
 	QString now = datetime.toString("[yyyy-MM-dd HH:mm:ss]");
 	append(info.arg(now).arg(text));
-	if (text.contains("BVH")) isBusy = false; //针对BVH特殊处理，不阻塞绘画事件
+	if (text.contains("BVH") || text.contains("保存至")) isBusy = false; //处理特殊时间
 	else isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
 	scroll();

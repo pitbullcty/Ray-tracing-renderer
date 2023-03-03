@@ -52,17 +52,19 @@ public:
 	void DrawCamem(const tvector3& orig,const tvector3& vtx,const tvector3& vty,float ng);
 	void DrawQuad(const tvector3& orig, float size, bool bSelected, const tvector3& axisU, const tvector3 &axisV);
 	void DrawTri(const tvector3& orig, float size, bool bSelected, const tvector3& axisU, const tvector3& axisV);
+	
 
 protected:
 	QOpenGLExtraFunctions* functions;
 	QOpenGLShaderProgram* program;
 	QOpenGLBuffer VBO;
 	QOpenGLVertexArrayObject VAO;
-
+	
 	void Draw(const QVector<float>& data, GLenum mode, int count, bool isBlend = false);
 	void addColor(QVector<float>& data, const tvector4& col);
 	void addColor(QVector<float>& data, int r, int g, int b);
 	void addVector3(QVector<float>& data, const tvector3& v);
+	
 };
 
 #endif // !defined(AFX_GIZMOTRANSFORMRENDER_H__549F6E7A_D46D_4B18_9E74_76B7E43A3841__INCLUDED_)

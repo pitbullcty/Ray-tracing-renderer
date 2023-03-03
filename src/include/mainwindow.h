@@ -11,10 +11,15 @@ public:
     void setStyle(int style=0);
     void closeEvent(QCloseEvent* event);
 
+protected:
+    virtual void dragEnterEvent(QDragEnterEvent* event);
+    virtual void dropEvent(QDropEvent* event);
+
 private:
     Ui::MainWindow* ui;
     WindowActions actions;
     void bindSignals();
+    void copyLightsModel();
 };
 
 

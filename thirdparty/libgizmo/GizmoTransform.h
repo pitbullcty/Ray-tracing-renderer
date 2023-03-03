@@ -50,6 +50,7 @@ public:
         mScreenHeight = mScreenWidth = 1;
         m_ScreenFactor = 1;
         mDisplayScale = 1.f;
+
 	}
 
 	virtual ~CGizmoTransform()
@@ -101,8 +102,6 @@ public:
         m_CamDir = m_invmodel.V4.dir;
         m_CamUp = m_invmodel.V4.up;
 	}
-
-
 
 	// tools
 
@@ -257,6 +256,7 @@ protected:
 	//draw helpers
 
 	unsigned int mMask;
+
 	void SnapIt(float &pos, float &snap)
 	{
 		float sn = (float)fmod(pos,snap);

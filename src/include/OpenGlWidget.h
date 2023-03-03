@@ -51,7 +51,10 @@ private:
     bool isFullScreen;  //是否全屏显示
 
     QPoint lastPos; //上次鼠标停留的位置
+    QMatrix4x4 lastEdit; //上次编辑的模型矩阵
+
     QPainter painter; //绘制提示/FPS
+    Model modelToRevert; //需要撤回的模型
 
     float deltaTime; //渲染每帧间隔时间
     float lastFrameTime; //上一帧时间

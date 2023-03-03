@@ -38,7 +38,6 @@ void Gizmo::setEditModel(Model* model)
 {
 	this->model = model;
 	if (!model) return;
-
 	QMatrix4x4 gizmoModel ; //获取初始模型矩阵
 	gizmoModel = model->transform.getModel();
 	QMatrix4x4 trans;
@@ -60,9 +59,11 @@ void Gizmo::applyToModel()
 
 bool Gizmo::checkScale()
 {
-	if (abs((model->transform.scaleX - 1.0f)) > 1e-6 || abs((model->transform.scaleY - 1.0f)) > 1e-6
-		|| abs((model->transform.scaleY - 1.0f)) > 1e-6) {
-		model->transform.scaleX = model->transform.scaleY = model->transform.scaleZ = 1.0f;
+	if (abs((model->transform.scaleX - model->transform.initScaleX)) > 1e-6 || abs((model->transform.scaleZ - model->transform.initScaleZ)) > 1e-6
+		|| abs((model->transform.scaleY - model->transform.initScaleY)) > 1e-6) {
+		model->transform.scaleX = model->transform.initScaleX;
+		model->transform.scaleY = model->transform.initScaleY;
+		model->transform.scaleZ = model->transform.initScaleZ;
 		return true;
 	}
 	return false;
@@ -138,6 +139,11 @@ void Gizmo::mouseUp(int x, int y)
 void Gizmo::setLocate(IGizmo::LOCATION location)
 {
 	gizmo->SetLocation(location);
+}
+
+bool Gizmo::isChange(const QMatrix4x4& modelMatrix)
+{
+	return QMatrix4x4(gizmo->getEditMatrix()).transposed() != modelMatrix;
 }
 
 void Gizmo::Draw()

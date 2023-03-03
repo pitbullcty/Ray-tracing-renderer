@@ -9,6 +9,7 @@ const float PI = 3.1415926f;
 Transform::Transform()
 {
 	scaleX = scaleY = scaleZ = 1.0f;
+	initScaleX = initScaleY = initScaleZ = 1.0f;
 	rotationX = rotationY = rotationZ = 0.0f;
 	translationX = translationY = translationZ = 0.0f;
 }
@@ -91,6 +92,9 @@ void Transform::prase(const QJsonObject& transform)
 	this->scaleX = transform["scaleX"].toVariant().toFloat();
 	this->scaleY = transform["scaleY"].toVariant().toFloat();
 	this->scaleZ = transform["scaleZ"].toVariant().toFloat();
+	initScaleX = scaleX;
+	initScaleY = scaleY;
+	initScaleZ = scaleZ;
 	calcModel();
 }
 

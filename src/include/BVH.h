@@ -57,6 +57,13 @@ struct AABB {
 		else return AXIS_Z;
 	}
 
+	float maxLength() {
+		float lenx = maxpos.x() - minpos.x();
+		float leny = maxpos.y() - minpos.y();
+		float lenz = maxpos.z() - minpos.z();
+		return std::max(lenx, std::max(leny, lenz));
+	}
+
 	 QVector<QVector<float>> generateAABBData() {
 		float minx = minpos.x();
 		float miny = minpos.y();

@@ -32,11 +32,23 @@ void ModelLoader::clearPathes()
     pathLoaded.clear();
 }
 
+void ModelLoader::addPath(const QString& path)
+{
+    if(!pathLoaded.contains(path))
+        pathLoaded.push_back(path);
+}
+
+bool ModelLoader::checkPath(const QString& path)
+{
+    return pathLoaded.contains(path);
+}
+
 void ModelLoader::setContext(QOpenGLExtraFunctions* functions, QOpenGLShaderProgram* shaderProgram)
 {
     this->functions = functions;
     this->shaderProgram = shaderProgram;
 }
+
 
 static QSharedPointer<QOpenGLTexture> textureFromFile(const QString& path)
 {

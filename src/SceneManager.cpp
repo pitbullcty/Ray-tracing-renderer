@@ -15,14 +15,16 @@ void SceneManager::destory(SceneManager* sceneManager)
 	delete sceneManager;
 }
 
-QString SceneManager::addModel(const QString& path, const QString& modelName, bool isCopy, bool isLight)
+QString SceneManager::addModel(const QString& path, const QString& modelName, bool isCopy, bool isLight, bool isLoadScene)
 {
+	
+
 	QString newname;
-	QString pathSep = path.right(path.size() - path.lastIndexOf('/') - 1);
-	QString name = pathSep.left(pathSep.lastIndexOf('.'));
+	QString name = QFileInfo(path).baseName();
 	QString modelLoaded;
 	QRegularExpression exp("\\d*$");
 	QString maxNum = "-1";
+
 
 	if (models.contains(modelName)) {
 		return "";
@@ -59,10 +61,12 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 	
 	QElapsedTimer timer;
 	timer.start();
+
 	auto loadRes = modelLoader->loadModel(path, models[newname], isLight);
 	if (loadRes == RELOADED) {
 		models[newname].setCopy(&models[modelLoaded]); //如果已经加载过则直接复制
 		if(!isCopy && !isLight)  emit Info("模型" + path + "已加载！"); 
+		if (!isLoadScene) addRevertModel(REMOVE, models[newname], newname);
 		emit updateList(&models, nullptr);
 	}
 	else if (loadRes == SUCCESS) {
@@ -74,6 +78,7 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 		else {
 			models[newname].setType(LIGHT);
 		}
+		if (!isLoadScene) addRevertModel(REMOVE, models[newname], newname);
 		emit updateList(&models, nullptr);
 	}
 	else newname = "";
@@ -83,6 +88,40 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 void SceneManager::getEditModel(const QString& name)
 {
 	emit sendEditModel(&models[name]);
+}
+
+void SceneManager::revertAction()
+{
+	if (!revertActions.empty()) {
+		auto action = revertActions.pop();
+		if (action.first.first == ADD) {
+			QString name = action.second;
+			Model model = action.first.second;
+			models[name] = model;
+			modelLoader->addPath(model.getPath());
+		}
+		else if (action.first.first == REMOVE) {
+			removeModelByName(action.second);
+			revertActions.pop();
+		}
+		else if (action.first.first == RENAME) {
+			auto list = action.second.split("$@$");
+			QString oldname = list.at(0);
+			QString newname = list.at(1);
+			rename(newname, oldname);
+			revertActions.pop();
+			revertActions.pop();
+			revertActions.pop();
+		}
+		else {
+			QString name = action.second;
+			auto& model = models[name];
+			model.transform = action.first.second.transform;
+			model.updateBound();
+		}
+		emit sendEditModel(nullptr);
+		emit updateList(&models, nullptr);
+	}
 }
 
 void SceneManager::pasteModel(QPoint pos)
@@ -97,7 +136,8 @@ void SceneManager::pasteModel(QPoint pos)
 	Ray ray(x, y, projection, view);
 	ray.direction = (ray.pos - camera->getPos()).normalized(); //构建射线
 
-	pasteModel(camera->getPos() + 50 *ray.direction); //往射线方向移动
+	float maxLength = modelToCopy->getDectionBound().maxLength(); //获取最长轴
+	pasteModel(camera->getPos() + maxLength * ray.direction); //往射线方向移动
 
 }
 
@@ -131,10 +171,10 @@ Model* SceneManager::removeModelByName(const QString& name)
 		} //如果有物体的复制,转移数据
 		else {
 			modelLoader->removePath(model.getPath());
-			model.destroyTextures(); //可以删除材质
 		} //如果没有说明是最后一个物体,清除modelLoader保存信息
 
 	} //如果要删除的是原始数据
+	addRevertModel(ADD, model, name);
 	models.remove(name);
 	emit updateList(&models, nullptr);
 	emit sendEditModel(nullptr);
@@ -156,6 +196,7 @@ void SceneManager::copyModel(const QString& name)
 	this->modelToCopy = &models[name];
 }
 
+
 void SceneManager::lookAtModel(const QString& name)
 {
 	auto& model = models[name];
@@ -164,24 +205,37 @@ void SceneManager::lookAtModel(const QString& name)
 	emit sendEditModel(&model);
 }
 
+void SceneManager::addRevertModel(const ACITIONTYPE& action, const Model& model, const QString& name)
+{
+	if (revertActions.size() >= MAXSIZE) {
+		revertActions.pop_front(); //删除之前操作
+	}
+	revertActions.push({ {action, model},name });
+}
+
+
 void SceneManager::pasteModel(QVector3D pos)
 {
 	if (modelToCopy) {
 		QString name = addModel(modelToCopy->getPath(),"",true);
-		models[name].transform.translationX = pos.x();
-		models[name].transform.translationY = pos.y();
-		models[name].transform.translationZ = pos.z();
-		models[name].transform.calcModel();
-		models[name].updateBound();
+		auto& newModel = models[name];
+		newModel.copyFrom(modelToCopy);
+		newModel.transform.translationX = pos.x();
+		newModel.transform.translationY = pos.y();
+		newModel.transform.translationZ = pos.z();
+		newModel.transform.calcModel();
+		newModel.updateBound();
 		emit sendEditModel(&models[name]);
+		emit updateList(&models, &models[name]);
 	} //如果有要复制的模型
 }
 
 
 void SceneManager::pasteByName(const QString& name)
 {
-	copyModel(&models[name]);
-	pasteModel(models[name].transform.getTranslation());
+	auto& model = models[name];
+	copyModel(&model);
+	pasteModel(model.transform.getTranslation());
 }
 
 void SceneManager::rename(const QString& oldname, const QString& newname)
@@ -193,12 +247,15 @@ void SceneManager::rename(const QString& oldname, const QString& newname)
 		model.setCopy(change, false);
 	} //如果需要
 	models.insert(newname, model);
-	emit sendEditModel(&models[newname]);
+	modelLoader->addPath(model.getPath());
+	addRevertModel(RENAME, model, oldname + "$@$" + newname);
+	emit sendEditModel(nullptr);
 	emit updateList(&models, nullptr);
 }
 
 void SceneManager::clearModels()
 {
+	revertActions.clear();
 	for (auto it = models.begin(); it != models.end(); it++) {
 		it->destroyTextures();
 	}
@@ -262,8 +319,8 @@ void SceneManager::loadScene(const QString& path)
 {
 
 	if (!dealDifference()) return;
-	emit Clear();
 
+	emit Clear();
 	sceneFileName = path;
 	bool res = true;
 	clearModels();
@@ -298,9 +355,9 @@ void SceneManager::loadScene(const QString& path)
 						QString modelName = subobj["name"].toString();
 						QString loadRes;
 						if(key=="lights")
-							loadRes = addModel(path, modelName, false, true);
+							loadRes = addModel(path, modelName, false, true, true);
 						else
-							loadRes = addModel(path, modelName);
+							loadRes = addModel(path, modelName, false, false, true);
 
 						if (loadRes.isEmpty()) {
 							res = false;
@@ -374,7 +431,6 @@ bool SceneManager::saveScene()
 	file.write(doc.toJson());
 	file.close(); //写入json
 	emit Info("场景保存至" + sceneFileName);
-	qDebug() << "场景保存至" + sceneFileName;
 	return true;
 }
 
@@ -386,7 +442,6 @@ void SceneManager::saveSceneAs(const QString& path)
 	file.open(QFile::WriteOnly);
 	file.write(doc.toJson());
 	emit Info("场景保存至" + sceneFileName);
-	qDebug() << "场景保存至" + sceneFileName;
 	file.close(); //写入json
 }
 
