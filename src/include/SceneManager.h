@@ -4,6 +4,7 @@
 #include "ModelLoader.h"
 #include "Camera.h"
 #include "Skybox.h"
+#include "DataBuilder.h"
 #include "Gizmo.h"
 #include <QFile>
 #include <QRegularExpression>
@@ -14,6 +15,7 @@
 #include <QFileDialog>
 #include <QMessagebox>
 #include <QIcon>
+#include <QtConcurrent>
 #include <QStack>
 
 const int MAXSIZE = 1000; //默认保存1000次操作

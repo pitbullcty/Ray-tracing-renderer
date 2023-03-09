@@ -6,5 +6,9 @@
         <file>skybox.vert</file>
         <file>gizmo.frag</file>
         <file>gizmo.vert</file>
+        <file>accum.frag</file>
+        <file>output.frag</file>
+        <file>pathTracing.frag</file>
+        <file>pathTracing.vert</file>
     </qresource>
 </RCC>

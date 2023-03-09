@@ -4,6 +4,17 @@
 #include <QVector3D>
 #include <QJsonObject>
 
+struct MaterialEncoded {
+    QVector3D emissive;      // 自发光参数
+    QVector3D baseColor;     // 颜色
+    QVector3D param1;        // (subsurface, metallic, specular)
+    QVector3D param2;        // (specularTint, roughness, anisotropic)
+    QVector3D param3;        // (sheen, sheenTint, clearcoat)
+    QVector3D param4;        // (clearcoatGloss,baseColorTexId, metalnessTexId) 记录材质类型
+    QVector3D param5;       //(normalTexId, emissiveTexId, 0)
+    MaterialEncoded() = default;
+};
+
 struct ModelMaterial
 {
     QVector3D emissive;  // 作为光源时的发光颜色
@@ -18,8 +29,6 @@ struct ModelMaterial
     float sheenTint; //光泽色
     float clearcoat; //清漆强度
     float clearcoatGloss; //清漆光泽度
-    float IOR; //反射率
-    float transmission;
 
     ModelMaterial() {
         emissive = QVector3D(0, 0, 0); 
@@ -34,8 +43,6 @@ struct ModelMaterial
         sheenTint = 0.0; 
         clearcoat = 0.0;
         clearcoatGloss = 0.0; 
-        IOR = 1.0; 
-        transmission = 0.0;
     }
 
     QJsonObject toJson(){
@@ -60,8 +67,6 @@ struct ModelMaterial
         material.insert("sheenTint", sheenTint);
         material.insert("clearcoat", clearcoat);
         material.insert("clearcoatGloss", clearcoatGloss);
-        material.insert("IOR", IOR);
-        material.insert("transmission", transmission);
         return material;
     }
 
@@ -80,10 +85,19 @@ struct ModelMaterial
         sheenTint = ModelMaterial["sheenTint"].toVariant().toFloat();
         clearcoat = ModelMaterial["clearcoat"].toVariant().toFloat();
         clearcoatGloss = ModelMaterial["clearcoatGloss"].toVariant().toFloat();
-        IOR = ModelMaterial["IOR"].toVariant().toFloat();
-        transmission = ModelMaterial["transmission"].toVariant().toFloat();
     }
 
+    MaterialEncoded encode() const {
+        MaterialEncoded res;
+        res.emissive = emissive;
+        res.baseColor = baseColor;
+        res.param1 = { subsurface, metallic, specular };
+        res.param2 = { specularTint, roughness, anisotropic };
+        res.param3 = { sheen, sheenTint, clearcoat };
+        res.param4 = { clearcoatGloss, -1,-1};
+        res.param5 = { -1, -1,-1 };
+        return res;
+    }
 };
 
 struct LightMaterial

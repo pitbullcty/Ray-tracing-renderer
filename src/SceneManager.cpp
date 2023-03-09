@@ -1,5 +1,6 @@
 ﻿#include "SceneManager.h"
 
+
 QSharedPointer<SceneManager> SceneManager::instance = nullptr;
 
 QSharedPointer<SceneManager>& SceneManager::GetInstance()
@@ -76,7 +77,12 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 			emit Info(loadModelTime);
 		}
 		else {
-			models[newname].setType(LIGHT);
+			MODELTYPE type;
+			if (path.contains("sphere"))
+				type = SPHERELIGHT;
+			else
+				type = RECTLIGHT;
+			models[newname].setType(type);
 		}
 		if (!isLoadScene) addRevertModel(REMOVE, models[newname], newname);
 		emit updateList(&models, nullptr);
@@ -99,6 +105,7 @@ void SceneManager::revertAction()
 			Model model = action.first.second;
 			models[name] = model;
 			modelLoader->addPath(model.getPath());
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
 		}
 		else if (action.first.first == REMOVE) {
 			removeModelByName(action.second);
@@ -112,12 +119,14 @@ void SceneManager::revertAction()
 			revertActions.pop();
 			revertActions.pop();
 			revertActions.pop();
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
 		}
 		else {
 			QString name = action.second;
 			auto& model = models[name];
 			model.transform = action.first.second.transform;
 			model.updateBound();
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
 		}
 		emit sendEditModel(nullptr);
 		emit updateList(&models, nullptr);
@@ -176,6 +185,7 @@ Model* SceneManager::removeModelByName(const QString& name)
 	} //如果要删除的是原始数据
 	addRevertModel(ADD, model, name);
 	models.remove(name);
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
 	emit updateList(&models, nullptr);
 	emit sendEditModel(nullptr);
 	return change;
@@ -225,6 +235,7 @@ void SceneManager::pasteModel(QVector3D pos)
 		newModel.transform.translationZ = pos.z();
 		newModel.transform.calcModel();
 		newModel.updateBound();
+		QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
 		emit sendEditModel(&models[name]);
 		emit updateList(&models, &models[name]);
 	} //如果有要复制的模型
@@ -255,11 +266,13 @@ void SceneManager::rename(const QString& oldname, const QString& newname)
 
 void SceneManager::clearModels()
 {
-	revertActions.clear();
-	for (auto it = models.begin(); it != models.end(); it++) {
-		it->destroyTextures();
+	if(!revertActions.empty()) revertActions.clear();
+	if (!models.empty()) {
+		for (auto it = models.begin(); it != models.end(); it++) {
+			it->destroyTextures();
+		}
+		models.clear();
 	}
-	models.clear();
 }
 
 
@@ -494,7 +507,7 @@ QJsonObject SceneManager::toJsonObeject()
 		auto& model = it.value();
 		auto modelJson = it.value().toJson();
 		modelJson.insert("name", it.key());
-		if (model.getType() == NORMAL) {
+		if (!model.isLight()) {
 			modelsJsons.append(modelJson);
 		}
 		else {

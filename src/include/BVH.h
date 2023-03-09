@@ -1,9 +1,10 @@
 ﻿#ifndef __BVH__
 #define __BVH__
 
+
+#include <limits.h>
 #include <QVector3D>
 #include <QVector>
-#include <limits.h>
 #include <QMatrix4x4>
 
 constexpr auto MAX = std::numeric_limits<float>::max();
@@ -89,20 +90,10 @@ struct AABB {
 };
 
 
-struct Triangle
-{
-	QVector3D a;
-	QVector3D b;
-	QVector3D c;
-	AABB bound;
-	Triangle() = default;
-	Triangle(const QVector3D& a, const QVector3D& b, const QVector3D& c) :a(a), b(b), c(c) {
-		bound.maxpos = max(a, max(b, c));
-		bound.minpos = min(a, min(b, c));
-	};
-	QVector3D getCenter() const {
-		return (a + b + c) / 3;
-	}
+struct BVHNodeEncoded {
+	QVector3D childs;        // (left, right)
+	QVector3D leafInfo;      // (n, index )
+	QVector3D AA, BB;  //AABB包围盒
 };
 
 struct Ray
@@ -151,13 +142,16 @@ struct BVHNode
 	int n; //叶子结点三角形数量
 	int index; //叶子结点在三角形中索引
 	AABB bound; //节点包围盒
+	BVHNode() :parent(-2), lChild(-1), rChild(-1), isLeaf(false), n(0), index(-1) {};
 };
 
-class BVH {
-public:
-	QVector<BVHNode> nodes;
-	QVector<int> hitInfo; //记录节点碰撞信息
-	BVH() = default;
+struct LightEncoded
+{
+	QVector3D position;
+	QVector3D emission;
+	QVector3D u;
+	QVector3D v;
+	QVector3D param; //编码半径，类型（radius, type）
 };
 
 #endif

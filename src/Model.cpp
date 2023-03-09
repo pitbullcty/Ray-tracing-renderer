@@ -38,7 +38,7 @@ QJsonObject Model::toJson()
     QJsonObject model;
     model.insert("modelPath", path);
     model.insert("transform", transform.toJson());
-    if (type == LIGHT) {
+    if (isLight()) {
         model.insert("material", lightMaterial.toJson());
     }
     else {
@@ -104,6 +104,11 @@ Model* Model::getCopy()
 MODELTYPE Model::getType()
 {
     return type;
+}
+
+bool Model::isLight()
+{
+    return type==SPHERELIGHT || type == RECTLIGHT;
 }
 
 bool Model::isCopy()

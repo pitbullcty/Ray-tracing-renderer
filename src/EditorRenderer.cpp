@@ -3,15 +3,25 @@
 QSharedPointer<EditorRenderer> EditorRenderer::instance = nullptr;
 const float PI = 3.14159f;
 
-int renderIndex[][2] ={{0, 1},{2, 3},{4, 5},{6, 7},{0, 2},{1, 3},{4, 6},{5, 7},{0, 4},{1, 5},{7, 3},{2, 6}};
-//AABB渲染顺序
+int renderIndex[][2] = { {0, 1},{2, 3},{4, 5},{6, 7},
+	{0, 2},{1, 3},{4, 6},{5, 7},
+	{0, 4},{1, 5},{7, 3},{2, 6} };
+//AABB渲染索引
 
-void EditorRenderer::destory(EditorRenderer* renderer)
+void EditorRenderer::destory(EditorRenderer* editorRenderer)
 {
-	renderer->models = nullptr;
-	renderer->selected = nullptr;
-	renderer->selected = nullptr;
-	delete renderer;
+	editorRenderer->models = nullptr;
+	editorRenderer->selected = nullptr;
+	editorRenderer->selected = nullptr;
+	delete editorRenderer;
+}
+
+void EditorRenderer::destoryData()
+{
+	skyboxVBO.destroy();
+	AABBVBO.destroy();
+	skyboxVAO.destroy();
+	AABBVAO.destroy();
 }
 
 QSharedPointer<EditorRenderer>& EditorRenderer::GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height)
@@ -22,17 +32,11 @@ QSharedPointer<EditorRenderer>& EditorRenderer::GetInstance(QMap<QString, QOpenG
 }
 
 EditorRenderer::EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
-	shaderProgram(_shaderProgram), 
-	functions(_functions), 
+	Renderer(_shaderProgram, _functions, width, height),
 	skyboxVBO(QOpenGLBuffer::VertexBuffer),
 	AABBVBO(QOpenGLBuffer::VertexBuffer),
-	width(width), 
-	height(height),
-	selected(nullptr)
+	selected(nullptr),models(nullptr)
 {
-	models = nullptr;
-	camera = Camera::GetInstance();
-	skybox = Skybox::GetInstance();
 	gizmo = QSharedPointer<Gizmo>(new Gizmo(functions, shaderProgram["gizmo"]));
 	gizmo->setScale(5.0f);
 	gizmo->setType(MOVE);
@@ -40,12 +44,6 @@ EditorRenderer::EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgr
 	skyboxVBO.create();
 	AABBVBO.create();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
-}
-
-void EditorRenderer::setModels(QMap<QString, Model>* _models)
-{
-	
-	models = _models;
 }
 
 void EditorRenderer::setSelected(Model* model)
@@ -59,7 +57,6 @@ Model* EditorRenderer::getSelected()
 	return selected;
 }
 
-
 void EditorRenderer::renderModels()
 {
 	shaderProgram["model"]->bind();
@@ -72,9 +69,9 @@ void EditorRenderer::renderModels()
 	for (auto it = models->begin(); it != models->end(); it++) {
 		auto& model = it.value();
 		shaderProgram["model"]->bind();
-		if (model.getType() == NORMAL) 
+		if (!model.isLight())
 			shaderProgram["model"]->setUniformValue("color", model.modelMaterial.baseColor);
-		else 
+		else
 			shaderProgram["model"]->setUniformValue("color", model.lightMaterial.baseColor);
 		shaderProgram["model"]->setUniformValue("model", model.transform.getModel());
 		QVector<QSharedPointer<Mesh>> meshes;
@@ -92,36 +89,16 @@ void EditorRenderer::renderModels()
 	shaderProgram["model"]->release();
 }
 
-
 void EditorRenderer::initSkybox()
 {
 	shaderProgram["skybox"]->bind();
-	functions->glGenTextures(1, &envCubemap);
-	functions->glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap); //生成立方体截图
-	QString keys[6] = { "+x","-x","+y","-y","+z","-z"};
-	int i = 0;
-	for (auto& key:keys)
-	{
-		QImage tex(skybox->pathes[key]);
-		tex = tex.convertToFormat(QImage::Format_RGB888);
-		functions->glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-			0, GL_RGB, tex.width(), tex.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, tex.bits()
-		);
-		i++;
-	}
-	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	initSkyboxTexture();
 	shaderProgram["skybox"]->setUniformValue("skybox", 0);
-
 	QOpenGLVertexArrayObject::Binder binder(&skyboxVAO);
 	skyboxVBO.bind();
-	skyboxVBO.allocate(skybox->vertices.data(), skybox->vertices.size() * sizeof(float));
+	skyboxVBO.allocate(skybox->vertices.data(), (unsigned int)skybox->vertices.size() * sizeof(float));
 	shaderProgram["skybox"]->enableAttributeArray(0);
 	shaderProgram["skybox"]->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float) * 3);
-
 	shaderProgram["skybox"]->release();
 }
 
@@ -129,7 +106,7 @@ void EditorRenderer::renderSkybox()
 {
 	shaderProgram["skybox"]->bind();
 	shaderProgram["skybox"]->setUniformValue("projection", projection);
-	shaderProgram["skybox"]->setUniformValue("view",camera->getView());
+	shaderProgram["skybox"]->setUniformValue("view", camera->getView());
 	functions->glActiveTexture(GL_TEXTURE0);
 	functions->glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
 	functions->glDepthFunc(GL_LEQUAL); //一定要设置
@@ -165,10 +142,10 @@ void EditorRenderer::renderAABB()
 	functions->glDisable(GL_DEPTH_TEST);
 	QOpenGLVertexArrayObject::Binder binder(&AABBVAO);
 	for (int i = 0; i < 12; i++) {
-		memcpy(data, AABBdata[renderIndex[i][0]].data(), sizeof(float)*7);
-		memcpy(data+7, AABBdata[renderIndex[i][1]].data(), sizeof(float)*7);
+		memcpy(data, AABBdata[renderIndex[i][0]].data(), sizeof(float) * 7);
+		memcpy(data + 7, AABBdata[renderIndex[i][1]].data(), sizeof(float) * 7);
 		AABBVBO.bind();
-		AABBVBO.allocate(data,sizeof(data));
+		AABBVBO.allocate(data, sizeof(data));
 		shaderProgram["gizmo"]->enableAttributeArray(0);
 		shaderProgram["gizmo"]->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float) * 7);
 		shaderProgram["gizmo"]->enableAttributeArray(1);
@@ -193,9 +170,7 @@ QSharedPointer<Gizmo> EditorRenderer::getGizmo()
 	return gizmo;
 }
 
-
-QSharedPointer<Camera> EditorRenderer::getCamera()
+void EditorRenderer::setModels(QMap<QString, Model>* _models)
 {
-	return camera;
+	this->models = _models;
 }
-

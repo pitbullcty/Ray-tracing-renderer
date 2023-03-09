@@ -13,6 +13,7 @@ Mesh::Mesh(QOpenGLExtraFunctions* functions, QOpenGLShaderProgram* program) :
 
 Mesh::~Mesh()
 {
+	VAO.destroy();
 	VBO.destroy();
 	EBO.destroy();
 	functions = nullptr;
@@ -26,6 +27,7 @@ void Mesh::destoryTextures()
 	}
 }
 
+
 void Mesh::setUp()
 {
 	shaderProgram->bind();
@@ -33,10 +35,10 @@ void Mesh::setUp()
 	QOpenGLVertexArrayObject::Binder binder(&VAO);
 
 	VBO.bind();
-	VBO.allocate(vertices.data(), vertices.size() * sizeof(Vertex));
+	VBO.allocate(vertices.data(), (unsigned int)vertices.size() * sizeof(Vertex));
 
 	EBO.bind();
-	EBO.allocate(indices.data(), indices.size() * sizeof(unsigned int));
+	EBO.allocate(indices.data(), (unsigned int)indices.size() * sizeof(unsigned int));
 
 	shaderProgram->enableAttributeArray(0);
 	shaderProgram->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(Vertex));

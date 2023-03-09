@@ -1,7 +1,7 @@
 ﻿uic ./ui/mainwindow.ui -o ./src/include/ui_mainwindow.h
 
-1.实现矩形，圆形光源
-2.实现材质混合（漫反射材质、法线材质）
+1.开启光追渲染
+2.切换页面
 3.降噪
 
 ui方面：

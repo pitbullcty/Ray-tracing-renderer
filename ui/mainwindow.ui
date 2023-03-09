@@ -34,7 +34,22 @@
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <widget class="OpenGLWidget" name="openGLWidget"/>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <widget class="QWidget" name="stackedWidgetPage1" native="true">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="EditorOpenGLWidget" name="editor"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="stackedWidgetPage2" native="true">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="RayTracingOpenGLWidget" name="rayTracing"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -162,7 +177,7 @@
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>模型编辑器</string>
+    <string>模型信息</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -274,11 +289,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>OpenGLWidget</class>
-   <extends>QOpenGLWidget</extends>
-   <header>OpenGLWidget.h</header>
-  </customwidget>
-  <customwidget>
    <class>Console</class>
    <extends>QTextBrowser</extends>
    <header>Console.h</header>
@@ -287,6 +297,16 @@
    <class>ModelListWidget</class>
    <extends>QListWidget</extends>
    <header>ModelListWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EditorOpenGLWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>EditorOpenglWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RayTracingOpenGLWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>RayTracingOpenGLWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -14,16 +14,19 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "Console.h"
+#include "EditorOpenglWidget.h"
 #include "ModelListWidget.h"
-#include "OpenGLWidget.h"
+#include "RayTracingOpenGLWidget.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -41,7 +44,13 @@ public:
     QAction *actionloadRecent;
     QWidget *widget;
     QGridLayout *gridLayout;
-    OpenGLWidget *openGLWidget;
+    QStackedWidget *stackedWidget;
+    QWidget *stackedWidgetPage1;
+    QHBoxLayout *horizontalLayout_2;
+    EditorOpenGLWidget *editor;
+    QWidget *stackedWidgetPage2;
+    QHBoxLayout *horizontalLayout;
+    RayTracingOpenGLWidget *rayTracing;
     QMenuBar *menubar;
     QMenu *menu;
     QMenu *menu_3;
@@ -96,10 +105,30 @@ public:
         widget->setMaximumSize(QSize(16777215, 16777215));
         gridLayout = new QGridLayout(widget);
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        openGLWidget = new OpenGLWidget(widget);
-        openGLWidget->setObjectName(QString::fromUtf8("openGLWidget"));
+        stackedWidget = new QStackedWidget(widget);
+        stackedWidget->setObjectName(QString::fromUtf8("stackedWidget"));
+        stackedWidgetPage1 = new QWidget();
+        stackedWidgetPage1->setObjectName(QString::fromUtf8("stackedWidgetPage1"));
+        horizontalLayout_2 = new QHBoxLayout(stackedWidgetPage1);
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        editor = new EditorOpenGLWidget(stackedWidgetPage1);
+        editor->setObjectName(QString::fromUtf8("editor"));
 
-        gridLayout->addWidget(openGLWidget, 0, 0, 1, 1);
+        horizontalLayout_2->addWidget(editor);
+
+        stackedWidget->addWidget(stackedWidgetPage1);
+        stackedWidgetPage2 = new QWidget();
+        stackedWidgetPage2->setObjectName(QString::fromUtf8("stackedWidgetPage2"));
+        horizontalLayout = new QHBoxLayout(stackedWidgetPage2);
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        rayTracing = new RayTracingOpenGLWidget(stackedWidgetPage2);
+        rayTracing->setObjectName(QString::fromUtf8("rayTracing"));
+
+        horizontalLayout->addWidget(rayTracing);
+
+        stackedWidget->addWidget(stackedWidgetPage2);
+
+        gridLayout->addWidget(stackedWidget, 0, 0, 1, 1);
 
         MainWindow->setCentralWidget(widget);
         menubar = new QMenuBar(MainWindow);
@@ -230,7 +259,7 @@ public:
         menu_5->setTitle(QCoreApplication::translate("MainWindow", "\350\256\276\347\275\256(&S)", nullptr));
         toolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar", nullptr));
         dockWidgetInfos->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\250\241\345\236\213", nullptr));
-        dockWidgetDetails->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\250\241\345\236\213\347\274\226\350\276\221\345\231\250", nullptr));
+        dockWidgetDetails->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\250\241\345\236\213\344\277\241\346\201\257", nullptr));
         dockWidgetConsole->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\216\247\345\210\266\345\217\260", nullptr));
     } // retranslateUi
 

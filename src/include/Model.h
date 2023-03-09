@@ -6,7 +6,8 @@
 #include "Material.h"
 
 enum MODELTYPE {
-	LIGHT,
+	RECTLIGHT,
+	SPHERELIGHT,
 	NORMAL
 };
 
@@ -29,6 +30,8 @@ public:
 	QString getPath() const;
 	Model* getCopy();
 	MODELTYPE getType();
+
+	bool isLight();
 
 	AABB& getBound();
 	AABB& getDectionBound();

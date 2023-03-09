@@ -3,7 +3,11 @@
 
 extern bool isBusy;
 
-MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindow),actions(ui)
+MainWindow::MainWindow(QWidget* parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow),
+    actions(ui),
+    currentIndex(0)
 {
 	ui->setupUi(this);
     this->setWindowIcon(QIcon(":icons/title.ico"));
@@ -11,9 +15,13 @@ MainWindow::MainWindow(QWidget* parent):QMainWindow(parent),ui(new Ui::MainWindo
     this->setStyle();
     this->showMaximized();
     this->setAcceptDrops(true); //接受拖拽
+    QThreadPool* global = QThreadPool::globalInstance();
+    global->setMaxThreadCount(1); //设置线程池最多执行单线程
     actions.bind(); //绑定actions
     bindSignals(); //绑定其他信号
     copyLightsModel();
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->stackedWidget->setCurrentIndex(0);
 }
 
 MainWindow::~MainWindow()//析构函数，关掉ＵＩ界面
@@ -47,7 +55,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
         event->ignore();
         return;
     }
-    if (ui->openGLWidget->closeApp()) {
+    if (ui->editor->closeApp()) {
         event->accept();
     }
     else {
@@ -78,7 +86,18 @@ void MainWindow::dropEvent(QDropEvent* event)
         else if (filename.contains(".json")) {
             actions.loadScene(filename);
         }
+        else;
     }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+    Qt::Key key = (Qt::Key)(event->key());
+    if (key == Qt::Key_F5) {
+        currentIndex = (currentIndex == 0) ? 1 : 0;
+        ui->stackedWidget->setCurrentIndex(currentIndex);
+    }
+    else;
 }
 
 void MainWindow::bindSignals()
@@ -104,8 +123,9 @@ void MainWindow::bindSignals()
     connect(modelLoader.data(), &ModelLoader::Error, ui->console, &Console::Error);
     connect(modelLoader.data(), &ModelLoader::Warning, ui->console, &Console::Warning);
 
-    auto& rayTracingRenderer = RayTracingRenderer::GetInstance();
-    connect(rayTracingRenderer.data(), &RayTracingRenderer::Info, ui->console, &Console::Info);
+    auto& dataBuilder = DataBuilder::GetInstance();
+    dataBuilder->setModels(seceneManager->getModels());
+    connect(dataBuilder.data(), &DataBuilder::Info, ui->console, &Console::Info);
 
     connect(ui->closeWindow, &QAction::triggered, this, &MainWindow::close);
     

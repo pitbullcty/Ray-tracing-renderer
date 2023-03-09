@@ -250,6 +250,7 @@ QVector<Texture> ModelLoader::loadTexture(aiMaterial* material, aiTextureType ty
             if (!tex.texture.isNull()) {
                 tex.type = name;
                 tex.path = texpath;
+                tex.id = tex.texture->textureId(); //获取id
                 textures.emplace_back(tex);
                 textures_loaded.emplace_back(tex);
             }

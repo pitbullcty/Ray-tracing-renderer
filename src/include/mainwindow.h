@@ -14,10 +14,12 @@ public:
 protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dropEvent(QDropEvent* event);
+    virtual void keyPressEvent(QKeyEvent* event);
 
 private:
     Ui::MainWindow* ui;
     WindowActions actions;
+    int currentIndex;
     void bindSignals();
     void copyLightsModel();
 };

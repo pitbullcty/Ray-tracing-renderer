@@ -1,38 +1,31 @@
 ﻿#ifndef __EDITOR_RENDERER__
 #define __EDITOR_RENDERER__
 
-#include "Model.h"
-#include "Camera.h"
-#include "Skybox.h"
-#include "Gizmo.h"
-#include <QMap>
-
+#include "Renderer.h"
 
 //使用单例模式
-class EditorRenderer:public QObject {
-	Q_OBJECT
+class EditorRenderer : public Renderer {
 
 public:
-	void setModels(QMap<QString, Model>* _models); //设置渲染模型指针
+
 	Model* getSelected();
 
-	void renderModels();
-
 	void initSkybox();
+	void renderModels();
 	void renderSkybox();
-
 	void renderGizmo();
 	void renderAABB();
 
-	void resize(int w, int h);
+	virtual void resize(int w, int h);
 
 	QSharedPointer<Gizmo> getGizmo();
-	QSharedPointer<Camera> getCamera();
+	void setModels(QMap<QString, Model>* _models); //设置渲染模型指针
 
-	static void destory(EditorRenderer* sceneManager);
-	
-	static QSharedPointer<EditorRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions
-	, int width, int height);
+	static void destory(EditorRenderer* editorRenderer);
+	virtual void destoryData();
+
+	static QSharedPointer<EditorRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, 
+		QOpenGLExtraFunctions* _functions, int width, int height);
 
 public slots:
 	void setSelected(Model* model);
@@ -40,29 +33,16 @@ public slots:
 private:
 	static QSharedPointer<EditorRenderer> instance;
 
-	//OpenGl上下文相关
-	QMap<QString, QOpenGLShaderProgram*> shaderProgram;
-	QOpenGLExtraFunctions* functions;
-
 	QOpenGLBuffer skyboxVBO;
 	QOpenGLBuffer AABBVBO;
 
 	QOpenGLVertexArrayObject skyboxVAO;
 	QOpenGLVertexArrayObject AABBVAO;
 
-	unsigned int envCubemap;
-
-	int width;
-	int height; //窗口相关参数
-
-	QMatrix4x4 projection; //投影矩阵
-
-	QMap<QString, Model>* models; //模型
-	QSharedPointer<Camera> camera; //摄像机
-	QSharedPointer<Skybox> skybox; //天空盒
 	QSharedPointer<Gizmo> gizmo; //gizmo控件
 
 	Model* selected; //被选中的物体
+	QMap<QString, Model>* models; //模型
 
 	EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height);
 	~EditorRenderer() = default;

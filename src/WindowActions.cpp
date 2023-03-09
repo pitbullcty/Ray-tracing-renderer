@@ -25,6 +25,7 @@ void WindowActions::bind()
 void WindowActions::loadModel(const QString& path)
 {
 	QString fileName;
+	bool isShow;
 	if (path.isEmpty()) {
 		if (lastModelPath.isEmpty()) lastModelPath = QDir::currentPath();
 		fileName = QFileDialog::getOpenFileName(nullptr, "打开模型文件", lastModelPath, tr("模型文件 (*.fbx *.obj *.3ds *.gltf *.blend)"));
@@ -37,26 +38,31 @@ void WindowActions::loadModel(const QString& path)
 	else {
 		fileName = path;
 	}
-	auto sceneManager = ui->openGLWidget->getSceneManager();
-	auto editorRenderer = ui->openGLWidget->getEditorRenderer();
+	auto sceneManager = ui->editor->getSceneManager();
+	auto editorRenderer = ui->editor->getEditorRenderer();
 	editorRenderer->setSelected(nullptr);
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	if (sceneManager->getState() == NONE) {
 		sceneManager->createScene();
 	}
-	if(path.contains("/lights/rectlight.obj") || path.contains("/lights/spherelight.obj")) sceneManager->addModel(fileName, "", false, true); //路径为添加灯光
+	if (path.contains("/lights/rectlight.obj") || path.contains("/lights/spherelight.obj")) {
+		sceneManager->addModel(fileName, "", false, true); //路径为添加灯光
+		isShow = false;
+	}
 	else {
+		isShow = !sceneManager->getModels()->size();
 		isBusy = true;
 		sceneManager->addModel(fileName);
 		isBusy = false;
-		auto buildTask = QtConcurrent::run(&RayTracingRenderer::buildBVH, RayTracingRenderer::GetInstance().data());
 	}
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), isShow);
+	
 }
 
 void WindowActions::crateScene()
 {
-	auto sceneManager = ui->openGLWidget->getSceneManager();
-	auto editorRenderer = ui->openGLWidget->getEditorRenderer();
+	auto sceneManager = ui->editor->getSceneManager();
+	auto editorRenderer = ui->editor->getEditorRenderer();
 	editorRenderer->setSelected(nullptr);
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	sceneManager->createScene();
@@ -78,21 +84,21 @@ void WindowActions::loadScene(const QString& path)
 	}
 	lastScenePath = fileInfo.absolutePath();
 
-	auto sceneManager = ui->openGLWidget->getSceneManager();
-	auto editorRenderer = ui->openGLWidget->getEditorRenderer();
+	auto sceneManager = ui->editor->getSceneManager();
+	auto editorRenderer = ui->editor->getEditorRenderer();
 	editorRenderer->setSelected(nullptr);
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	isBusy = true;
 	sceneManager->loadScene(fileName);
 	isBusy = false;
-	auto buildTask = QtConcurrent::run(&RayTracingRenderer::buildBVH, RayTracingRenderer::GetInstance().data());
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(),true);
 }
 
 void WindowActions::saveScene()
 {
-	auto sceneManager = ui->openGLWidget->getSceneManager();
+	auto sceneManager = ui->editor->getSceneManager();
 	if (sceneManager->getState() == NONE) {
-		QMessageBox::warning(ui->openGLWidget, "警告", "尚未打开场景！", QMessageBox::Yes);
+		QMessageBox::warning(ui->editor, "警告", "尚未打开场景！", QMessageBox::Yes);
 		return;
 	}
 	sceneManager->saveScene();
@@ -100,12 +106,12 @@ void WindowActions::saveScene()
 
 void WindowActions::saveSceneAS()
 {
-	auto sceneManager = ui->openGLWidget->getSceneManager();
+	auto sceneManager = ui->editor->getSceneManager();
 	if (sceneManager->getState() == NONE) {
-		QMessageBox::warning(ui->openGLWidget, "警告", "尚未打开场景！", QMessageBox::Yes);
+		QMessageBox::warning(ui->editor, "警告", "尚未打开场景！", QMessageBox::Yes);
 		return;
 	}
-	QString fileName = QFileDialog::getSaveFileName(ui->openGLWidget, "选择保存路径", QDir::currentPath(), "场景文件(*.json)");
+	QString fileName = QFileDialog::getSaveFileName(ui->editor, "选择保存路径", QDir::currentPath(), "场景文件(*.json)");
 	if (fileName.isEmpty()) {
 		return;
 	}
@@ -115,7 +121,7 @@ void WindowActions::saveSceneAS()
 
 void WindowActions::closeScene()
 {
-	auto sceneManager = ui->openGLWidget->getSceneManager();
+	auto sceneManager = ui->editor->getSceneManager();
 	if (sceneManager->getState() == NONE) return;
 	sceneManager->closeScene();
 }

@@ -1,42 +1,67 @@
-﻿#ifndef __RAY_TRACING_RENDERER__
-#define __RAY_TRACING_RENDERER__
+﻿#ifndef _RAY_TRACING_RENDERER_
+#define _RAY_TRACING_RENDERER_
 
-#include <QSharedPointer>
-#include "Model.h"
-#include "Console.h"
-#include <QElapsedTimer>
+#include "Renderer.h"
+#include "DataBuilder.h"
 
-enum STRATEGY {
-	MAXDIM,
-	ALLAXIS
-};//SAH策略
-
-class RayTracingRenderer:public QObject
-{
-	Q_OBJECT
+class RayTracingRenderer :public Renderer {
 public:
-	static QSharedPointer<RayTracingRenderer>& GetInstance();
-	static void destory(RayTracingRenderer* builder);
 
-	void buildBVH();
-	void setModels(QMap<QString, Model>* models);
+	void initFBOs();
+	void render();
+	void clearFrameCounter();
+	virtual void destoryData();
+	virtual void resize(int w, int h);
 
-signals:
-	void Info(QString info);
+	static QSharedPointer<RayTracingRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram,
+		QOpenGLExtraFunctions* _functions, int width, int height);
+
+	static void destory(RayTracingRenderer* rayTracingRenderer);
+
+public slots:
+	void sendDataToGPU();  //收到信号发送编码好数据至gpu端
 
 private:
-	QMap<QString, Model>* models;
+	
+	unsigned int frameCounter; //帧计数器
 
-	BVH bvh;
-	QVector<Triangle> triangles;
+	QOpenGLBuffer pathTraceVBO;
+	QOpenGLVertexArrayObject pathTracingVAO;
+
+	QOpenGLBuffer accumVBO;
+	QOpenGLVertexArrayObject accumVAO;
+
+	QOpenGLBuffer outputVBO;
+	QOpenGLVertexArrayObject outputVAO;  //shader使用的VAO以及VBO
+
+	unsigned int pathTracingFBO, accumFBO;
+	unsigned int pathTracingTexture, accumTexture; //用到的FBO以及颜色附件
+
+	unsigned int BVHbuffer;
+	unsigned int BVHTexture; 
+
+	unsigned int triangleBuffer;
+	unsigned int triangleTexture; //三角形材质缓存
+
+	unsigned int materialBuffer; 
+	unsigned int materialTexture; //材质
+
+	unsigned int lightsTexture; //灯光
+	unsigned int textureMapsArrayTex; //贴图
 
 	static QSharedPointer<RayTracingRenderer> instance;
-	RayTracingRenderer();
-	~RayTracingRenderer() = default;
 
-	int buildBVHHelp(int l, int r, int maxCount, int parent = -2, STRATEGY stratgey = MAXDIM);
-	int findSplitAxis(int l, int r, BVHNode& node, float& cost); //找到最佳分割轴
-	void buildTriangles();
+	unsigned int generateAttachment();
+
+	void bindVAO();
+	void bindTexture();
+
+	void destoryFBOs();
+	void destoryVAO();
+	void destoryTexture(); //资源销毁
+
+	RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height);
+	~RayTracingRenderer() = default;
 };
 
-#endif 
+#endif // !_RAY_TRACING_RENDERER
