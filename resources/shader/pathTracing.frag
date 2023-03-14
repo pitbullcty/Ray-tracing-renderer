@@ -4,9 +4,8 @@
 in vec3 vertex;
 out vec4 fragColor;
 
-// ----------------------------------------------------------------------------- //
-
 uniform uint frameCounter;
+
 uniform int width;
 uniform int height;
 
@@ -15,7 +14,8 @@ uniform samplerBuffer BVHnodes;
 uniform samplerBuffer materials;
 
 uniform sampler2D lastFrame;
-uniform samplerCube cubemap;
+uniform sampler2D lights;
+uniform sampler2D hdrMap;
 
 uniform vec3 eye;
 uniform mat4 cameraRotate;
@@ -38,8 +38,10 @@ struct Triangle {
 
 // BVH 树节点
 struct BVHNode {
-    int left,right;           // 子树
-    int n,index;              // 索引
+    int left;           // 左子树
+    int right;          // 右子树
+    int n;              // 包含三角形数目
+    int index;          // 三角形索引
     vec3 AA, BB;        // 碰撞盒
 };
 
@@ -60,7 +62,7 @@ struct Material {
     int baseColorTexId;
     int metalnessTexId;
     int normalTexId;
-    int emissiveTexId; //对应材质id
+    int emissiveTexId;
 };
 
 // 光线
@@ -73,7 +75,7 @@ struct Ray {
 struct HitResult {
     bool isHit;             // 是否命中
     bool isInside;          // 是否从内部命中
-    float dis;         // 与交点的距离
+    float distance;         // 与交点的距离
     vec3 hitPoint;          // 光线命中点
     vec3 normal;            // 命中点法线
     vec3 viewDir;           // 击中该点的光线的方向
@@ -127,10 +129,20 @@ vec3 toNormalHemisphere(vec3 v, vec3 N) {
 
 // ----------------------------------------------------------------------------- //
 
+// 将三维向量 v 转为 HDR map 的纹理坐标 uv
+vec2 SampleSphericalMap(vec3 v) {
+    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+    uv /= vec2(2.0 * PI, PI);
+    uv += 0.5;
+    uv.y = 1.0 - uv.y;
+    return uv;
+}
 
 // 获取 HDR 环境颜色
-vec3 sampleCubeMap(vec3 v) {
-    vec3 color = texture(cubemap, v).rgb;
+vec3 sampleHdr(vec3 v) {
+    vec2 uv = SampleSphericalMap(normalize(v));
+    vec3 color = texture2D(hdrMap, uv).rgb;
+    color = min(color, vec3(10));
     return color;
 }
 
@@ -159,14 +171,14 @@ Material getMaterial(int i) {
 
     int offset = i * SIZE_MATERIAL;
 
-    m.emissive = texelFetch(materials, offset+ 0).xyz;
+    m.emissive = texelFetch(materials, offset + 0).xyz;
     m.baseColor = texelFetch(materials, offset + 1).xyz;
     vec3 param1 = texelFetch(materials, offset + 2).xyz;
     vec3 param2 = texelFetch(materials, offset + 3).xyz;
     vec3 param3 = texelFetch(materials, offset + 4).xyz;
     vec3 param4 = texelFetch(materials, offset + 5).xyz;
     vec3 param5 = texelFetch(materials, offset + 6).xyz;
-  
+
     m.subsurface = param1.x;
     m.metallic = param1.y;
     m.specular = param1.z;
@@ -181,7 +193,6 @@ Material getMaterial(int i) {
     m.metalnessTexId = int(param4.z);
     m.normalTexId = int(param5.x);
     m.emissiveTexId = int(param5.y);
-
     return m;
 }
 
@@ -210,7 +221,7 @@ BVHNode getBVHNode(int i) {
 // 光线和三角形求交 
 HitResult hitTriangle(Triangle triangle, Ray ray) {
     HitResult res;
-    res.dis = INF;
+    res.distance = INF;
     res.isHit = false;
     res.isInside = false;
 
@@ -249,7 +260,7 @@ HitResult hitTriangle(Triangle triangle, Ray ray) {
     if (r1 || r2) {
         res.isHit = true;
         res.hitPoint = P;
-        res.dis = t;
+        res.distance = t;
         res.normal = N;
         res.viewDir = d;
         // 根据交点位置插值顶点法线
@@ -286,11 +297,11 @@ float hitAABB(Ray r, vec3 AA, vec3 BB) {
 HitResult hitArray(Ray ray, int l, int r) {
     HitResult res;
     res.isHit = false;
-    res.dis = INF;
+    res.distance = INF;
     for(int i=l; i<=r; i++) {
         Triangle triangle = getTriangle(i);
         HitResult r = hitTriangle(triangle, ray);
-        if(r.isHit && r.dis<res.dis) {
+        if(r.isHit && r.distance<res.distance) {
             res = r;
             res.material = getMaterial(i);
         }
@@ -302,7 +313,7 @@ HitResult hitArray(Ray ray, int l, int r) {
 HitResult hitBVH(Ray ray) {
     HitResult res;
     res.isHit = false;
-    res.dis = INF;
+    res.distance = INF;
 
     // 栈
     int stack[256];
@@ -318,7 +329,7 @@ HitResult hitBVH(Ray ray) {
             int L = node.index;
             int R = node.index + node.n - 1;
             HitResult r = hitArray(ray, L, R);
-            if(r.isHit && r.dis<res.dis) res = r;
+            if(r.isHit && r.distance<res.distance) res = r;
             continue;
         }
         
@@ -378,7 +389,7 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
 
         // 未命中
         if(!newHit.isHit) {
-            vec3 skyColor = sampleCubeMap(randomRay.direction);
+            vec3 skyColor = sampleHdr(randomRay.direction);
             Lo += history * skyColor * f_r * cosine_i / pdf;
             break;
         }
@@ -413,9 +424,8 @@ void main() {
     
     if(!firstHit.isHit) {
         color = vec3(0);
-        color = sampleCubeMap(ray.direction);
-    } 
-    else {
+        color = sampleHdr(ray.direction);
+    } else {
         vec3 Le = firstHit.material.emissive;
         vec3 Li = pathTracing(firstHit, 2);
         color = Le + Li;

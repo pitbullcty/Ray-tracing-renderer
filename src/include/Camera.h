@@ -27,6 +27,7 @@ public:
     void processMouseScroll(float yoffset);
     void updateState();
     void reSet();
+    QVector3D getDirection();
     QJsonObject toJson();
     void prase(const QJsonObject& camera);
 

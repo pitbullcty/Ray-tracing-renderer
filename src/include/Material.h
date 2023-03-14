@@ -94,8 +94,8 @@ struct ModelMaterial
         res.param1 = { subsurface, metallic, specular };
         res.param2 = { specularTint, roughness, anisotropic };
         res.param3 = { sheen, sheenTint, clearcoat };
-        res.param4 = { clearcoatGloss, -1,-1};
-        res.param5 = { -1, -1,-1 };
+        res.param4 = { clearcoatGloss, 0,0};
+        res.param5 = { 0, 0, 0 };
         return res;
     }
 };

@@ -20,7 +20,7 @@ struct Vertex
 	QVector2D texCoords; //材质坐标
 	Vertex& map(const QMatrix4x4& model) {
 		pos = model.map(pos);
-		normal = model.map(normal);
+		normal = (model.inverted().transposed() * QVector4D(normal, 0.0)).toVector3D().normalized();
 		return *this;
 	}
 };

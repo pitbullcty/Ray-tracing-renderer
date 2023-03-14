@@ -136,11 +136,7 @@ void Camera::processMouseScroll(float yoffset)
 */
 void Camera::updateState()
 {
-	QVector3D newDirection;
-	newDirection.setX(cos((radians(yaw))) * cos(radians(pitch)));
-	newDirection.setY(sin(radians(pitch)));
-	newDirection.setZ(sin(radians(yaw)) * cos(radians(pitch)));
-	direction = newDirection.normalized();
+	direction = getDirection().normalized();
 	right = QVector3D::crossProduct(direction, worldUP).normalized();
 	up = QVector3D::crossProduct(right, direction).normalized();
 }
@@ -157,6 +153,11 @@ void Camera::reSet()
     speed = 10.0f;
     sensitivity = 0.1f;
     zoom = 30.0f;
+}
+
+QVector3D Camera::getDirection()
+{
+    return QVector3D{ -sin(radians(yaw)) * cos(radians(pitch)) , sin(radians(pitch)) ,cos((radians(yaw))) * cos(radians(pitch)) };
 }
 
 QJsonObject Camera::toJson()

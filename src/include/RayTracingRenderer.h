@@ -3,6 +3,7 @@
 
 #include "Renderer.h"
 #include "DataBuilder.h"
+#include "thirdparty/hdrloader/hdrloader.h"
 
 class RayTracingRenderer :public Renderer {
 public:
@@ -24,6 +25,7 @@ public slots:
 private:
 	
 	unsigned int frameCounter; //帧计数器
+	unsigned int hdr; //hdr贴图
 
 	QOpenGLBuffer pathTraceVBO;
 	QOpenGLVertexArrayObject pathTracingVAO;
@@ -51,7 +53,7 @@ private:
 
 	static QSharedPointer<RayTracingRenderer> instance;
 
-	unsigned int generateAttachment();
+	unsigned int generateAttachment(int w, int h);
 
 	void bindVAO();
 	void bindTexture();

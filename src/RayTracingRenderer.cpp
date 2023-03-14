@@ -28,12 +28,12 @@ QSharedPointer<RayTracingRenderer>& RayTracingRenderer::GetInstance(QMap<QString
 	return instance;
 }
 
-unsigned int RayTracingRenderer::generateAttachment()
+unsigned int RayTracingRenderer::generateAttachment(int w, int h)
 {
 	unsigned int id;
 	functions->glGenTextures(1, &id);
 	functions->glBindTexture(GL_TEXTURE_2D, id);
-	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
 	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -79,6 +79,9 @@ void RayTracingRenderer::bindVAO()
 
 void RayTracingRenderer::bindTexture()
 {
+	functions->glActiveTexture(GL_TEXTURE0);
+	functions->glBindTexture(GL_TEXTURE_2D, hdr);
+
 	functions->glActiveTexture(GL_TEXTURE1);
 	functions->glBindTexture(GL_TEXTURE_BUFFER, BVHTexture);
 
@@ -154,18 +157,20 @@ void RayTracingRenderer::sendDataToGPU()
 	auto& data = DataBuilder::GetInstance()->getData(); //获取渲染数据
 
 	destoryTexture();
+	frameCounter = 0;
 
 	functions->glGenBuffers(1, &BVHbuffer);
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, BVHbuffer);
-	functions->glBufferData(GL_TEXTURE_BUFFER,sizeof(BVHNodeEncoded) * (unsigned int)data.encodedBVH.size(),&data.encodedBVH[0], GL_STATIC_DRAW);
+	functions->glBufferData(GL_TEXTURE_BUFFER,sizeof(BVHNodeEncoded) * (unsigned int)data.encodedBVH.size(),data.encodedBVH.data(), GL_STATIC_DRAW);
 	functions->glGenTextures(1, &BVHTexture);
 	functions->glBindTexture(GL_TEXTURE_BUFFER, BVHTexture);
 	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, BVHbuffer); //发送BVH数据
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
+
 	functions->glGenBuffers(1, &triangleBuffer);
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, triangleBuffer);
-	functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(TriangleEncoded) * (unsigned int)data.encodedTriangles.size(), &data.encodedTriangles[0], GL_STATIC_DRAW);
+	functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(TriangleEncoded) * (unsigned int)data.encodedTriangles.size(), data.encodedTriangles.data(), GL_STATIC_DRAW);
 	functions->glGenTextures(1, &triangleTexture);
 	functions->glBindTexture(GL_TEXTURE_BUFFER, triangleTexture);
 	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, triangleBuffer); //发送三角形数据
@@ -173,7 +178,7 @@ void RayTracingRenderer::sendDataToGPU()
 
 	functions->glGenBuffers(1, &materialBuffer);
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, materialBuffer);
-	functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(MaterialEncoded) * (unsigned int)data.encodedMaterial.size(), &data.encodedMaterial[0], GL_STATIC_DRAW);
+	functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(MaterialEncoded) * (unsigned int)data.encodedMaterials.size(), data.encodedMaterials.data(), GL_STATIC_DRAW);
 	functions->glGenTextures(1, &materialTexture);
 	functions->glBindTexture(GL_TEXTURE_BUFFER, materialTexture);
 	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, materialBuffer); 
@@ -187,7 +192,6 @@ void RayTracingRenderer::sendDataToGPU()
 	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	functions->glBindTexture(GL_TEXTURE_2D, 0);
-	
 	
 	functions->glGenTextures(1, &textureMapsArrayTex);
 	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, textureMapsArrayTex);
@@ -203,9 +207,13 @@ void RayTracingRenderer::sendDataToGPU()
 
 void RayTracingRenderer::initFBOs()
 {
-	
-	accumTexture = generateAttachment();
-	pathTracingTexture = generateAttachment();
+	HDRLoaderResult hdrRes;
+	bool r = HDRLoader::load("F://Ray-tracing-renderer//resources//hdr//pizzo_pernice_puresky_4k.hdr", hdrRes);
+	hdr = generateAttachment(hdrRes.width, hdrRes.height);
+	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, hdrRes.width, hdrRes.height, 0, GL_RGB, GL_FLOAT, hdrRes.cols);
+
+	accumTexture = generateAttachment(width, height);
+	pathTracingTexture = generateAttachment(width, height);
 
 	functions->glGenFramebuffers(1, &pathTracingFBO);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, pathTracingFBO);
@@ -228,9 +236,7 @@ void RayTracingRenderer::initFBOs()
 
 void RayTracingRenderer::render()
 {
-	GLenum error = functions->glGetError();
 
-	functions->glEnable(GL_DEPTH_TEST);  // 开启深度测试
 	functions->glViewport(0, 0, width, height);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
@@ -238,16 +244,18 @@ void RayTracingRenderer::render()
 	
 	pathTracingVAO.bind();
 	shaderProgram["pathTracing"]->bind();
-	shaderProgram["pathTracing"]->setUniformValue("cubemap", 0);
+	shaderProgram["pathTracing"]->setUniformValue("hdrMap", 0);
 	shaderProgram["pathTracing"]->setUniformValue("BVHnodes", 1);
 	shaderProgram["pathTracing"]->setUniformValue("triangles", 2);
 	shaderProgram["pathTracing"]->setUniformValue("materials", 3);
+	shaderProgram["pathTracing"]->setUniformValue("lights", 4);
 	shaderProgram["pathTracing"]->setUniformValue("lastFrame", 7);
 	shaderProgram["pathTracing"]->setUniformValue("eye", camera->getPos());
-	shaderProgram["pathTracing"]->setUniformValue("cameraRotate", camera->getView());
+	shaderProgram["pathTracing"]->setUniformValue("cameraRotate", camera->getView().inverted());
 	auto location = shaderProgram["pathTracing"]->programId();
 	functions->glUniform1ui(functions->glGetUniformLocation(location,"frameCounter"), frameCounter++);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, pathTracingFBO);
+	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
 	shaderProgram["pathTracing"]->release();
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -257,6 +265,7 @@ void RayTracingRenderer::render()
 	shaderProgram["accum"]->bind();
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
 	shaderProgram["accum"]->setUniformValue("lastFrame", 6);
+	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
 	shaderProgram["accum"]->release();
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -267,7 +276,8 @@ void RayTracingRenderer::render()
 	shaderProgram["output"]->bind();
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	shaderProgram["output"]->setUniformValue("lastFrame", 7);
-	shaderProgram["output"]->setUniformValue("needToneMapping", false);
+	shaderProgram["output"]->setUniformValue("needToneMapping", true);
+	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
 	shaderProgram["output"]->release();
 	outputVAO.release();
@@ -281,9 +291,9 @@ void RayTracingRenderer::clearFrameCounter()
 
 void RayTracingRenderer::resize(int w, int h)
 {
+	frameCounter = 0;
 	width = w;
 	height = h;
 	destoryFBOs();
 	initFBOs();
-	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 }

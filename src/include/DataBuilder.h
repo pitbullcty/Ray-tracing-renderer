@@ -18,8 +18,15 @@ struct RenderData {
 	QVector<TriangleEncoded> encodedTriangles; //编码后顶点数据
 	QVector<BVHNodeEncoded> encodedBVH; //编码后BVH
 	QVector<LightEncoded> encodedLight; //编码后灯光数据
-	QVector<MaterialEncoded> encodedMaterial; //编码后材质
+	QVector<MaterialEncoded> encodedMaterials; //编码后材质
 	QVector<unsigned char> encodedTexture; //编码后的贴图数组
+	void clear() {
+		encodedTriangles.clear();
+		encodedBVH.clear();
+		encodedLight.clear();
+		encodedMaterials.clear();
+		encodedTexture.clear();
+	}
 };
 
 class DataBuilder:public QObject

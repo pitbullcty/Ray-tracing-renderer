@@ -33,7 +33,7 @@ void DataBuilder::buildData(bool needTips) {
 	if(needTips) emit Info("正在构建BVH...");
 	flattenAndBuildData(); //展平数据并且构建BVH
 	int maxcount = int(log2(triangles.size())) + 1;
-	buildBVHHelp(0, triangles.size() - 1, 8, -2, ALLAXIS);
+	buildBVHHelp(0, triangles.size() - 1, maxcount, -2, ALLAXIS);
 	encodeData();
 	emit sendDataDone();
 	if (needTips) emit Info("BVH建立完成，耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms");
@@ -42,11 +42,12 @@ void DataBuilder::buildData(bool needTips) {
 int DataBuilder::buildBVHHelp(int l, int r, int maxCount, int parent, STRATEGY stratgey)
 {
 	if (l > r) return 0;
+
 	BVHNode node;
-	int id = bvh.size();
-	node.parent = parent;
-	node.lChild = node.rChild = node.index = node.n = 0;
 	bvh.emplace_back(node); //放入bvh树
+	int id = bvh.size()-1;
+	bvh[id].parent = parent;
+	bvh[id].lChild = bvh[id].rChild = bvh[id].index = bvh[id].n = 0;
 
 	int splitIndex = 0;
 	DIM maxdim = AXIS_X;
@@ -108,6 +109,7 @@ int DataBuilder::buildBVHHelp(int l, int r, int maxCount, int parent, STRATEGY s
 		if (best == AXIS_Y) std::sort(triangles.begin() + l, triangles.begin() + r + 1, cmpy);
 		if (best == AXIS_Z) std::sort(triangles.begin() + l, triangles.begin() + r + 1, cmpz);
 	}
+
 
 	int left = buildBVHHelp(l, splitIndex, maxCount, id, stratgey);
 	int right = buildBVHHelp(splitIndex + 1, r, maxCount, id, stratgey);
@@ -190,7 +192,7 @@ RenderData& DataBuilder::getData()
 
 void DataBuilder::encodeData()
 {
-
+	data.clear();
 	for (auto& triangle : triangles) {
 		TriangleEncoded tri;
 
@@ -217,7 +219,7 @@ void DataBuilder::encodeData()
 			if (texture.first == "texture_normal") encoded.param5.setX(texture.second);
 			if (texture.first == "texture_emissive") encoded.param5.setY(texture.second);
 		} //设置材质类型
-		data.encodedMaterial.emplace_back(encoded);
+		data.encodedMaterials.emplace_back(encoded);
 	}  //编码材质，三角形
 
 	int texBytes = Texturesize * Texturesize * 4; //贴图大小

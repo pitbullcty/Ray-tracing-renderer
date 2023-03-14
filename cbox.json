@@ -1,34 +1,24 @@
 {
     "camera": {
-        "pitch": -12.200005531311035,
-        "x": 0.05724593997001648,
-        "y": 0.8618212938308716,
-        "yaw": -269.3005065917969,
-        "z": -2.529324531555176
+        "pitch": -5.999997615814209,
+        "x": 0.38715994358062744,
+        "y": 0.36805886030197144,
+        "yaw": 1.8000001907348633,
+        "z": -0.7566757798194885
     },
     "lights": [
         {
             "material": {
-                "anisotropic": 0,
                 "baseColor": {
                     "b": 1,
                     "g": 1,
                     "r": 1
                 },
-                "clearcoat": 0,
-                "clearcoatGloss": 0,
                 "emissive": {
                     "x": 17,
                     "y": 12,
                     "z": 4
-                },
-                "metallic": 0,
-                "roughness": 0,
-                "sheen": 0,
-                "sheenTint": 0,
-                "specular": 0,
-                "specularTint": 0,
-                "subsurface": 0
+                }
             },
             "modelPath": "F:/Ray-tracing-renderer/out/build/x64-debug/lights/rectlight.obj",
             "name": "rectlight",
@@ -48,16 +38,26 @@
     "models": [
         {
             "material": {
+                "anisotropic": 0,
                 "baseColor": {
-                    "b": 0.7250000238418579,
+                    "b": 0.6800000071525574,
                     "g": 0.7099999785423279,
-                    "r": 0.6800000071525574
+                    "r": 0.7250000238418579
                 },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
                 "emissive": {
                     "x": 0,
                     "y": 0,
                     "z": 0
-                }
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
             },
             "modelPath": "F:/Ray-tracing-renderer/resources/Model/test/cbox_back.obj",
             "name": "cbox_back",
@@ -75,16 +75,26 @@
         },
         {
             "material": {
+                "anisotropic": 0,
                 "baseColor": {
-                    "b": 0.7250000238418579,
+                    "b": 0.6800000071525574,
                     "g": 0.7099999785423279,
-                    "r": 0.6800000071525574
+                    "r": 0.7250000238418579
                 },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
                 "emissive": {
                     "x": 0,
                     "y": 0,
                     "z": 0
-                }
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
             },
             "modelPath": "F:/Ray-tracing-renderer/resources/Model/test/cbox_ceiling.obj",
             "name": "cbox_ceiling",
@@ -102,16 +112,26 @@
         },
         {
             "material": {
+                "anisotropic": 0,
                 "baseColor": {
-                    "b": 0.7250000238418579,
+                    "b": 0.6800000071525574,
                     "g": 0.7099999785423279,
-                    "r": 0.6800000071525574
+                    "r": 0.7250000238418579
                 },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
                 "emissive": {
                     "x": 0,
                     "y": 0,
                     "z": 0
-                }
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
             },
             "modelPath": "F:/Ray-tracing-renderer/resources/Model/test/cbox_floor.obj",
             "name": "cbox_floor",
@@ -129,16 +149,26 @@
         },
         {
             "material": {
+                "anisotropic": 0,
                 "baseColor": {
-                    "b": 0.14000000059604645,
+                    "b": 0.09099999815225601,
                     "g": 0.44999998807907104,
-                    "r": 0.09099999815225601
+                    "r": 0.14000000059604645
                 },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
                 "emissive": {
                     "x": 0,
                     "y": 0,
                     "z": 0
-                }
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
             },
             "modelPath": "F:/Ray-tracing-renderer/resources/Model/test/cbox_greenwall.obj",
             "name": "cbox_greenwall",
@@ -149,23 +179,33 @@
                 "scaleX": 0.009999999776482582,
                 "scaleY": 0.009999999776482582,
                 "scaleZ": 0.009999999776482582,
-                "translationX": -0.0029946565628051758,
+                "translationX": 0,
                 "translationY": 0.274399995803833,
                 "translationZ": 0.27959999442100525
             }
         },
         {
             "material": {
+                "anisotropic": 0,
                 "baseColor": {
-                    "b": 0.7250000238418579,
+                    "b": 0.6800000071525574,
                     "g": 0.7099999785423279,
-                    "r": 0.6800000071525574
+                    "r": 0.7250000238418579
                 },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
                 "emissive": {
                     "x": 0,
                     "y": 0,
                     "z": 0
-                }
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
             },
             "modelPath": "F:/Ray-tracing-renderer//resources/Model/test/cbox_largebox.obj",
             "name": "cbox_largebox",
@@ -183,16 +223,26 @@
         },
         {
             "material": {
+                "anisotropic": 0,
                 "baseColor": {
-                    "b": 0.6299999952316284,
+                    "b": 0.05000000074505806,
                     "g": 0.06499999761581421,
-                    "r": 0.05000000074505806
+                    "r": 0.6299999952316284
                 },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
                 "emissive": {
                     "x": 0,
                     "y": 0,
                     "z": 0
-                }
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
             },
             "modelPath": "F:/Ray-tracing-renderer//resources/Model/test/cbox_redwall.obj",
             "name": "cbox_redwall",
@@ -210,16 +260,26 @@
         },
         {
             "material": {
+                "anisotropic": 0,
                 "baseColor": {
-                    "b": 0.7250000238418579,
+                    "b": 0.6800000071525574,
                     "g": 0.7099999785423279,
-                    "r": 0.6800000071525574
+                    "r": 0.7250000238418579
                 },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
                 "emissive": {
                     "x": 0,
                     "y": 0,
                     "z": 0
-                }
+                },
+                "metallic": 0,
+                "roughness": 0,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
             },
             "modelPath": "F:/Ray-tracing-renderer//resources/Model/test/cbox_smallbox.obj",
             "name": "cbox_smallbox",
