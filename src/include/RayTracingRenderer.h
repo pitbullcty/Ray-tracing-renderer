@@ -3,7 +3,7 @@
 
 #include "Renderer.h"
 #include "DataBuilder.h"
-#include "thirdparty/hdrloader/hdrloader.h"
+
 
 class RayTracingRenderer :public Renderer {
 public:
@@ -13,7 +13,7 @@ public:
 	void clearFrameCounter();
 	virtual void destoryData();
 	virtual void resize(int w, int h);
-
+	void resizeFBO();
 	static QSharedPointer<RayTracingRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram,
 		QOpenGLExtraFunctions* _functions, int width, int height);
 
@@ -23,9 +23,8 @@ public slots:
 	void sendDataToGPU();  //收到信号发送编码好数据至gpu端
 
 private:
-	
+	bool isResized;  //是否发生resize事件
 	unsigned int frameCounter; //帧计数器
-	unsigned int hdr; //hdr贴图
 
 	QOpenGLBuffer pathTraceVBO;
 	QOpenGLVertexArrayObject pathTracingVAO;

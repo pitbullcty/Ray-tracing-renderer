@@ -49,13 +49,16 @@ void BaseOpenGLWidget::drawFPS()
     deltaTime = time - lastFrameTime;
     lastFrameTime = time; //更新渲染时间
 
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST); //禁用深度测试和模板测试
+    glDisable(GL_BLEND);
+
     if (abs(deltaTime - 0.0f) < 1e-6) return;
     int fps = 1.0f / deltaTime;
     if (fps > 144) {
         return;
     }
-    if (!painter.isActive())
-        painter.begin(this);
+    QPainter painter(this); 
     painter.setPen(QColor(0, 0, 0));//设置画笔颜色
     painter.setRenderHint(QPainter::Antialiasing, true);
     QFont font;//设置字体，下面设置字体属性
@@ -63,15 +66,22 @@ void BaseOpenGLWidget::drawFPS()
     font.setPointSizeF(20);
     painter.setFont(font);
     QString text = "FPS:" + QString::number(fps);
-    painter.drawText(rect(), Qt::AlignLeft, text);
+    painter.drawText(rect(), Qt::AlignRight, text);
     painter.end();
 
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
+   
 }
 
 void BaseOpenGLWidget::drawTips(const QString& tips)
 {
-    if (!painter.isActive())
-        painter.begin(this);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST); //禁用深度测试和模板测试
+    glDisable(GL_BLEND);
+
+    QPainter painter(this);
     painter.setPen(QColor(0, 0, 0));//设置画笔颜色
     painter.setRenderHint(QPainter::Antialiasing, true); // 反走样
     QFont font;//设置字体，下面设置字体属性
@@ -80,6 +90,10 @@ void BaseOpenGLWidget::drawTips(const QString& tips)
     painter.setFont(font);
     painter.drawText(rect(), Qt::AlignCenter, tips);
     painter.end();
+
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
 }
 
 bool BaseOpenGLWidget::isIgnore()

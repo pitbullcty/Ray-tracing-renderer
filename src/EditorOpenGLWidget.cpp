@@ -44,7 +44,7 @@ void EditorOpenGLWidget::resizeGL(int w, int h)
 void EditorOpenGLWidget::paintGL()
 {
     if (isBusy) return;
-   
+
     if (sceneManager->getState() == NONE) {
         drawTips("请新建或打开文件！");
     }

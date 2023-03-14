@@ -162,7 +162,6 @@ void EditorRenderer::resize(int w, int h)
 	width = w;
 	height = h;
 	gizmo->setSize(w, h);
-	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 }
 
 QSharedPointer<Gizmo> EditorRenderer::getGizmo()

@@ -44,7 +44,6 @@ protected:
 
     QPoint lastPos; //上次鼠标停留的位置
 
-    QPainter painter; //绘制提示/FPS
     Model modelToRevert; //需要撤回的模型
 
     float deltaTime; //渲染每帧间隔时间

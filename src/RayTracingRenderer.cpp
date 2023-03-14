@@ -10,7 +10,7 @@ void RayTracingRenderer::destory(RayTracingRenderer* rayTracingRenderer)
 RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
 	Renderer(_shaderProgram, _functions, width, height),
 	BVHbuffer(-1), BVHTexture(-1), frameCounter(0), materialBuffer(-1),
-	triangleBuffer(-1), triangleTexture(-1),
+	triangleBuffer(-1), triangleTexture(-1),isResized(false),
 	materialTexture(-1), lightsTexture(-1), textureMapsArrayTex(-1),
 	accumFBO(-1),accumTexture(-1),pathTracingFBO(-1),pathTracingTexture(-1),
 	pathTraceVBO(QOpenGLBuffer::VertexBuffer), accumVBO(QOpenGLBuffer::VertexBuffer),
@@ -55,8 +55,6 @@ void RayTracingRenderer::bindVAO()
 	pathTraceVBO.allocate(quadData.data(), (unsigned int)quadData.size() * sizeof(float));
 	shaderProgram["pathTracing"]->enableAttributeArray(0);
 	shaderProgram["pathTracing"]->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float)*3);
-	shaderProgram["pathTracing"]->setUniformValue("width", width);
-	shaderProgram["pathTracing"]->setUniformValue("height", height);
 	shaderProgram["pathTracing"]->release();
 
 	shaderProgram["accum"]->bind();
@@ -80,7 +78,7 @@ void RayTracingRenderer::bindVAO()
 void RayTracingRenderer::bindTexture()
 {
 	functions->glActiveTexture(GL_TEXTURE0);
-	functions->glBindTexture(GL_TEXTURE_2D, hdr);
+	functions->glBindTexture(GL_TEXTURE_2D, envCubemap);
 
 	functions->glActiveTexture(GL_TEXTURE1);
 	functions->glBindTexture(GL_TEXTURE_BUFFER, BVHTexture);
@@ -207,11 +205,6 @@ void RayTracingRenderer::sendDataToGPU()
 
 void RayTracingRenderer::initFBOs()
 {
-	HDRLoaderResult hdrRes;
-	bool r = HDRLoader::load("F://Ray-tracing-renderer//resources//hdr//pizzo_pernice_puresky_4k.hdr", hdrRes);
-	hdr = generateAttachment(hdrRes.width, hdrRes.height);
-	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, hdrRes.width, hdrRes.height, 0, GL_RGB, GL_FLOAT, hdrRes.cols);
-
 	accumTexture = generateAttachment(width, height);
 	pathTracingTexture = generateAttachment(width, height);
 
@@ -236,20 +229,24 @@ void RayTracingRenderer::initFBOs()
 
 void RayTracingRenderer::render()
 {
-
-	functions->glViewport(0, 0, width, height);
-	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	resizeFBO(); //判断是否需要变换FBO大小
 	bindTexture();
-	
+
+	projection = QMatrix4x4();
+	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
+
 	pathTracingVAO.bind();
 	shaderProgram["pathTracing"]->bind();
-	shaderProgram["pathTracing"]->setUniformValue("hdrMap", 0);
+	shaderProgram["pathTracing"]->setUniformValue("cubemap", 0);
 	shaderProgram["pathTracing"]->setUniformValue("BVHnodes", 1);
 	shaderProgram["pathTracing"]->setUniformValue("triangles", 2);
 	shaderProgram["pathTracing"]->setUniformValue("materials", 3);
 	shaderProgram["pathTracing"]->setUniformValue("lights", 4);
 	shaderProgram["pathTracing"]->setUniformValue("lastFrame", 7);
+	shaderProgram["pathTracing"]->setUniformValue("width", width);
+	shaderProgram["pathTracing"]->setUniformValue("height", height);
+	shaderProgram["pathTracing"]->setUniformValue("projection", projection.inverted());
 	shaderProgram["pathTracing"]->setUniformValue("eye", camera->getPos());
 	shaderProgram["pathTracing"]->setUniformValue("cameraRotate", camera->getView().inverted());
 	auto location = shaderProgram["pathTracing"]->programId();
@@ -292,8 +289,19 @@ void RayTracingRenderer::clearFrameCounter()
 void RayTracingRenderer::resize(int w, int h)
 {
 	frameCounter = 0;
-	width = w;
-	height = h;
-	destoryFBOs();
-	initFBOs();
+	isResized = true;
+
+}
+
+void RayTracingRenderer::resizeFBO()
+{
+	if (isResized) {
+		int viewport[4];
+		functions->glGetIntegerv(GL_VIEWPORT, viewport);
+		width = viewport[2];
+		height = viewport[3];
+		destoryFBOs();
+		initFBOs();
+		isResized = false;
+	}
 }

@@ -96,6 +96,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
     if (key == Qt::Key_F5) {
         currentIndex = (currentIndex == 0) ? 1 : 0;
         ui->stackedWidget->setCurrentIndex(currentIndex);
+        if (currentIndex) ui->rayTracing->getRayTracingRenderer()->clearFrameCounter(); //清除帧计数器
     }
     else;
 }

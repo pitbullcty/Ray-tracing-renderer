@@ -15,15 +15,16 @@ uniform samplerBuffer materials;
 
 uniform sampler2D lastFrame;
 uniform sampler2D lights;
-uniform sampler2D hdrMap;
+uniform samplerCube cubemap;
 
 uniform vec3 eye;
 uniform mat4 cameraRotate;
+uniform mat4 projection;
 
 // ----------------------------------------------------------------------------- //
 
 #define PI              3.1415926
-#define INF             114514.0
+#define INF             10000000
 #define SIZE_TRIANGLE   9
 #define SIZE_MATERIAL   7
 #define SIZE_BVHNODE    4
@@ -129,21 +130,9 @@ vec3 toNormalHemisphere(vec3 v, vec3 N) {
 
 // ----------------------------------------------------------------------------- //
 
-// 将三维向量 v 转为 HDR map 的纹理坐标 uv
-vec2 SampleSphericalMap(vec3 v) {
-    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
-    uv /= vec2(2.0 * PI, PI);
-    uv += 0.5;
-    uv.y = 1.0 - uv.y;
-    return uv;
-}
 
-// 获取 HDR 环境颜色
-vec3 sampleHdr(vec3 v) {
-    vec2 uv = SampleSphericalMap(normalize(v));
-    vec3 color = texture2D(hdrMap, uv).rgb;
-    color = min(color, vec3(10));
-    return color;
+vec3 sampleCube(vec3 v){
+    return texture(cubemap, v).rgb;
 }
 
 // ----------------------------------------------------------------------------- //
@@ -389,7 +378,7 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
 
         // 未命中
         if(!newHit.isHit) {
-            vec3 skyColor = sampleHdr(randomRay.direction);
+            vec3 skyColor = sampleCube(randomRay.direction);
             Lo += history * skyColor * f_r * cosine_i / pdf;
             break;
         }
@@ -414,8 +403,10 @@ void main() {
     Ray ray;
     
     ray.startPoint = eye;
+
     vec2 AA = vec2((rand()-0.5)/float(width), (rand()-0.5)/float(height));
-    vec4 dir = cameraRotate * vec4(vertex.xy+AA, -1.5, 0.0);
+
+    vec4 dir = cameraRotate * projection *vec4(vertex.xy+AA,1.0, 1.0);
     ray.direction = normalize(dir.xyz);
 
     // primary hit
@@ -424,7 +415,7 @@ void main() {
     
     if(!firstHit.isHit) {
         color = vec3(0);
-        color = sampleHdr(ray.direction);
+        color = sampleCube(ray.direction);
     } else {
         vec3 Le = firstHit.material.emissive;
         vec3 Li = pathTracing(firstHit, 2);

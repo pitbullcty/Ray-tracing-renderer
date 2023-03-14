@@ -26,6 +26,7 @@ void RayTracingOpenGLWidget::resizeGL(int w, int h)
 {
     this->glEnable(GL_DEPTH_TEST);
     this->glDepthFunc(GL_LEQUAL);
+    this->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     this->glViewport(0, 0, w, h); 
     rayTracingRenderer->resize(w, h);
     sceneManager->setSize(w, h);
@@ -55,7 +56,7 @@ void RayTracingOpenGLWidget::keyPressEvent(QKeyEvent* event)
 void RayTracingOpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 {
     processKeyRelease(event);
-
+    rayTracingRenderer->clearFrameCounter();
 }
 
 void RayTracingOpenGLWidget::mousePressEvent(QMouseEvent* event)
@@ -91,6 +92,12 @@ void RayTracingOpenGLWidget::mouseMoveEvent(QMouseEvent* event)
     if (isRightClicked) {
         rayTracingRenderer->clearFrameCounter();
     }
+}
+
+void RayTracingOpenGLWidget::wheelEvent(QWheelEvent* event)
+{
+    processWheel(event);
+    rayTracingRenderer->clearFrameCounter();
 }
 
 void RayTracingOpenGLWidget::initShaders()

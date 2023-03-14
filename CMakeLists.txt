@@ -26,7 +26,6 @@ file(GLOB_RECURSE src_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE inc_files ${CMAKE_CURRENT_SOURCE_DIR}/src/include/*.h)
 file(GLOB_RECURSE gizmo_src_files ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libgizmo/*.cpp)
 file(GLOB_RECURSE gizmo_inc_files ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libgizmo/*.h)
-set(hdrloader "thirdparty/hdrloader/hdrloader.cpp" "thirdparty/hdrloader/hdrloader.h")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include ${ASSIMP_INCLUDE_DIR})
 
@@ -39,7 +38,7 @@ qt_add_resources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/shader/shader.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/skybox/cubemap/Standard-Cube-Map1/skybox.qrc
 )
 
-add_executable(${PROJECT_NAME} ${inc_files} ${src_files} ${gizmo_inc_files} ${gizmo_src_files} ${hdrloader} ${SOURCES})
+add_executable(${PROJECT_NAME} ${inc_files} ${src_files} ${gizmo_inc_files} ${gizmo_src_files} ${SOURCES})
 
 message(STATUS ${ASSIMP_INCLUDE_DIR})
 
