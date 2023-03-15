@@ -40,7 +40,7 @@ void RayTracingOpenGLWidget::paintGL()
     else {
         sceneManager->getCamera()->processKeyboard(deltaTime);
         rayTracingRenderer->render();
-        drawFPS();
+        clacFPS();
     }
     update();
 }

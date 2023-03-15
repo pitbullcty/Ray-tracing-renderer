@@ -4,5 +4,7 @@
         <file>info.ico</file>
         <file>warning.ico</file>
         <file>title.ico</file>
+        <file>play.ico</file>
+        <file>pause.ico</file>
     </qresource>
 </RCC>

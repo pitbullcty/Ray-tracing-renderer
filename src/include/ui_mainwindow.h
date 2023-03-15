@@ -13,11 +13,13 @@
 #include <QtGui/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDockWidget>
-#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
@@ -43,7 +45,13 @@ public:
     QAction *closeWindow;
     QAction *actionloadRecent;
     QWidget *widget;
-    QGridLayout *gridLayout;
+    QVBoxLayout *verticalLayout_3;
+    QGroupBox *groupBox;
+    QVBoxLayout *verticalLayout_4;
+    QWidget *renderWidget;
+    QHBoxLayout *horizontalLayout_4;
+    QLabel *fpslabel;
+    QPushButton *renderButton;
     QStackedWidget *stackedWidget;
     QWidget *stackedWidgetPage1;
     QHBoxLayout *horizontalLayout_2;
@@ -103,9 +111,35 @@ public:
         widget->setSizePolicy(sizePolicy);
         widget->setMinimumSize(QSize(0, 0));
         widget->setMaximumSize(QSize(16777215, 16777215));
-        gridLayout = new QGridLayout(widget);
-        gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
-        stackedWidget = new QStackedWidget(widget);
+        verticalLayout_3 = new QVBoxLayout(widget);
+        verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
+        groupBox = new QGroupBox(widget);
+        groupBox->setObjectName(QString::fromUtf8("groupBox"));
+        verticalLayout_4 = new QVBoxLayout(groupBox);
+        verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
+        renderWidget = new QWidget(groupBox);
+        renderWidget->setObjectName(QString::fromUtf8("renderWidget"));
+        horizontalLayout_4 = new QHBoxLayout(renderWidget);
+        horizontalLayout_4->setObjectName(QString::fromUtf8("horizontalLayout_4"));
+        fpslabel = new QLabel(renderWidget);
+        fpslabel->setObjectName(QString::fromUtf8("fpslabel"));
+
+        horizontalLayout_4->addWidget(fpslabel);
+
+        renderButton = new QPushButton(renderWidget);
+        renderButton->setObjectName(QString::fromUtf8("renderButton"));
+        renderButton->setEnabled(true);
+        sizePolicy.setHeightForWidth(renderButton->sizePolicy().hasHeightForWidth());
+        renderButton->setSizePolicy(sizePolicy);
+        renderButton->setMinimumSize(QSize(0, 0));
+        renderButton->setMaximumSize(QSize(16777215, 16777215));
+
+        horizontalLayout_4->addWidget(renderButton, 0, Qt::AlignHCenter|Qt::AlignVCenter);
+
+
+        verticalLayout_4->addWidget(renderWidget);
+
+        stackedWidget = new QStackedWidget(groupBox);
         stackedWidget->setObjectName(QString::fromUtf8("stackedWidget"));
         stackedWidgetPage1 = new QWidget();
         stackedWidgetPage1->setObjectName(QString::fromUtf8("stackedWidgetPage1"));
@@ -128,7 +162,10 @@ public:
 
         stackedWidget->addWidget(stackedWidgetPage2);
 
-        gridLayout->addWidget(stackedWidget, 0, 0, 1, 1);
+        verticalLayout_4->addWidget(stackedWidget);
+
+
+        verticalLayout_3->addWidget(groupBox);
 
         MainWindow->setCentralWidget(widget);
         menubar = new QMenuBar(MainWindow);
@@ -181,13 +218,13 @@ public:
         MainWindow->addDockWidget(Qt::RightDockWidgetArea, dockWidgetDetails);
         dockWidgetConsole = new QDockWidget(MainWindow);
         dockWidgetConsole->setObjectName(QString::fromUtf8("dockWidgetConsole"));
-        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Maximum);
+        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Minimum);
         sizePolicy1.setHorizontalStretch(0);
         sizePolicy1.setVerticalStretch(0);
         sizePolicy1.setHeightForWidth(dockWidgetConsole->sizePolicy().hasHeightForWidth());
         dockWidgetConsole->setSizePolicy(sizePolicy1);
-        dockWidgetConsole->setMinimumSize(QSize(89, 112));
-        dockWidgetConsole->setMaximumSize(QSize(524287, 500));
+        dockWidgetConsole->setMinimumSize(QSize(89, 125));
+        dockWidgetConsole->setMaximumSize(QSize(524287, 325));
         dockWidgetConsole->setAllowedAreas(Qt::BottomDockWidgetArea|Qt::TopDockWidgetArea);
         consoleContents = new QWidget();
         consoleContents->setObjectName(QString::fromUtf8("consoleContents"));
@@ -252,6 +289,9 @@ public:
 #endif // QT_CONFIG(shortcut)
         closeWindow->setText(QCoreApplication::translate("MainWindow", "\351\200\200\345\207\272(&Q)...", nullptr));
         actionloadRecent->setText(QCoreApplication::translate("MainWindow", "loadRecent", nullptr));
+        groupBox->setTitle(QString());
+        fpslabel->setText(QString());
+        renderButton->setText(QString());
         menu->setTitle(QCoreApplication::translate("MainWindow", "\346\226\207\344\273\266(&F)", nullptr));
         menu_3->setTitle(QCoreApplication::translate("MainWindow", "\346\211\223\345\274\200(&O)", nullptr));
         menu_2->setTitle(QCoreApplication::translate("MainWindow", "\345\270\256\345\212\251(&H)", nullptr));

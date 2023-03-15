@@ -19,7 +19,7 @@ public:
     BaseOpenGLWidget(QWidget* parent = 0);
     virtual ~BaseOpenGLWidget();
     QSharedPointer<SceneManager> getSceneManager() const;
-
+    int getFPS();
 
 protected:
 
@@ -35,7 +35,7 @@ protected:
     virtual void initRenderer()= 0;
 
     void compileShader(QOpenGLShaderProgram* shaderProgram, const QString& shaderName, const QString& vertName = "");
-    void drawFPS();
+    void clacFPS();
     void drawTips(const QString& tips);
 
     bool isRightClicked; //右键是否按下
@@ -48,6 +48,7 @@ protected:
 
     float deltaTime; //渲染每帧间隔时间
     float lastFrameTime; //上一帧时间
+    int fps; //帧数
  
     QSharedPointer<SceneManager> sceneManager; //场景管理器
 

@@ -1,5 +1,6 @@
 ﻿#include "ui_Mainwindow.h"
-#include "WindowActions.h"
+#include "MainWindowManager.h"
+
 
 class MainWindow : public QMainWindow
 {
@@ -8,7 +9,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget* parent = 0);
     ~MainWindow();
-    void setStyle(int style=0);
+  
     void closeEvent(QCloseEvent* event);
 
 protected:
@@ -16,12 +17,14 @@ protected:
     virtual void dropEvent(QDropEvent* event);
     virtual void keyPressEvent(QKeyEvent* event);
 
+signals:
+    void sendChangeWindow();
+
 private:
     Ui::MainWindow* ui;
-    WindowActions actions;
-    int currentIndex;
+    MainWindowManager* mainWindowManager;
+
     void bindSignals();
-    void copyLightsModel();
 };
 
 

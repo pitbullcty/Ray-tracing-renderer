@@ -9,16 +9,30 @@ void RayTracingRenderer::destory(RayTracingRenderer* rayTracingRenderer)
 
 RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
 	Renderer(_shaderProgram, _functions, width, height),
-	BVHbuffer(-1), BVHTexture(-1), frameCounter(0), materialBuffer(-1),
-	triangleBuffer(-1), triangleTexture(-1),isResized(false),
-	materialTexture(-1), lightsTexture(-1), textureMapsArrayTex(-1),
-	accumFBO(-1),accumTexture(-1),pathTracingFBO(-1),pathTracingTexture(-1),
-	pathTraceVBO(QOpenGLBuffer::VertexBuffer), accumVBO(QOpenGLBuffer::VertexBuffer),
-	outputVBO(QOpenGLBuffer::VertexBuffer)
+	BVHbuffer(-1), BVHTexture(-1),
+	triangleBuffer(-1), triangleTexture(-1),
+	materialBuffer(-1), materialTexture(-1),
+	lightsTexture(-1), textureMapsArrayTex(-1),
+	accumFBO(-1),accumTexture(-1),
+	outputFBO(-1),outputTexture(-1),
+	pathTracingFBO(-1),pathTracingTexture(-1),
+	pathTraceVBO(QOpenGLBuffer::VertexBuffer),
+	accumVBO(QOpenGLBuffer::VertexBuffer),
+	outputVBO(QOpenGLBuffer::VertexBuffer), 
+	isResized(false),
+	frameCounter(0),
+	denoiserInputBuffer(nullptr),
+	denoiserOutputBuffer(nullptr)
 {
 	outputVBO.create();
 	accumVBO.create();
 	pathTraceVBO.create();
+}
+
+RayTracingRenderer::~RayTracingRenderer()
+{
+	if (!denoiserOutputBuffer) delete[] denoiserInputBuffer;
+	if (!denoiserOutputBuffer) delete[] denoiserOutputBuffer;
 }
 
 QSharedPointer<RayTracingRenderer>& RayTracingRenderer::GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height)
@@ -114,9 +128,12 @@ void RayTracingRenderer::destoryData()
 void RayTracingRenderer::destoryFBOs()
 {
 	functions->glBindTexture(GL_TEXTURE_2D, 0);
+
+	functions->glDeleteTextures(1, &outputTexture);
 	functions->glDeleteTextures(1, &pathTracingTexture);
 	functions->glDeleteTextures(1, &accumTexture); //删除材质和FBO
 
+	functions->glDeleteTextures(1, &outputFBO);
 	functions->glDeleteFramebuffers(1, &pathTracingFBO);
 	functions->glDeleteFramebuffers(1, &accumFBO);
 	
@@ -146,6 +163,36 @@ void RayTracingRenderer::destoryTexture()
 	functions->glDeleteTextures(1, &lightsTexture);
 	functions->glDeleteTextures(1, &textureMapsArrayTex); //删除材质以及缓冲区
 	
+}
+
+void RayTracingRenderer::clearFrameCounter()
+{
+	frameCounter = 0;
+}
+
+void RayTracingRenderer::resize(int w, int h)
+{
+	frameCounter = 0;
+	isResized = true;
+}
+
+void RayTracingRenderer::resizeFBO()
+{
+	if (isResized) {
+		int viewport[4];
+		functions->glGetIntegerv(GL_VIEWPORT, viewport);
+		width = viewport[2];
+		height = viewport[3];
+
+		if (denoiserInputBuffer) delete[] denoiserInputBuffer;
+		denoiserInputBuffer = new QVector3D[width * height];
+		if (denoiserOutputBuffer) delete[] denoiserOutputBuffer;
+		denoiserOutputBuffer = new QVector3D[width * height];  //根据FBO大小创建缓冲区
+
+		destoryFBOs();
+		initFBOs();
+		isResized = false;
+	}
 }
 
 
@@ -207,18 +254,22 @@ void RayTracingRenderer::initFBOs()
 {
 	accumTexture = generateAttachment(width, height);
 	pathTracingTexture = generateAttachment(width, height);
+	outputTexture = generateAttachment(width, height);
 
 	functions->glGenFramebuffers(1, &pathTracingFBO);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, pathTracingFBO);
 	functions->glBindTexture(GL_TEXTURE_2D, pathTracingTexture);
 	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pathTracingTexture, 0);
 
-
 	functions->glGenFramebuffers(1, &accumFBO);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
 	functions->glBindTexture(GL_TEXTURE_2D, accumTexture);
 	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, accumTexture, 0);
 
+	functions->glGenFramebuffers(1, &outputFBO);
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, outputFBO);
+	functions->glBindTexture(GL_TEXTURE_2D, outputTexture);
+	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, outputTexture, 0);
 
 	functions->glBindTexture(GL_TEXTURE_2D, 0);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0); //解绑
@@ -251,57 +302,89 @@ void RayTracingRenderer::render()
 	shaderProgram["pathTracing"]->setUniformValue("cameraRotate", camera->getView().inverted());
 	auto location = shaderProgram["pathTracing"]->programId();
 	functions->glUniform1ui(functions->glGetUniformLocation(location,"frameCounter"), frameCounter++);
+
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, pathTracingFBO);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
+
 	shaderProgram["pathTracing"]->release();
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	pathTracingVAO.release();
 
 	accumVAO.bind();
 	shaderProgram["accum"]->bind();
-	functions->glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
 	shaderProgram["accum"]->setUniformValue("lastFrame", 6);
+
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
+
 	shaderProgram["accum"]->release();
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	accumVAO.release();
 	
-	
+	denoise(); //输出前降噪
+
 	outputVAO.bind();
 	shaderProgram["output"]->bind();
-	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	shaderProgram["output"]->setUniformValue("lastFrame", 7);
-	shaderProgram["output"]->setUniformValue("needToneMapping", true);
+
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, outputFBO);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
+	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //绘制到outputFBO保存结果
+
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //显示到屏幕
+
 	shaderProgram["output"]->release();
 	outputVAO.release();
-
+	
 }
 
-void RayTracingRenderer::clearFrameCounter()
+void RayTracingRenderer::getPixels(QVector<unsigned char>& pixels, unsigned int FBO, unsigned int texture)
 {
-	frameCounter = 0;
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	functions->glBindTexture(GL_TEXTURE_2D, texture);
+	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+	functions->glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	functions->glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void RayTracingRenderer::resize(int w, int h)
+void RayTracingRenderer::saveRenderResult(const QString& path, int quality)
 {
-	frameCounter = 0;
-	isResized = true;
-
+	QVector<unsigned char> pixels(width * height * 4);
+	getPixels(pixels, outputFBO, outputTexture);
+	QImage image(pixels.data(), width, height, QImage::Format_RGBA8888);
+	QFileInfo info(path);
+	image.mirrored().save(path, info.suffix().toStdString().c_str(), quality);
 }
 
-void RayTracingRenderer::resizeFBO()
+void RayTracingRenderer::denoise()
 {
-	if (isResized) {
-		int viewport[4];
-		functions->glGetIntegerv(GL_VIEWPORT, viewport);
-		width = viewport[2];
-		height = viewport[3];
-		destoryFBOs();
-		initFBOs();
-		isResized = false;
-	}
+	
+	
+	//functions->glBindTexture(GL_TEXTURE_2D, 0);
+	//functions->glBindTexture(GL_TEXTURE_2D, accumTexture);
+	//functions->glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, denoiserInputBuffer);
+
+	//oidn::DeviceRef device = oidn::newDevice();
+	//device.commit();
+
+	//oidn::FilterRef filter = device.newFilter("RT");
+	
+	//filter.setImage("color", denoiserInputBuffer, oidn::Format::Float3, width,height, 0, 0, 0);
+	//filter.setImage("output", denoiserOutputBuffer, oidn::Format::Float3, width, height, 0, 0, 0);
+	//filter.set("hdr", false);
+	//filter.commit();
+
+	//filter.execute();
+
+	//const char* errorMessage;
+	//if (device.getError(errorMessage) != oidn::Error::None)
+		//qDebug() << "Error: " << errorMessage;
+
 }
+

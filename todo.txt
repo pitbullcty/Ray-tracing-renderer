@@ -1,7 +1,9 @@
 ﻿uic ./ui/mainwindow.ui -o ./src/include/ui_mainwindow.h
 
-1.开启光追渲染
+1.brdf待实现,光源待实现,fps显示优化
 2.切换页面
 3.降噪
 
 ui方面：
+1.编辑器
+2.渲染选项

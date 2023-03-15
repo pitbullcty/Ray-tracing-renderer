@@ -55,7 +55,7 @@ void EditorOpenGLWidget::paintGL()
         editorRenderer->renderSkybox();
         editorRenderer->renderAABB();
         editorRenderer->renderGizmo(); //最后渲染gizmo避免被遮挡 
-        drawFPS();
+        clacFPS();
     }
     update();
 }

@@ -353,28 +353,128 @@ HitResult hitBVH(Ray ray) {
     return res;
 }
 
+float sqr(float x) { 
+    return x*x; 
+}
+
+float SchlickFresnel(float u) {
+    float m = clamp(1-u, 0, 1);
+    float m2 = m*m;
+    return m2*m2*m; // pow(m,5)
+}
+
+float GTR1(float NdotH, float a) {
+    if (a >= 1) return 1/PI;
+    float a2 = a*a;
+    float t = 1 + (a2-1)*NdotH*NdotH;
+    return (a2-1) / (PI*log(a2)*t);
+}
+
+float GTR2(float NdotH, float a) {
+    float a2 = a*a;
+    float t = 1 + (a2-1)*NdotH*NdotH;
+    return a2 / (PI * t*t);
+}
+
+float GTR2_aniso(float NdotH, float HdotX, float HdotY, float ax, float ay) {
+    return 1 / (PI * ax*ay * sqr( sqr(HdotX/ax) + sqr(HdotY/ay) + NdotH*NdotH ));
+}
+
+float smithG_GGX(float NdotV, float alphaG) {
+    float a = alphaG*alphaG;
+    float b = NdotV*NdotV;
+    return 1 / (NdotV + sqrt(a + b - a*b));
+}
+
+float smithG_GGX_aniso(float NdotV, float VdotX, float VdotY, float ax, float ay) {
+    return 1 / (NdotV + sqrt( sqr(VdotX*ax) + sqr(VdotY*ay) + sqr(NdotV) ));
+}
+
+vec3 BRDF_Evaluate(vec3 V, vec3 N, vec3 L, vec3 X, vec3 Y, in Material material) {
+    float NdotL = dot(N, L);
+    float NdotV = dot(N, V);
+    if(NdotL < 0 || NdotV < 0) return vec3(0);
+
+    vec3 H = normalize(L + V);
+    float NdotH = dot(N, H);
+    float LdotH = dot(L, H);
+
+    // 各种颜色
+    vec3 Cdlin = material.baseColor;
+    float Cdlum = 0.3 * Cdlin.r + 0.6 * Cdlin.g  + 0.1 * Cdlin.b;
+    vec3 Ctint = (Cdlum > 0) ? (Cdlin/Cdlum) : (vec3(1));   
+    vec3 Cspec = material.specular * mix(vec3(1), Ctint, material.specularTint);
+    vec3 Cspec0 = mix(0.08*Cspec, Cdlin, material.metallic); // 0° 镜面反射颜色
+    vec3 Csheen = mix(vec3(1), Ctint, material.sheenTint);   // 织物颜色
+
+    // 漫反射
+    float Fd90 = 0.5 + 2.0 * LdotH * LdotH * material.roughness;
+    float FL = SchlickFresnel(NdotL);
+    float FV = SchlickFresnel(NdotV);
+    float Fd = mix(1.0, Fd90, FL) * mix(1.0, Fd90, FV);
+
+    // 次表面散射
+    float Fss90 = LdotH * LdotH * material.roughness;
+    float Fss = mix(1.0, Fss90, FL) * mix(1.0, Fss90, FV);
+    float ss = 1.25 * (Fss * (1.0 / (NdotL + NdotV) - 0.5) + 0.5);
+
+    // 镜面反射 -- 各向异性
+    float aspect = sqrt(1.0 - material.anisotropic * 0.9);
+    float ax = max(0.001, sqr(material.roughness)/aspect);
+    float ay = max(0.001, sqr(material.roughness)*aspect);
+    float Ds = GTR2_aniso(NdotH, dot(H, X), dot(H, Y), ax, ay);
+    float FH = SchlickFresnel(LdotH);
+    vec3 Fs = mix(Cspec0, vec3(1), FH);
+    float Gs;
+    Gs  = smithG_GGX_aniso(NdotL, dot(L, X), dot(L, Y), ax, ay);
+    Gs *= smithG_GGX_aniso(NdotV, dot(V, X), dot(V, Y), ax, ay);
+
+    // 清漆
+    float Dr = GTR1(NdotH, mix(0.1, 0.001, material.clearcoatGloss));
+    float Fr = mix(0.04, 1.0, FH);
+    float Gr = smithG_GGX(NdotL, 0.25) * smithG_GGX(NdotV, 0.25);
+
+    // sheen
+    vec3 Fsheen = FH * material.sheen * Csheen;
+    
+    vec3 diffuse = (1.0/PI) * mix(Fd, ss, material.subsurface) * Cdlin + Fsheen;
+    vec3 specular = Gs * Fs * Ds;
+    vec3 clearcoat = vec3(0.25 * Gr * Fr * Dr * material.clearcoat);
+
+    return diffuse * (1.0 - material.metallic) + specular + clearcoat;
+}
+
+void getTangent(vec3 N, inout vec3 tangent, inout vec3 bitangent) {
+    vec3 helper = vec3(1, 0, 0);
+    if(abs(N.x)>0.999) helper = vec3(0, 0, 1);
+    bitangent = normalize(cross(N, helper));
+    tangent = normalize(cross(N, bitangent));
+}
+
 // ----------------------------------------------------------------------------- //
 
 // 路径追踪
 vec3 pathTracing(HitResult hit, int maxBounce) {
-
     vec3 Lo = vec3(0);      // 最终的颜色
     vec3 history = vec3(1); // 递归积累的颜色
 
     for(int bounce=0; bounce<maxBounce; bounce++) {
-        // 随机出射方向 wi
-        vec3 wi = toNormalHemisphere(SampleHemisphere(), hit.normal);
+        vec3 V = -hit.viewDir;
+        vec3 N = hit.normal;
+        vec3 L = toNormalHemisphere(SampleHemisphere(), hit.normal);    // 随机出射方向 wi
+        float pdf = 1.0 / (2.0 * PI);                                   // 半球均匀采样概率密度
+        float cosine_o = max(0, dot(V, N));                             // 入射光和法线夹角余弦
+        float cosine_i = max(0, dot(L, N));                             // 出射光和法线夹角余弦
+        vec3 tangent, bitangent;
 
+        getTangent(N, tangent, bitangent);
+        vec3 f_r = BRDF_Evaluate(V, N, L, tangent, bitangent, hit.material);
+       // vec3 f_r = hit.material.baseColor / PI;  
         // 漫反射: 随机发射光线
         Ray randomRay;
         randomRay.startPoint = hit.hitPoint;
-        randomRay.direction = wi;
+        randomRay.direction = L;
         HitResult newHit = hitBVH(randomRay);
-
-        float pdf = 1.0 / (2.0 * PI);                                   // 半球均匀采样概率密度
-        float cosine_o = max(0, dot(-hit.viewDir, hit.normal));         // 入射光和法线夹角余弦
-        float cosine_i = max(0, dot(randomRay.direction, hit.normal));  // 出射光和法线夹角余弦
-        vec3 f_r = hit.material.baseColor / PI;                         // 漫反射 BRDF
 
         // 未命中
         if(!newHit.isHit) {
@@ -399,14 +499,11 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
 
 void main() {
 
-    // 投射光线
     Ray ray;
     
     ray.startPoint = eye;
-
     vec2 AA = vec2((rand()-0.5)/float(width), (rand()-0.5)/float(height));
-
-    vec4 dir = cameraRotate * projection *vec4(vertex.xy+AA,1.0, 1.0);
+    vec4 dir = cameraRotate * projection* vec4(vertex.xy+AA, 1.0, 1.0);
     ray.direction = normalize(dir.xyz);
 
     // primary hit
@@ -425,6 +522,7 @@ void main() {
     // 和上一帧混合
     vec3 lastColor = texture2D(lastFrame, vertex.xy*0.5+0.5).rgb;
     color = mix(lastColor, color, 1.0/float(frameCounter+uint(1)));
+
 
     // 输出
     fragColor = vec4(color, 1.0);

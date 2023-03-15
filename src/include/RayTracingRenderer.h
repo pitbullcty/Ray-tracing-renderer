@@ -3,15 +3,19 @@
 
 #include "Renderer.h"
 #include "DataBuilder.h"
-
+#include <QFileInfo>
+#include "OpenImageDenoise/oidn.hpp"
 
 class RayTracingRenderer :public Renderer {
 public:
 
-	void initFBOs();
 	void render();
+	void saveRenderResult(const QString& path, int quality=50);
+
 	void clearFrameCounter();
 	virtual void destoryData();
+
+	void initFBOs();
 	virtual void resize(int w, int h);
 	void resizeFBO();
 	static QSharedPointer<RayTracingRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram,
@@ -35,8 +39,8 @@ private:
 	QOpenGLBuffer outputVBO;
 	QOpenGLVertexArrayObject outputVAO;  //shader使用的VAO以及VBO
 
-	unsigned int pathTracingFBO, accumFBO;
-	unsigned int pathTracingTexture, accumTexture; //用到的FBO以及颜色附件
+	unsigned int pathTracingFBO, accumFBO, outputFBO;
+	unsigned int pathTracingTexture, accumTexture, outputTexture; //用到的FBO以及颜色附件
 
 	unsigned int BVHbuffer;
 	unsigned int BVHTexture; 
@@ -50,10 +54,14 @@ private:
 	unsigned int lightsTexture; //灯光
 	unsigned int textureMapsArrayTex; //贴图
 
+	QVector3D* denoiserInputBuffer, *denoiserOutputBuffer; //降噪使用的缓冲区
+
 	static QSharedPointer<RayTracingRenderer> instance;
 
 	unsigned int generateAttachment(int w, int h);
+	void denoise(); //降噪
 
+	void getPixels(QVector<unsigned char>& pixels, unsigned int FBO, unsigned int texture);
 	void bindVAO();
 	void bindTexture();
 
@@ -62,7 +70,7 @@ private:
 	void destoryTexture(); //资源销毁
 
 	RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height);
-	~RayTracingRenderer() = default;
+	~RayTracingRenderer();
 };
 
 #endif // !_RAY_TRACING_RENDERER

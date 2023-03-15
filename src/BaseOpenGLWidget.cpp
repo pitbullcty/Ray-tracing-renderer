@@ -9,7 +9,8 @@ BaseOpenGLWidget::BaseOpenGLWidget(QWidget* parent):
     isLeftClicked(false),
     isFullScreen(false),
     deltaTime(0.0f),
-    lastFrameTime(0.0f)
+    lastFrameTime(0.0f),
+    fps(0)
 {
     QSurfaceFormat surfaceFormat;
     surfaceFormat.setSamples(4);
@@ -43,36 +44,18 @@ void BaseOpenGLWidget::compileShader(QOpenGLShaderProgram* shaderProgram, const 
     }
 }
 
-void BaseOpenGLWidget::drawFPS()
+void BaseOpenGLWidget::clacFPS()
 {
     float time = QTime::currentTime().msecsSinceStartOfDay() / 1000.0; //返回当天的秒数
     deltaTime = time - lastFrameTime;
     lastFrameTime = time; //更新渲染时间
 
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_STENCIL_TEST); //禁用深度测试和模板测试
-    glDisable(GL_BLEND);
-
     if (abs(deltaTime - 0.0f) < 1e-6) return;
-    int fps = 1.0f / deltaTime;
+    fps = 1.0f / deltaTime;
     if (fps > 144) {
         return;
     }
-    QPainter painter(this); 
-    painter.setPen(QColor(0, 0, 0));//设置画笔颜色
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    QFont font;//设置字体，下面设置字体属性
-    font.setFamily("宋体");//字体样式
-    font.setPointSizeF(20);
-    painter.setFont(font);
-    QString text = "FPS:" + QString::number(fps);
-    painter.drawText(rect(), Qt::AlignRight, text);
-    painter.end();
 
-    glEnable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_STENCIL_TEST);
-   
 }
 
 void BaseOpenGLWidget::drawTips(const QString& tips)
@@ -116,6 +99,11 @@ void BaseOpenGLWidget::initGL()
 QSharedPointer<SceneManager> BaseOpenGLWidget::getSceneManager() const
 {
     return sceneManager;
+}
+
+int BaseOpenGLWidget::getFPS()
+{
+    return fps;
 }
 
 void BaseOpenGLWidget::processWheel(QWheelEvent* event)
