@@ -54,14 +54,18 @@ private:
 	unsigned int lightsTexture; //灯光
 	unsigned int textureMapsArrayTex; //贴图
 
-	QVector3D* denoiserInputBuffer, *denoiserOutputBuffer; //降噪使用的缓冲区
+	unsigned int denoiserStep; //降噪帧数间隔
+	QVector<QVector3D> denoiserInputBuffer, denoiserOutputBuffer; //降噪使用的缓冲区
 
 	static QSharedPointer<RayTracingRenderer> instance;
 
 	unsigned int generateAttachment(int w, int h);
-	void denoise(); //降噪
+	void denoise(unsigned int FBO, unsigned int texture); //降噪
 
-	void getPixels(QVector<unsigned char>& pixels, unsigned int FBO, unsigned int texture);
+	template<typename T>
+	void getPixels(QVector<T>& pixels, unsigned int FBO, unsigned int texture, GLenum format, GLenum type);
+	void saveFBO(const QString& path, unsigned int FBO, unsigned int texture, int quality = 50);
+
 	void bindVAO();
 	void bindTexture();
 

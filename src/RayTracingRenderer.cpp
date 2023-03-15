@@ -21,8 +21,7 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	outputVBO(QOpenGLBuffer::VertexBuffer), 
 	isResized(false),
 	frameCounter(0),
-	denoiserInputBuffer(nullptr),
-	denoiserOutputBuffer(nullptr)
+	denoiserStep(20)
 {
 	outputVBO.create();
 	accumVBO.create();
@@ -31,8 +30,7 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 
 RayTracingRenderer::~RayTracingRenderer()
 {
-	if (!denoiserOutputBuffer) delete[] denoiserInputBuffer;
-	if (!denoiserOutputBuffer) delete[] denoiserOutputBuffer;
+	
 }
 
 QSharedPointer<RayTracingRenderer>& RayTracingRenderer::GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height)
@@ -47,13 +45,14 @@ unsigned int RayTracingRenderer::generateAttachment(int w, int h)
 	unsigned int id;
 	functions->glGenTextures(1, &id);
 	functions->glBindTexture(GL_TEXTURE_2D, id);
-	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
+	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, w, h, 0, GL_RGB, GL_FLOAT, NULL);
 	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	return id;
 }
+
 
 void RayTracingRenderer::bindVAO()
 {
@@ -184,10 +183,8 @@ void RayTracingRenderer::resizeFBO()
 		width = viewport[2];
 		height = viewport[3];
 
-		if (denoiserInputBuffer) delete[] denoiserInputBuffer;
-		denoiserInputBuffer = new QVector3D[width * height];
-		if (denoiserOutputBuffer) delete[] denoiserOutputBuffer;
-		denoiserOutputBuffer = new QVector3D[width * height];  //根据FBO大小创建缓冲区
+		denoiserInputBuffer.resize(width * height);
+		denoiserOutputBuffer.resize(width * height); //根据FBO大小创建缓冲区
 
 		destoryFBOs();
 		initFBOs();
@@ -322,8 +319,6 @@ void RayTracingRenderer::render()
 	shaderProgram["accum"]->release();
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	accumVAO.release();
-	
-	denoise(); //输出前降噪
 
 	outputVAO.bind();
 	shaderProgram["output"]->bind();
@@ -339,15 +334,16 @@ void RayTracingRenderer::render()
 
 	shaderProgram["output"]->release();
 	outputVAO.release();
-	
+	if (frameCounter == 255) saveRenderResult("./测试.jpg");
 }
 
-void RayTracingRenderer::getPixels(QVector<unsigned char>& pixels, unsigned int FBO, unsigned int texture)
+template<typename T>
+void RayTracingRenderer::getPixels(QVector<T>& pixels, unsigned int FBO, unsigned int texture, GLenum format, GLenum type)
 {
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	functions->glBindTexture(GL_TEXTURE_2D, texture);
 	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-	functions->glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+	functions->glReadPixels(0, 0, width, height, format, type, pixels.data());
 	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	functions->glBindTexture(GL_TEXTURE_2D, 0);
@@ -355,36 +351,44 @@ void RayTracingRenderer::getPixels(QVector<unsigned char>& pixels, unsigned int 
 
 void RayTracingRenderer::saveRenderResult(const QString& path, int quality)
 {
+	denoise(outputFBO, outputTexture);
+	saveFBO(path, outputFBO, outputTexture);
+}
+
+void RayTracingRenderer::saveFBO(const QString& path, unsigned int FBO, unsigned int texture, int quality)
+{
 	QVector<unsigned char> pixels(width * height * 4);
-	getPixels(pixels, outputFBO, outputTexture);
+	getPixels<unsigned char>(pixels, FBO, texture, GL_RGBA, GL_UNSIGNED_BYTE);
 	QImage image(pixels.data(), width, height, QImage::Format_RGBA8888);
 	QFileInfo info(path);
 	image.mirrored().save(path, info.suffix().toStdString().c_str(), quality);
 }
 
-void RayTracingRenderer::denoise()
+
+void RayTracingRenderer::denoise(unsigned int FBO, unsigned int texture)
 {
+
+	getPixels<QVector3D>(denoiserInputBuffer, FBO, texture, GL_RGB, GL_FLOAT); //读取数据
 	
+	oidn::DeviceRef device = oidn::newDevice();
+	device.commit();
+
+	oidn::FilterRef filter = device.newFilter("RT");
 	
-	//functions->glBindTexture(GL_TEXTURE_2D, 0);
-	//functions->glBindTexture(GL_TEXTURE_2D, accumTexture);
-	//functions->glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, denoiserInputBuffer);
+	filter.setImage("color", denoiserInputBuffer.data(), oidn::Format::Float3, width, height, 0, 0, 0);
+	filter.setImage("output", denoiserOutputBuffer.data(), oidn::Format::Float3, width, height, 0, 0, 0);
+	filter.set("hdr", false);
+	filter.commit();
 
-	//oidn::DeviceRef device = oidn::newDevice();
-	//device.commit();
+	filter.execute();  //执行降噪
 
-	//oidn::FilterRef filter = device.newFilter("RT");
-	
-	//filter.setImage("color", denoiserInputBuffer, oidn::Format::Float3, width,height, 0, 0, 0);
-	//filter.setImage("output", denoiserOutputBuffer, oidn::Format::Float3, width, height, 0, 0, 0);
-	//filter.set("hdr", false);
-	//filter.commit();
+	const char* errorMessage;
+	if (device.getError(errorMessage) != oidn::Error::None)
+		qDebug() << "Error: " << errorMessage;
 
-	//filter.execute();
-
-	//const char* errorMessage;
-	//if (device.getError(errorMessage) != oidn::Error::None)
-		//qDebug() << "Error: " << errorMessage;
+	functions->glBindTexture(GL_TEXTURE_2D, texture);
+	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGB, GL_FLOAT, denoiserOutputBuffer.data());
+	functions->glBindTexture(GL_TEXTURE_2D, 0);
 
 }
 
