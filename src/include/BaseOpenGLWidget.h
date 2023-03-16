@@ -30,8 +30,8 @@ protected:
     void processWheel(QWheelEvent* event);
     void processKeyRelease(QKeyEvent* event);
     void processMouseMove(QMouseEvent* event);
-    void processCameraKey(QKeyEvent* event);
-    void changeFullScreen(Qt::Key key);
+    bool processCameraKey(QKeyEvent* event);
+    bool changeFullScreen(Qt::Key key);
     bool isIgnore();
     void initGL();
 

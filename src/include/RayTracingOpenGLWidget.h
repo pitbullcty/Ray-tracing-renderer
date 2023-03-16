@@ -31,8 +31,6 @@ private:
     QOpenGLShaderProgram accumProgram;
     QOpenGLShaderProgram outputProgram;
 
-
-
     QSharedPointer<RayTracingRenderer> rayTracingRenderer; //编辑器所用渲染器
     void getSnapshot();
 };

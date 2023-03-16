@@ -146,7 +146,7 @@ void BaseOpenGLWidget::processMouseMove(QMouseEvent* event)
     }
 }
 
-void BaseOpenGLWidget::processCameraKey(QKeyEvent* event)
+bool BaseOpenGLWidget::processCameraKey(QKeyEvent* event)
 {
     Qt::Key key = (Qt::Key)(event->key());
     auto modifiers = event->modifiers();
@@ -154,32 +154,39 @@ void BaseOpenGLWidget::processCameraKey(QKeyEvent* event)
         || key == Qt::Key_Space || key == Qt::Key_Shift)
     {
         if (event->isAutoRepeat())
-            return;
+            return true;
         sceneManager->getCamera()->addKey(key);
+        return true;
     }
+    return false;
 }
 
-void BaseOpenGLWidget::changeFullScreen(Qt::Key key)
+bool BaseOpenGLWidget::changeFullScreen(Qt::Key key)
 {
    
     if (key == Qt::Key_F11) {
         if (!isFullScreen) {
             setWindowFlags(Qt::Window);
-            showFullScreen();
             isFullScreen = true;
             emit SendHideRenderWidget(isFullScreen);
+            setFocus();
+            showFullScreen();
         }
+        return true;
     }
     else if (key == Qt::Key_Escape) {
         if (isFullScreen) {
             setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint); //去除边框和按钮
             setWindowFlag(Qt::SubWindow);
-            showNormal();
             isFullScreen = false;
             emit SendHideRenderWidget(isFullScreen);
+            setFocus();
+            showNormal();
         }
+        return true;
     }
-    else;
-
+    else
+        return false;
+    
 }
 

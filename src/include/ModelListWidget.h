@@ -42,9 +42,11 @@ public slots:
 	void addRectLight();
 	void addSphereLight();
 	void getSelectedName();
+	void receiveIndex(int index);
 
 private:
 	QListWidgetItem* current;
+	int currentIndex; //当前使用的窗口
 	QString copyName; //复制文件名
 };
 

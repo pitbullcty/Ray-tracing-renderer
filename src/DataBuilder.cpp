@@ -27,13 +27,17 @@ void DataBuilder::destory(DataBuilder* builder)
 
 void DataBuilder::buildData(bool needTips) {
 
-	if (models->empty()) return; //没有模型直接返回
+	if (models->empty()) {
+		data.clear();
+		emit sendDataDone();
+		return;
+	} //模型为空则直接清空
 	QElapsedTimer timer;
 	timer.start();
 	if(needTips) emit Info("正在构建BVH...");
 	flattenAndBuildData(); //展平数据并且构建BVH
 	int maxcount = int(log2(triangles.size())) + 1;
-	buildBVHHelp(0, triangles.size() - 1, maxcount, -2, ALLAXIS);
+	buildBVHHelp(0, triangles.size() - 1, maxcount, -2, MAXDIM);
 	encodeData();
 	emit sendDataDone();
 	if (needTips) emit Info("BVH建立完成，耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms");

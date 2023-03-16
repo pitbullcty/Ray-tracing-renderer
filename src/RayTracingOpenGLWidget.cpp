@@ -52,18 +52,18 @@ void RayTracingOpenGLWidget::paintGL()
 void RayTracingOpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
     Qt::Key key = (Qt::Key)(event->key());
-    processCameraKey(event);
-    changeFullScreen(key);
+    if (processCameraKey(event) || changeFullScreen(key)) {
+       rayTracingRenderer->clearFrameCounter();
+    } //发生变化
     if (key == Qt::Key_F10) {
         getSnapshot();
     }
-    rayTracingRenderer->clearFrameCounter();
+   
 }
 
 void RayTracingOpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 {
     processKeyRelease(event);
-    rayTracingRenderer->clearFrameCounter();
 }
 
 void RayTracingOpenGLWidget::mousePressEvent(QMouseEvent* event)
@@ -136,5 +136,7 @@ void RayTracingOpenGLWidget::getSnapshot()
     QString filename(QDir::currentPath() + "/snapshots/%1%2.jpg");
     filename = filename.arg(sceneManager->getSceneName()).arg(rayTracingRenderer->getFrameCounter());
     rayTracingRenderer->setSavingParam(filename);
-    emit Info("快照保存至" + filename);
+    QString info("快照保存至%1, <a href=\"file:///%2\">单击链接查看</a>");
+    info = info.arg(filename).arg(filename);
+    emit Info(info);
 }

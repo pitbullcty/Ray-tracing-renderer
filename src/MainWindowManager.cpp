@@ -22,7 +22,7 @@ MainWindowManager::MainWindowManager(Ui::MainWindow* ui) : ui(ui),currentIndex(0
 	ui->fpslabel->setFont(font);
 	//相关设置
 
-	connect(&fpsTimer, &QTimer::timeout, this, &MainWindowManager::showFPS);
+	connect(&fpsTimer, &QTimer::timeout, this, &MainWindowManager::showSceneInfo);
 	fpsTimer.setInterval(50);
 	fpsTimer.start();
 }
@@ -72,6 +72,8 @@ void MainWindowManager::bindSignals()
 	connect(ui->editor, &EditorOpenGLWidget::SendHideRenderWidget, this, &MainWindowManager::hideRenderWidget);
 
 	connect(ui->renderButton, &QPushButton::clicked, this, &MainWindowManager::changeRenderWindow);
+
+	connect(this, &MainWindowManager::sendCurrentIndex, ui->listWidget, &ModelListWidget::receiveIndex);
 }
 
 void MainWindowManager::loadModel(const QString& path)
@@ -107,6 +109,9 @@ void MainWindowManager::loadModel(const QString& path)
 		sceneManager->addModel(fileName);
 		isBusy = false;
 	}
+	if (currentIndex) {
+		changeRenderWindow();
+	}
 	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), isShow);
 	ui->renderWidget->show();
 }
@@ -118,7 +123,11 @@ void MainWindowManager::crateScene()
 	editorRenderer->setSelected(nullptr);
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	sceneManager->createScene();
+	if (currentIndex) {
+		changeRenderWindow();
+	}
 	ui->renderWidget->show();
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
 }
 
 void MainWindowManager::loadScene(const QString& path)
@@ -136,13 +145,15 @@ void MainWindowManager::loadScene(const QString& path)
 		return;
 	}
 	lastScenePath = fileInfo.absolutePath();
-
 	auto sceneManager = ui->editor->getSceneManager();
 	auto editorRenderer = ui->editor->getEditorRenderer();
 	editorRenderer->setSelected(nullptr);
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	isBusy = true;
 	sceneManager->loadScene(fileName);
+	if (currentIndex) {
+		changeRenderWindow();
+	}
 	isBusy = false;
 	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(),true);
 	ui->renderWidget->show();
@@ -178,6 +189,9 @@ void MainWindowManager::closeScene()
 	auto sceneManager = ui->editor->getSceneManager();
 	if (sceneManager->getState() == NONE) return;
 	sceneManager->closeScene();
+	if (currentIndex) {
+		changeRenderWindow();
+	}
 	ui->renderWidget->hide();
 }
 
@@ -210,21 +224,14 @@ void MainWindowManager::changeRenderWindow()
 	if (ui->renderWidget->isHidden()) return;
 	currentIndex = (currentIndex == 0) ? 1 : 0;
 	ui->stackedWidget->setCurrentIndex(currentIndex);
-	if (currentIndex) {
-		QIcon icon(":icons/pause.ico");
-		ui->renderButton->setIcon(icon);
-		ui->rayTracing->getRayTracingRenderer()->clearFrameCounter(); //清除帧计数器
-	}
-	else {
-		QIcon icon(":icons/play.ico");
-		ui->renderButton->setIcon(icon);
-	}
+	setButtonStyle(currentIndex);
+	emit sendCurrentIndex(currentIndex);
 }
 
 void MainWindowManager::hideRenderWidget(bool isHide)
 {
-	// if (isHide) ui->renderWidget->hide();
-	//else ui->renderWidget->show();
+	if (isHide) ui->renderWidget->hide();
+	else ui->renderWidget->show();
 }
 
 void MainWindowManager::copyLightsModel()
@@ -245,8 +252,10 @@ void MainWindowManager::copyLightsModel()
 		QFile::copy(":/light/rectlight.obj", rectPath);
 }
 
-void MainWindowManager::showFPS()
+void MainWindowManager::showSceneInfo()
 {
+	auto sceneManager = ui->editor->getSceneManager();
+	ui->groupBox->setTitle(sceneManager->getSceneName());
 	if (ui->renderWidget->isHidden()) {
 		ui->fpslabel->setText("");
 		return;
@@ -256,6 +265,21 @@ void MainWindowManager::showFPS()
 	else fps = ui->editor->getFPS();
 	if (fps) {
 		ui->fpslabel->setText("FPS:" + QString::number(fps));
+	}
+}
+
+void MainWindowManager::setButtonStyle(int index)
+{
+	if (index) {
+		QIcon icon(":icons/pause.ico");
+		ui->renderButton->setIcon(icon);
+		ui->rayTracing->getRayTracingRenderer()->clearFrameCounter(); //清除帧计数器
+		ui->rayTracing->setFocus();
+	}
+	else {
+		QIcon icon(":icons/play.ico");
+		ui->renderButton->setIcon(icon);
+		ui->editor->setFocus();
 	}
 }
 

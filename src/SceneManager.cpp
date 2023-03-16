@@ -85,7 +85,6 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 			models[newname].setType(type);
 		}
 		if (!isLoadScene) addRevertModel(REMOVE, models[newname], newname); 
-		else 
 		emit updateList(&models, nullptr);
 	}
 	else newname = "";
@@ -420,8 +419,8 @@ void SceneManager::loadScene(const QString& path)
 		clearModels();
 		modelLoader->clearPathes(); //清除现有模型
 		camera->reSet();
-		sceneFileName.clear();
-		sceneName.clear();
+		sceneFileName = "";
+		sceneName = "";
 		state = NONE;
 		return;
 	}
@@ -474,8 +473,8 @@ void SceneManager::createScene()
 {
 	if (!dealDifference()) return;
 	emit Clear();
-	sceneFileName.clear(); //清除保存文件名
-	sceneName = "新建场景";
+	sceneFileName =""; 
+	sceneName = "新场景";
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();
@@ -487,8 +486,8 @@ void SceneManager::closeScene()
 {
 	if (!dealDifference()) return;
 	emit Clear();
-	sceneFileName.clear(); //清除保存文件名
-	sceneName.clear();
+	sceneFileName =""; 
+	sceneName ="";//清除保存文件名
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();

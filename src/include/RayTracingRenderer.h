@@ -29,8 +29,10 @@ public:
 public slots:
 	void sendDataToGPU();  //收到信号发送编码好数据至gpu端
 
+
 private:
 	bool isResized;  //是否发生resize事件
+	bool hasData; //是否有数据传输
 	unsigned int frameCounter; //帧计数器
 
 	QOpenGLBuffer pathTraceVBO;
@@ -68,7 +70,7 @@ private:
 	static QSharedPointer<RayTracingRenderer> instance;
 
 	unsigned int generateAttachment(int w, int h);
-	void denoise(unsigned int FBO, unsigned int texture); //降噪
+	void denoise(unsigned int FBO, unsigned int texture, bool needWriteBack=false); //降噪
 
 	template<typename T>
 	void getPixels(QVector<T>& pixels, unsigned int FBO, unsigned int texture, GLenum format, GLenum type);

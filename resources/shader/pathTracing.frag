@@ -9,6 +9,8 @@ uniform uint frameCounter;
 uniform int width;
 uniform int height;
 
+uniform bool hasData;
+
 uniform samplerBuffer triangles;
 uniform samplerBuffer BVHnodes;
 uniform samplerBuffer materials;
@@ -505,25 +507,29 @@ void main() {
     vec2 AA = vec2((rand()-0.5)/float(width), (rand()-0.5)/float(height));
     vec4 dir = cameraRotate * projection* vec4(vertex.xy+AA, 1.0, 1.0);
     ray.direction = normalize(dir.xyz);
-
-    // primary hit
-    HitResult firstHit = hitBVH(ray);
     vec3 color;
+
+    if(hasData){
+         // primary hit
+        HitResult firstHit = hitBVH(ray);
+        
+        if(!firstHit.isHit) {
+            color = vec3(0);
+            color = sampleCube(ray.direction);
+        } else {
+            vec3 Le = firstHit.material.emissive;
+            vec3 Li = pathTracing(firstHit, 2);
+            color = Le + Li;
+        }  
     
-    if(!firstHit.isHit) {
-        color = vec3(0);
+        // 和上一帧混合
+        vec3 lastColor = texture2D(lastFrame, vertex.xy*0.5+0.5).rgb;
+        color = mix(lastColor, color, 1.0/float(frameCounter+uint(1)));
+
+    }
+    else{
         color = sampleCube(ray.direction);
-    } else {
-        vec3 Le = firstHit.material.emissive;
-        vec3 Li = pathTracing(firstHit, 2);
-        color = Le + Li;
-    }  
-    
-    // 和上一帧混合
-    vec3 lastColor = texture2D(lastFrame, vertex.xy*0.5+0.5).rgb;
-    color = mix(lastColor, color, 1.0/float(frameCounter+uint(1)));
-
-
+    }
     // 输出
     fragColor = vec4(color, 1.0);
 }

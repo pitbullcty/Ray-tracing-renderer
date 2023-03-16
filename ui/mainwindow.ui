@@ -80,25 +80,25 @@
          </layout>
         </widget>
        </item>
+       <item>
+        <widget class="QStackedWidget" name="stackedWidget">
+         <widget class="QWidget" name="stackedWidgetPage1">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="EditorOpenGLWidget" name="editor"/>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="stackedWidgetPage2">
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="RayTracingOpenGLWidget" name="rayTracing"/>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
       </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QStackedWidget" name="stackedWidget">
-      <widget class="QWidget" name="stackedWidgetPage1">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="EditorOpenGLWidget" name="editor"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="stackedWidgetPage2">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="RayTracingOpenGLWidget" name="rayTracing"/>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
    </layout>

@@ -5,7 +5,7 @@
 #include <QApplication>
 #include <QDateTime>
 #include <QTimer>
-
+#include <QDesktopServices>
 
 class Console :public QTextBrowser {
 	Q_OBJECT
@@ -23,10 +23,11 @@ public slots:
 	void Info(const QString& text);
 	void Error(const QString& text);
 	void Clear();
-	
+	void openImage(const QUrl& url);
 
 private:
-	void scroll();
+	void scrollToBottom();
+
 };
 
 

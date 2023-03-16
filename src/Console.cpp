@@ -13,6 +13,8 @@ bool isBusy = false; //静态外部变量，程序是否忙碌
 
 Console::Console(QWidget* parent):QTextBrowser(parent)
 {
+	setOpenExternalLinks(true);
+	connect(this, &Console::anchorClicked, this, &Console::openImage);
 }
 
 void Console::Warning(const QString& text)
@@ -22,7 +24,7 @@ void Console::Warning(const QString& text)
 	append(warning.arg(now).arg(text));
 	isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
-	scroll();
+	scrollToBottom();
 	isBusy = false;
 }
 
@@ -34,7 +36,7 @@ void Console::Info(const QString& text)
 	if (text.contains("BVH") || text.contains("保存至")) isBusy = false; //处理特殊时间
 	else isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
-	scroll();
+	scrollToBottom();
 	isBusy = false;
 }
 
@@ -45,7 +47,7 @@ void Console::Error(const QString& text)
 	append(error.arg(now).arg(text));
 	isBusy = true;
 	QApplication::processEvents(); //显示数据，避免耗时任务太久
-	scroll();
+	scrollToBottom();
 	isBusy = false;
 }
 
@@ -54,7 +56,15 @@ void Console::Clear()
 	setText("");
 }
 
-void Console::scroll()
+void Console::openImage(const QUrl& url)
+{
+	QString text = this->toHtml();
+	QDesktopServices::openUrl(url);
+	this->setHtml(text);
+	scrollToBottom();
+}
+
+void Console::scrollToBottom()
 {
 	moveCursor(QTextCursor::End);
 }

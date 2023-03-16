@@ -1,6 +1,10 @@
 ﻿#include "ModelListWidget.h"
 
-ModelListWidget::ModelListWidget(QWidget* parent):QListWidget(parent), current(nullptr),copyName("")
+ModelListWidget::ModelListWidget(QWidget* parent):
+    QListWidget(parent), 
+    current(nullptr),
+    copyName(""),
+    currentIndex(0)
 {
    
 }
@@ -42,37 +46,41 @@ void ModelListWidget::contextMenuEvent(QContextMenuEvent* event)
     connect(addRectLightAction, &QAction::triggered, this, &ModelListWidget::addRectLight);
     connect(addSphereLightAction, &QAction::triggered, this, &ModelListWidget::addSphereLight);
 
-    if (current != nullptr) //如果有item则添加
-    {
-        copyAction = new QAction("复制", this);
-        if (!copyName.isEmpty()) {
-            pasteAction = new QAction("粘贴", this);
-            popMenu->addAction(pasteAction);
-            connect(pasteAction, &QAction::triggered, this, &ModelListWidget::paste);
+    if (!currentIndex) { //当前未使用光追
+        if (current != nullptr) //如果有item
+        {
+            copyAction = new QAction("复制", this);
+            if (!copyName.isEmpty()) {
+                pasteAction = new QAction("粘贴", this);
+                popMenu->addAction(pasteAction);
+                connect(pasteAction, &QAction::triggered, this, &ModelListWidget::paste);
+            }
+            deleteAction = new QAction("删除", popMenu);
+            renameAction = new QAction("重命名", popMenu);
+            popMenu->addAction(copyAction);
+            popMenu->addAction(deleteAction);
+            popMenu->addAction(renameAction);
+            connect(renameAction, &QAction::triggered, this, &ModelListWidget::rename);
+            connect(deleteAction, &QAction::triggered, this, &ModelListWidget::remove);
+            connect(copyAction, &QAction::triggered, this, &ModelListWidget::copy);
         }
-        deleteAction = new QAction("删除", popMenu);
-        renameAction = new QAction("重命名", popMenu);
-        popMenu->addAction(copyAction);
-        popMenu->addAction(deleteAction);
-        popMenu->addAction(renameAction);
-        connect(renameAction, &QAction::triggered, this, &ModelListWidget::rename);
-        connect(deleteAction, &QAction::triggered, this, &ModelListWidget::remove);
-        connect(copyAction, &QAction::triggered, this, &ModelListWidget::copy);
-    }
-    else {
-        if(currentItem()) currentItem()->setSelected(false);//取消选中状态
-        if (!copyName.isEmpty()) {
-            pasteAction = new QAction("粘贴", popMenu);
-            popMenu->addAction(pasteAction);
-            connect(pasteAction, &QAction::triggered, this, &ModelListWidget::paste);
+        else {
+            if (currentItem()) currentItem()->setSelected(false);//取消选中状态
+            if (!copyName.isEmpty()) {
+                pasteAction = new QAction("粘贴", popMenu);
+                popMenu->addAction(pasteAction);
+                connect(pasteAction, &QAction::triggered, this, &ModelListWidget::paste);
+            }
         }
     }
+
     popMenu->exec((QCursor::pos())); // 菜单出现的位置为当前鼠标的位置
     delete popMenu; //设置好父对象可以析构所有子对象
 }
 
 void ModelListWidget::keyPressEvent(QKeyEvent* event)
 {
+    if (currentIndex) return;
     auto key = event->key();
     auto modifiers = event->modifiers();
     current = currentItem();
@@ -161,6 +169,11 @@ void ModelListWidget::addSphereLight()
 void ModelListWidget::getSelectedName()
 {
     emit sendSelectedName(currentItem()->text());
+}
+
+void ModelListWidget::receiveIndex(int index)
+{
+    currentIndex = index;
 }
 
 void ModelListWidget::updateList(QMap<QString, Model>* models, Model* model) {

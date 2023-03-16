@@ -26,6 +26,9 @@ public slots:
 	void changeRenderWindow();
 	void hideRenderWidget(bool isHide);
 
+signals:
+	void sendCurrentIndex(int index);
+
 private:
 	Ui::MainWindow* ui;
 	QString lastModelPath;
@@ -35,7 +38,8 @@ private:
 	int currentIndex;  //当前index
 
 	void copyLightsModel();
-	void showFPS();
+	void showSceneInfo();
+	void setButtonStyle(int index);
 	void setStyle(int style = 0);
 
 };
