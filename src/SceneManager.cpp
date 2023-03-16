@@ -84,7 +84,8 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 				type = RECTLIGHT;
 			models[newname].setType(type);
 		}
-		if (!isLoadScene) addRevertModel(REMOVE, models[newname], newname);
+		if (!isLoadScene) addRevertModel(REMOVE, models[newname], newname); 
+		else 
 		emit updateList(&models, nullptr);
 	}
 	else newname = "";
@@ -328,13 +329,17 @@ STATE SceneManager::getState()
 	return state;
 }
 
+QString SceneManager::getSceneName()
+{
+	return sceneName;
+}
+
 void SceneManager::loadScene(const QString& path)
 {
 
 	if (!dealDifference()) return;
 
 	emit Clear();
-	sceneFileName = path;
 	bool res = true;
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
@@ -415,11 +420,15 @@ void SceneManager::loadScene(const QString& path)
 		clearModels();
 		modelLoader->clearPathes(); //清除现有模型
 		camera->reSet();
+		sceneFileName.clear();
+		sceneName.clear();
 		state = NONE;
 		return;
 	}
 	else {
 		QString loadSceneTime = "场景加载成功！耗时：" + QString::number(timer.elapsed(), 'f', 2) + "ms";
+		sceneFileName = path;
+		sceneName = QFileInfo(sceneFileName).baseName();
 		emit Info(loadSceneTime);
 	}
 	state = CREATED;
@@ -432,8 +441,10 @@ bool SceneManager::saveScene()
 		QFileDialog dialog;
 		dialog.setWindowIcon(QIcon(":icons/title.ico"));
 		QString savePath = dialog.getSaveFileName(nullptr, "选择保存路径", QDir::currentPath(), "场景文件(*.json)");
-		if (!savePath.isEmpty())
+		if (!savePath.isEmpty()) {
 			sceneFileName = savePath;
+			sceneName = QFileInfo(sceneFileName).baseName();
+		}
 		else
 			return false;
 	} //如果未打开文件,则选择文件名
@@ -450,6 +461,7 @@ bool SceneManager::saveScene()
 void SceneManager::saveSceneAs(const QString& path)
 {
 	sceneFileName = path;
+	sceneName = QFileInfo(sceneFileName).baseName();
 	QJsonDocument doc(toJsonObeject());
 	QFile file(sceneFileName);
 	file.open(QFile::WriteOnly);
@@ -462,7 +474,8 @@ void SceneManager::createScene()
 {
 	if (!dealDifference()) return;
 	emit Clear();
-	sceneFileName = ""; //清除保存文件名
+	sceneFileName.clear(); //清除保存文件名
+	sceneName = "新建场景";
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();
@@ -474,7 +487,8 @@ void SceneManager::closeScene()
 {
 	if (!dealDifference()) return;
 	emit Clear();
-	sceneFileName = ""; //清除保存文件名
+	sceneFileName.clear(); //清除保存文件名
+	sceneName.clear();
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();

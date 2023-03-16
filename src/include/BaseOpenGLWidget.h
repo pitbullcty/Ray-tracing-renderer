@@ -21,6 +21,10 @@ public:
     QSharedPointer<SceneManager> getSceneManager() const;
     int getFPS();
 
+signals:
+    void Info(QString info);
+    void SendHideRenderWidget(bool isHide);
+
 protected:
 
     void processWheel(QWheelEvent* event);

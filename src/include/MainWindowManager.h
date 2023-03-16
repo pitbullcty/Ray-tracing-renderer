@@ -24,6 +24,7 @@ public slots:
 	void loadModelFromAction();
 	void loadSceneFromAction();
 	void changeRenderWindow();
+	void hideRenderWidget(bool isHide);
 
 private:
 	Ui::MainWindow* ui;

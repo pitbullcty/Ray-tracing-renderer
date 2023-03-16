@@ -4,7 +4,11 @@
 RayTracingOpenGLWidget::RayTracingOpenGLWidget(QWidget* parent):
     BaseOpenGLWidget(parent)
 {
-
+    QDir dir;
+    QString snapShotPath(QDir::currentPath() + "/snapshots");
+    if (!dir.exists(snapShotPath)) {
+        dir.mkdir(snapShotPath);
+    }
 }
 
 RayTracingOpenGLWidget::~RayTracingOpenGLWidget()
@@ -50,6 +54,9 @@ void RayTracingOpenGLWidget::keyPressEvent(QKeyEvent* event)
     Qt::Key key = (Qt::Key)(event->key());
     processCameraKey(event);
     changeFullScreen(key);
+    if (key == Qt::Key_F10) {
+        getSnapshot();
+    }
     rayTracingRenderer->clearFrameCounter();
 }
 
@@ -122,4 +129,12 @@ void RayTracingOpenGLWidget::initRenderer()
     rayTracingRenderer->initSkyboxTexture();
     rayTracingRenderer->initFBOs();
 
+}
+
+void RayTracingOpenGLWidget::getSnapshot()
+{
+    QString filename(QDir::currentPath() + "/snapshots/%1%2.jpg");
+    filename = filename.arg(sceneManager->getSceneName()).arg(rayTracingRenderer->getFrameCounter());
+    rayTracingRenderer->setSavingParam(filename);
+    emit Info("快照保存至" + filename);
 }

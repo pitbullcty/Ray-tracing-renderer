@@ -10,8 +10,11 @@ class RayTracingRenderer :public Renderer {
 public:
 
 	void render();
-	void saveRenderResult(const QString& path, int quality=50);
 
+	void saveRenderResult();
+	void setSavingParam(const QString& savePath, int quality=50);
+
+	unsigned int getFrameCounter();
 	void clearFrameCounter();
 	virtual void destoryData();
 
@@ -54,8 +57,13 @@ private:
 	unsigned int lightsTexture; //灯光
 	unsigned int textureMapsArrayTex; //贴图
 
+	bool isRealTimeDenoising;
 	unsigned int denoiserStep; //降噪帧数间隔
 	QVector<QVector3D> denoiserInputBuffer, denoiserOutputBuffer; //降噪使用的缓冲区
+
+	bool isSaving;
+	QString savePath;
+	int quality; //保存参数
 
 	static QSharedPointer<RayTracingRenderer> instance;
 

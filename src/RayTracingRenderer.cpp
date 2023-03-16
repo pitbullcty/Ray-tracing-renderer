@@ -20,8 +20,11 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	accumVBO(QOpenGLBuffer::VertexBuffer),
 	outputVBO(QOpenGLBuffer::VertexBuffer), 
 	isResized(false),
+	isSaving(false),
+	isRealTimeDenoising(false),
 	frameCounter(0),
-	denoiserStep(20)
+	quality(50),
+	denoiserStep(40)
 {
 	outputVBO.create();
 	accumVBO.create();
@@ -114,6 +117,9 @@ void RayTracingRenderer::bindTexture()
 	functions->glActiveTexture(GL_TEXTURE7);
 	functions->glBindTexture(GL_TEXTURE_2D, accumTexture); //绑定纹理单元
 
+	functions->glActiveTexture(GL_TEXTURE8);
+	functions->glBindTexture(GL_TEXTURE_2D, outputTexture); //绑定纹理单元
+
 	functions->glActiveTexture(GL_TEXTURE0);
 }
 
@@ -162,6 +168,11 @@ void RayTracingRenderer::destoryTexture()
 	functions->glDeleteTextures(1, &lightsTexture);
 	functions->glDeleteTextures(1, &textureMapsArrayTex); //删除材质以及缓冲区
 	
+}
+
+unsigned int RayTracingRenderer::getFrameCounter()
+{
+	return frameCounter;
 }
 
 void RayTracingRenderer::clearFrameCounter()
@@ -320,21 +331,30 @@ void RayTracingRenderer::render()
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	accumVAO.release();
 
+	if (isRealTimeDenoising && frameCounter % denoiserStep == 0) {
+		denoise(accumFBO, accumTexture);
+	} //达到要求则降噪
+
 	outputVAO.bind();
 	shaderProgram["output"]->bind();
 	shaderProgram["output"]->setUniformValue("lastFrame", 7);
-
-	functions->glBindFramebuffer(GL_FRAMEBUFFER, outputFBO);
-	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //绘制到outputFBO保存结果
 
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //显示到屏幕
 
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, outputFBO);
+	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //绘制到outputFBO保存结果
+
+	if (isSaving) {
+		saveRenderResult();
+		isSaving = false;
+	}
+
 	shaderProgram["output"]->release();
 	outputVAO.release();
-	if (frameCounter == 255) saveRenderResult("./测试.jpg");
+	
 }
 
 template<typename T>
@@ -342,17 +362,22 @@ void RayTracingRenderer::getPixels(QVector<T>& pixels, unsigned int FBO, unsigne
 {
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	functions->glBindTexture(GL_TEXTURE_2D, texture);
-	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 	functions->glReadPixels(0, 0, width, height, format, type, pixels.data());
-	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	functions->glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void RayTracingRenderer::saveRenderResult(const QString& path, int quality)
+void RayTracingRenderer::saveRenderResult()
 {
 	denoise(outputFBO, outputTexture);
-	saveFBO(path, outputFBO, outputTexture);
+	saveFBO(savePath, outputFBO, outputTexture, quality);
+}
+
+void RayTracingRenderer::setSavingParam(const QString& savePath, int quality)
+{
+	this->savePath = savePath;
+	this->quality = quality;
+	isSaving = true;
 }
 
 void RayTracingRenderer::saveFBO(const QString& path, unsigned int FBO, unsigned int texture, int quality)

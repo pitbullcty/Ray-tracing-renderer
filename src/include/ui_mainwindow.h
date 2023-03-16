@@ -139,7 +139,10 @@ public:
 
         verticalLayout_4->addWidget(renderWidget);
 
-        stackedWidget = new QStackedWidget(groupBox);
+
+        verticalLayout_3->addWidget(groupBox);
+
+        stackedWidget = new QStackedWidget(widget);
         stackedWidget->setObjectName(QString::fromUtf8("stackedWidget"));
         stackedWidgetPage1 = new QWidget();
         stackedWidgetPage1->setObjectName(QString::fromUtf8("stackedWidgetPage1"));
@@ -162,10 +165,7 @@ public:
 
         stackedWidget->addWidget(stackedWidgetPage2);
 
-        verticalLayout_4->addWidget(stackedWidget);
-
-
-        verticalLayout_3->addWidget(groupBox);
+        verticalLayout_3->addWidget(stackedWidget);
 
         MainWindow->setCentralWidget(widget);
         menubar = new QMenuBar(MainWindow);

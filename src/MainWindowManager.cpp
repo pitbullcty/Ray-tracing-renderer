@@ -66,6 +66,11 @@ void MainWindowManager::bindSignals()
 	dataBuilder->setModels(seceneManager->getModels());
 	connect(dataBuilder.data(), &DataBuilder::Info, ui->console, &Console::Info);
 
+	connect(ui->rayTracing, &RayTracingOpenGLWidget::Info, ui->console, &Console::Info);
+	connect(ui->rayTracing, &RayTracingOpenGLWidget::SendHideRenderWidget, this, &MainWindowManager::hideRenderWidget);
+
+	connect(ui->editor, &EditorOpenGLWidget::SendHideRenderWidget, this, &MainWindowManager::hideRenderWidget);
+
 	connect(ui->renderButton, &QPushButton::clicked, this, &MainWindowManager::changeRenderWindow);
 }
 
@@ -216,6 +221,11 @@ void MainWindowManager::changeRenderWindow()
 	}
 }
 
+void MainWindowManager::hideRenderWidget(bool isHide)
+{
+	// if (isHide) ui->renderWidget->hide();
+	//else ui->renderWidget->show();
+}
 
 void MainWindowManager::copyLightsModel()
 {

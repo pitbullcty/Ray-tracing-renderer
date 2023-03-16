@@ -53,6 +53,7 @@ public:
 	QSharedPointer<Camera> getCamera();
 	QMap<QString, Model>* getModels(); //返回模型指针
 	STATE getState();
+	QString getSceneName();
 
 	void clearModels();
 	void copyModel(Model* model);
@@ -85,6 +86,7 @@ private:
 	QSharedPointer<Camera> camera; //摄像机
 	QSharedPointer<Skybox> skybox; //天空盒
 	QString sceneFileName; //场景文件名
+	QString sceneName; //场景名
 	QStack<QPair<QPair<ACITIONTYPE, Model>,QString>> revertActions;
 	STATE state; //当前编辑状态
 

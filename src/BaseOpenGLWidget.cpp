@@ -167,6 +167,7 @@ void BaseOpenGLWidget::changeFullScreen(Qt::Key key)
             setWindowFlags(Qt::Window);
             showFullScreen();
             isFullScreen = true;
+            emit SendHideRenderWidget(isFullScreen);
         }
     }
     else if (key == Qt::Key_Escape) {
@@ -175,6 +176,7 @@ void BaseOpenGLWidget::changeFullScreen(Qt::Key key)
             setWindowFlag(Qt::SubWindow);
             showNormal();
             isFullScreen = false;
+            emit SendHideRenderWidget(isFullScreen);
         }
     }
     else;
