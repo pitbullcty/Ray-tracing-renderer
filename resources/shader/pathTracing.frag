@@ -23,7 +23,7 @@ uniform vec3 eye;
 uniform mat4 cameraRotate;
 uniform mat4 projection;
 
-// ----------------------------------------------------------------------------- //
+//常量定义
 
 #define PI              3.1415926
 #define INF             10000000
@@ -31,15 +31,14 @@ uniform mat4 projection;
 #define SIZE_MATERIAL   7
 #define SIZE_BVHNODE    4
 
-// ----------------------------------------------------------------------------- //
 
-// Triangle 数据格式
+// 三角形数据格式
 struct Triangle {
     vec3 p1, p2, p3;    // 顶点坐标
     vec3 n1, n2, n3;    // 顶点法线
 };
 
-// BVH 树节点
+// BVH节点
 struct BVHNode {
     int left;           // 左子树
     int right;          // 右子树
@@ -85,7 +84,6 @@ struct HitResult {
     Material material;      // 命中点的表面材质
 };
 
-// ----------------------------------------------------------------------------- //
 
 /*
  * 生成随机向量，依赖于 frameCounter 帧计数器
@@ -110,7 +108,6 @@ float rand() {
     return float(wang_hash(seed)) / 4294967296.0;
 }
 
-// ----------------------------------------------------------------------------- //
 
 // 半球均匀采样
 vec3 SampleHemisphere() {
@@ -130,14 +127,11 @@ vec3 toNormalHemisphere(vec3 v, vec3 N) {
     return v.x * tangent + v.y * bitangent + v.z * N;
 }
 
-// ----------------------------------------------------------------------------- //
-
-
+// 采样天空盒
 vec3 sampleCube(vec3 v){
     return texture(cubemap, v).rgb;
 }
 
-// ----------------------------------------------------------------------------- //
 
 // 获取第 i 下标的三角形
 Triangle getTriangle(int i) {
@@ -206,8 +200,6 @@ BVHNode getBVHNode(int i) {
 
     return node;
 }
-
-// ----------------------------------------------------------------------------- //
 
 // 光线和三角形求交 
 HitResult hitTriangle(Triangle triangle, Ray ray) {
@@ -453,7 +445,6 @@ void getTangent(vec3 N, inout vec3 tangent, inout vec3 bitangent) {
     tangent = normalize(cross(N, bitangent));
 }
 
-// ----------------------------------------------------------------------------- //
 
 // 路径追踪
 vec3 pathTracing(HitResult hit, int maxBounce) {
@@ -471,8 +462,7 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
 
         getTangent(N, tangent, bitangent);
         vec3 f_r = BRDF_Evaluate(V, N, L, tangent, bitangent, hit.material);
-       // vec3 f_r = hit.material.baseColor / PI;  
-        // 漫反射: 随机发射光线
+
         Ray randomRay;
         randomRay.startPoint = hit.hitPoint;
         randomRay.direction = L;
@@ -497,7 +487,6 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
     return Lo;
 }
 
-// ----------------------------------------------------------------------------- //
 
 void main() {
 

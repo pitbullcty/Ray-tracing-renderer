@@ -1,9 +1,11 @@
 ﻿uic ./ui/mainwindow.ui -o ./src/include/ui_mainwindow.h
+cloc src --exclude-list-file=ignore.txt
 
-1.光源待实现,shader分拆
-2.切换页面
-3.降噪,设置降噪帧数间隔
+1.光源实现,待与发光颜色匹配,（shader分拆）
+2.解决拖影
 
 ui方面：
 1.编辑器
 2.渲染选项
+
+

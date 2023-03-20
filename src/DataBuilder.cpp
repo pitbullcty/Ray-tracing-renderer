@@ -133,30 +133,10 @@ void DataBuilder::flattenAndBuildData()
 	if (!bvh.isEmpty()) bvh.clear();
 	bvh.emplace_back(BVHNode());
 	if (!texInfo.isEmpty()) texInfo.clear();
-	if (!materialsFlatten.isEmpty()) materialsFlatten.clear(); //清空原有数据
+	if (!modelMaterialsFlatten.isEmpty()) modelMaterialsFlatten.clear(); //清空原有数据
 	for (auto it = models->begin(); it != models->end(); it++) {
 		auto& model = it.value();
 		auto modelMatrix = model.transform.getModel();
-		if (model.isLight()) {
-			auto& bound = model.getDectionBound();
-			auto& maxpos = bound.maxpos;
-			auto& minpos = bound.minpos;
-			LightEncoded light;
-			light.position = modelMatrix.map(model.getCenter());
-			light.emission = model.lightMaterial.emissive;
-			light.u = maxpos;
-			light.v = minpos;
-			if (model.getType() == SPHERELIGHT) {
-				float radius = (maxpos.x() - minpos.x()) / 2;
-				light.param.setX(1);
-				light.param.setY(radius);
-			}
-			else {
-				light.param.setX(0);
-			}
-			data.encodedLight.push_back(light);
-			continue;
-		} //对光源单独编码
 		QVector<QSharedPointer<Mesh>> meshes;
 		if (model.isCopy()) {
 			meshes = model.getCopy()->getMeshes();
@@ -179,7 +159,8 @@ void DataBuilder::flattenAndBuildData()
 			texInfo.emplace_back(temp);
 			meshindex++; //meshID增加
 		}
-		materialsFlatten.emplace_back(model.modelMaterial);
+		if (model.isLight()) modelMaterialsFlatten.emplace_back(model.lightMaterial.toModelMaterial());
+		else modelMaterialsFlatten.emplace_back(model.modelMaterial);
 		modelIndex++;
 	}
 }
@@ -213,7 +194,7 @@ void DataBuilder::encodeData()
 
 		data.encodedTriangles.emplace_back(tri);
 
-		auto& material = materialsFlatten.at(modelIndex); //获取材质
+		auto& material = modelMaterialsFlatten.at(modelIndex); //获取材质
 		auto& info = texInfo.at(meshIndex);
 		auto encoded = material.encode();
 
@@ -252,7 +233,7 @@ void DataBuilder::encodeData()
 
 	textureImageFlatten.clear();
 	texInfo.clear();
-	materialsFlatten.clear();
+	modelMaterialsFlatten.clear();
 	bvh.clear(); //释放临时内存
 }
 

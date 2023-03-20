@@ -31,6 +31,8 @@ private:
     QOpenGLShaderProgram accumProgram;
     QOpenGLShaderProgram outputProgram;
 
+    bool isLongPressing;
+
     QSharedPointer<RayTracingRenderer> rayTracingRenderer; //编辑器所用渲染器
     void getSnapshot();
 };

@@ -37,7 +37,7 @@ struct ModelMaterial
         metallic = 0.0;   
         specular = 0.0;  
         specularTint = 0.0;
-        roughness = 0.0; 
+        roughness = 0.5; 
         anisotropic = 0.0; 
         sheen = 0.0; 
         sheenTint = 0.0; 
@@ -106,7 +106,7 @@ struct LightMaterial
     QVector3D baseColor;
 
     LightMaterial() {
-        emissive = QVector3D(1, 1, 1);
+        emissive = QVector3D(20, 20, 20);
         baseColor = QVector3D(1, 1, 1); //基本颜色
     }
 
@@ -130,6 +130,13 @@ struct LightMaterial
         QJsonObject baseColor = LightMaterial["baseColor"].toObject();
         this->emissive = QVector3D(emissive["x"].toVariant().toFloat(), emissive["y"].toVariant().toFloat(), emissive["z"].toVariant().toFloat());
         this->baseColor = QVector3D(baseColor["r"].toVariant().toFloat(), baseColor["g"].toVariant().toFloat(), baseColor["b"].toVariant().toFloat());
+    }
+
+    ModelMaterial toModelMaterial() {
+        ModelMaterial res;
+        res.emissive = emissive;
+        res.baseColor = baseColor;
+        return res;
     }
 };
 

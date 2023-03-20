@@ -1,8 +1,8 @@
 ﻿#include "RayTracingOpenGLWidget.h"
 
-
 RayTracingOpenGLWidget::RayTracingOpenGLWidget(QWidget* parent):
-    BaseOpenGLWidget(parent)
+    BaseOpenGLWidget(parent),
+    isLongPressing(false)
 {
     QDir dir;
     QString snapShotPath(QDir::currentPath() + "/snapshots");
@@ -43,7 +43,11 @@ void RayTracingOpenGLWidget::paintGL()
     }
     else {
         sceneManager->getCamera()->processKeyboard(deltaTime);
-        rayTracingRenderer->render();
+        if (isLongPressing) {
+            rayTracingRenderer->clearFrameCounter();
+            rayTracingRenderer->render();
+        }
+        else rayTracingRenderer->render();
         clacFPS();
     }
     update();
@@ -52,18 +56,23 @@ void RayTracingOpenGLWidget::paintGL()
 void RayTracingOpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
     Qt::Key key = (Qt::Key)(event->key());
-    if (processCameraKey(event) || changeFullScreen(key)) {
-       rayTracingRenderer->clearFrameCounter();
-    } //发生变化
-    if (key == Qt::Key_F10) {
+    if (processCameraKey(event)) {
+        isLongPressing = true;
+    } //长按键盘
+    else if (changeFullScreen(key)) {
+        rayTracingRenderer->render();
+    }
+    else if (key == Qt::Key_F10) {
         getSnapshot();
     }
-   
 }
 
 void RayTracingOpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 {
+    Qt::Key key = (Qt::Key)(event->key());
     processKeyRelease(event);
+    if (key == Qt::Key_F10) return;
+    isLongPressing = false;
 }
 
 void RayTracingOpenGLWidget::mousePressEvent(QMouseEvent* event)
@@ -133,7 +142,7 @@ void RayTracingOpenGLWidget::initRenderer()
 
 void RayTracingOpenGLWidget::getSnapshot()
 {
-    QString filename(QDir::currentPath() + "/snapshots/%1%2.jpg");
+    QString filename(QDir::currentPath() + "/snapshots/%1%2.png");
     filename = filename.arg(sceneManager->getSceneName()).arg(rayTracingRenderer->getFrameCounter());
     rayTracingRenderer->setSavingParam(filename);
     QString info("快照保存至%1, <a href=\"file:///%2\">单击链接查看</a>");

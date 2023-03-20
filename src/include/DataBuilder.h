@@ -50,7 +50,7 @@ private:
 	QVector<Triangle> triangles;  //未编码顶点数据
 	QVector<QVector<QPair<QString, int>>> texInfo; //展平后贴图信息
 	QVector<QImage> textureImageFlatten; //展平后贴图路径
-	QVector<ModelMaterial> materialsFlatten; //展平后材质
+	QVector<ModelMaterial> modelMaterialsFlatten; //展平后材质
 
 	RenderData data; //渲染数据
 
