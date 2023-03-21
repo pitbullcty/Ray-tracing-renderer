@@ -15,8 +15,9 @@ uniform samplerBuffer triangles;
 uniform samplerBuffer BVHnodes;
 uniform samplerBuffer materials;
 
+uniform sampler2DArray textureMapsArrayTex;
+
 uniform sampler2D lastFrame;
-uniform sampler2D lights;
 uniform samplerCube cubemap;
 
 uniform vec3 eye;
@@ -30,12 +31,14 @@ uniform mat4 projection;
 #define SIZE_TRIANGLE   9
 #define SIZE_MATERIAL   7
 #define SIZE_BVHNODE    4
+#define EPSILON 0.000001
 
 
 // 三角形数据格式
 struct Triangle {
     vec3 p1, p2, p3;    // 顶点坐标
     vec3 n1, n2, n3;    // 顶点法线
+    vec3 texCoord1, texCoord2, texCoord3;
 };
 
 // BVH节点
@@ -79,7 +82,12 @@ struct HitResult {
     bool isInside;          // 是否从内部命中
     float distance;         // 与交点的距离
     vec3 hitPoint;          // 光线命中点
-    vec3 normal;            // 命中点法线
+
+    vec3 normal;            
+    vec3 tangent;
+    vec3 bitangent;         // 命中点切线空间
+    vec2 texCoord; //命中点纹理坐标
+
     vec3 viewDir;           // 击中该点的光线的方向
     Material material;      // 命中点的表面材质
 };
@@ -107,6 +115,13 @@ uint wang_hash(inout uint seed) {
 float rand() {
     return float(wang_hash(seed)) / 4294967296.0;
 }
+
+void getTangent(vec3 N, inout vec3 tangent, inout vec3 bitangent) {
+    vec3 helper = vec3(1, 0, 0);
+    if(abs(N.x)>0.999) helper = vec3(0, 0, 1);
+    bitangent = normalize(cross(N, helper));
+    tangent = normalize(cross(N, bitangent));
+} //计算法线空间
 
 
 // 半球均匀采样
@@ -147,11 +162,15 @@ Triangle getTriangle(int i) {
     t.n2 = texelFetch(triangles, offset + 4).xyz;
     t.n3 = texelFetch(triangles, offset + 5).xyz;
 
+    t.texCoord1 = texelFetch(triangles, offset + 6).xyz;
+    t.texCoord2 = texelFetch(triangles, offset + 7).xyz;
+    t.texCoord3 = texelFetch(triangles, offset + 8).xyz;
+
     return t;
 }
 
 // 获取第 i 下标的三角形的材质
-Material getMaterial(int i) {
+Material getMaterial(int i, inout HitResult res) {
     Material m;
 
     int offset = i * SIZE_MATERIAL;
@@ -168,7 +187,7 @@ Material getMaterial(int i) {
     m.metallic = param1.y;
     m.specular = param1.z;
     m.specularTint = param2.x;
-    m.roughness = param2.y;
+    m.roughness = max(param2.y,0.0001);
     m.anisotropic = param2.z;
     m.sheen = param3.x;
     m.sheenTint = param3.y;
@@ -178,6 +197,38 @@ Material getMaterial(int i) {
     m.metalnessTexId = int(param4.z);
     m.normalTexId = int(param5.x);
     m.emissiveTexId = int(param5.y);
+
+     // 反射贴图
+    if (m.baseColorTexId >= 0)
+    {
+       vec4 col = texture(textureMapsArrayTex, vec3(res.texCoord, m.baseColorTexId));
+       m.baseColor *= pow(col.rgb, vec3(2.2));
+    }
+
+    // 金属贴图
+    if (m.metalnessTexId >= 0)
+    {
+       vec2 matRgh = texture(textureMapsArrayTex, vec3(res.texCoord, m.metalnessTexId)).bg;
+       m.metallic = matRgh.x;
+       m.roughness = max(matRgh.y * matRgh.y, 0.001);
+    }
+
+    //法线贴图
+    if (m.normalTexId >= 0)
+    {
+       vec3 texNormal = texture(textureMapsArrayTex, vec3(res.texCoord, m.normalTexId)).rgb;
+
+       texNormal.y = 1.0 - texNormal.y;
+       texNormal = normalize(texNormal * 2.0 - 1.0);
+
+       res.normal = normalize(res.tangent * texNormal.x + res.bitangent * texNormal.y + res.normal * texNormal.z);
+ 
+    }
+
+    //自发光贴图
+    if (m.emissiveTexId >= 0)
+        m.emissive = pow(texture(textureMapsArrayTex, vec3(res.texCoord, m.emissiveTexId)).rgb, vec3(2.2));
+
     return m;
 }
 
@@ -203,6 +254,7 @@ BVHNode getBVHNode(int i) {
 
 // 光线和三角形求交 
 HitResult hitTriangle(Triangle triangle, Ray ray) {
+
     HitResult res;
     res.distance = INF;
     res.isHit = false;
@@ -212,47 +264,42 @@ HitResult hitTriangle(Triangle triangle, Ray ray) {
     vec3 p2 = triangle.p2;
     vec3 p3 = triangle.p3;
 
-    vec3 S = ray.startPoint;    // 射线起点
-    vec3 d = ray.direction;     // 射线方向
-    vec3 N = normalize(cross(p2-p1, p3-p1));    // 法向量
+    vec3 s = ray.startPoint - p1;
+    vec3 e1 = p2-p1;
+    vec3 e2 = p3-p1;
 
+    vec3 s1 = cross(ray.direction, e2);
+    vec3 s2 = cross(s, e1);
+
+    float s1e1 = dot(s1, e1);
+    float t = dot(s2, e2)/s1e1;
+    float a = dot(s1, s)/s1e1;
+    float b = dot(s2, ray.direction)/s1e1;
+    float c = 1-a-b;   //Möller-Trumbore算法求交
     // 从三角形背后（模型内部）击中
-    if (dot(N, d) > 0.0f) {
-        N = -N;   
-        res.isInside = true;
-    }
 
-    // 如果视线和三角形平行
-    if (abs(dot(N, d)) < 0.00001f) return res;
+    vec3 N = normalize(cross(p2-p1, p3-p1));    // 法向量
+    if (abs(dot(N, ray.direction)) < 0.00001f) return res;
 
-    // 距离
-    float t = (dot(N, p1) - dot(S, N)) / dot(d, N);
     if (t < 0.0005f) return res;    // 如果三角形在光线背面
 
-    // 交点计算
-    vec3 P = S + d * t;
-
-    // 判断交点是否在三角形中
-    vec3 c1 = cross(p2 - p1, P - p1);
-    vec3 c2 = cross(p3 - p2, P - p2);
-    vec3 c3 = cross(p1 - p3, P - p3);
-    bool r1 = (dot(c1, N) > 0 && dot(c2, N) > 0 && dot(c3, N) > 0);
-    bool r2 = (dot(c1, N) < 0 && dot(c2, N) < 0 && dot(c3, N) < 0);
-
     // 命中，封装返回结果
-    if (r1 || r2) {
+    if (t >= EPSILON && a >= EPSILON && b >= EPSILON && c >= EPSILON) {
+
         res.isHit = true;
-        res.hitPoint = P;
         res.distance = t;
-        res.normal = N;
-        res.viewDir = d;
-        // 根据交点位置插值顶点法线
-        float alpha = (-(P.x-p2.x)*(p3.y-p2.y) + (P.y-p2.y)*(p3.x-p2.x)) / (-(p1.x-p2.x-0.00005)*(p3.y-p2.y+0.00005) + (p1.y-p2.y+0.00005)*(p3.x-p2.x+0.00005));
-        float beta  = (-(P.x-p3.x)*(p1.y-p3.y) + (P.y-p3.y)*(p1.x-p3.x)) / (-(p2.x-p3.x-0.00005)*(p1.y-p3.y+0.00005) + (p2.y-p3.y+0.00005)*(p1.x-p3.x+0.00005));
+        res.viewDir = ray.direction;
+        res.hitPoint = ray.startPoint + t * ray.direction;
+        res.texCoord = a * triangle.texCoord1.xy + b * triangle.texCoord2.xy + c * triangle.texCoord3.xy;
+        vec3 normal = normalize(a* triangle.n1 + b* triangle.n2 + c* triangle.n3);
+        res.normal = dot(normal, ray.direction) <= 0.0 ? normal : -normal;
+        getTangent(res.normal, res.tangent, res.bitangent); //计算切线空间
+
+        float alpha = (-(res.hitPoint.x-p2.x)*(p3.y-p2.y) + (res.hitPoint.y-p2.y)*(p3.x-p2.x)) / (-(p1.x-p2.x-0.00005)*(p3.y-p2.y+0.00005) + (p1.y-p2.y+0.00005)*(p3.x-p2.x+0.00005));
+        float beta  = (-(res.hitPoint.x-p3.x)*(p1.y-p3.y) + (res.hitPoint.y-p3.y)*(p1.x-p3.x)) / (-(p2.x-p3.x-0.00005)*(p1.y-p3.y+0.00005) + (p2.y-p3.y+0.00005)*(p1.x-p3.x+0.00005));
         float gama  = 1.0 - alpha - beta;
-        vec3 Nsmooth = alpha * triangle.n1 + beta * triangle.n2 + gama * triangle.n3;
-        Nsmooth = normalize(Nsmooth);
-        res.normal = (res.isInside) ? (-Nsmooth) : (Nsmooth);
+        res.texCoord = alpha * triangle.texCoord1.xy + beta * triangle.texCoord2.xy + gama * triangle.texCoord3.xy; //插值计算坐标
+        
     }
 
     return res;
@@ -286,7 +333,7 @@ HitResult hitArray(Ray ray, int l, int r) {
         HitResult r = hitTriangle(triangle, ray);
         if(r.isHit && r.distance<res.distance) {
             res = r;
-            res.material = getMaterial(i);
+            res.material = getMaterial(i, res);
         }
     }
     return res;
@@ -438,14 +485,6 @@ vec3 BRDF_Evaluate(vec3 V, vec3 N, vec3 L, vec3 X, vec3 Y, in Material material)
     return diffuse * (1.0 - material.metallic) + specular + clearcoat;
 }
 
-void getTangent(vec3 N, inout vec3 tangent, inout vec3 bitangent) {
-    vec3 helper = vec3(1, 0, 0);
-    if(abs(N.x)>0.999) helper = vec3(0, 0, 1);
-    bitangent = normalize(cross(N, helper));
-    tangent = normalize(cross(N, bitangent));
-}
-
-
 // 路径追踪
 vec3 pathTracing(HitResult hit, int maxBounce) {
     vec3 Lo = vec3(0);      // 最终的颜色
@@ -458,10 +497,8 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
         float pdf = 1.0 / (2.0 * PI);                                   // 半球均匀采样概率密度
         float cosine_o = max(0, dot(V, N));                             // 入射光和法线夹角余弦
         float cosine_i = max(0, dot(L, N));                             // 出射光和法线夹角余弦
-        vec3 tangent, bitangent;
 
-        getTangent(N, tangent, bitangent);
-        vec3 f_r = BRDF_Evaluate(V, N, L, tangent, bitangent, hit.material);
+        vec3 f_r = BRDF_Evaluate(V, N, L, hit.tangent, hit.bitangent, hit.material);
 
         Ray randomRay;
         randomRay.startPoint = hit.hitPoint;

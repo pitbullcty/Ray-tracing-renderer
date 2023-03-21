@@ -2,6 +2,7 @@
 
 QSharedPointer<EditorRenderer> EditorRenderer::instance = nullptr;
 const float PI = 3.14159f;
+bool testing = true;	
 
 int renderIndex[][2] = { {0, 1},{2, 3},{4, 5},{6, 7},
 	{0, 2},{1, 3},{4, 6},{5, 7},
@@ -83,7 +84,7 @@ void EditorRenderer::renderModels()
 			if (!mesh->isInit) {
 				mesh->setUp();
 			} //mesh未初始化则直接初始化
-			mesh->render();
+			mesh->render();	
 		}
 	}
 	shaderProgram["model"]->release();

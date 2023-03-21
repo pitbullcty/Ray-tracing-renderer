@@ -17,9 +17,10 @@ class BaseOpenGLWidget : public QOpenGLWidget, public QOpenGLExtraFunctions
 public:
 
     BaseOpenGLWidget(QWidget* parent = 0);
-    virtual ~BaseOpenGLWidget();
+    virtual ~BaseOpenGLWidget() = default;
     QSharedPointer<SceneManager> getSceneManager() const;
     int getFPS();
+    virtual void destoryData() = 0;
 
 signals:
     void Info(QString info);

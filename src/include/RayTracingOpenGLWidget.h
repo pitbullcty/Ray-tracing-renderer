@@ -8,8 +8,9 @@ class RayTracingOpenGLWidget :public BaseOpenGLWidget {
 
 public:
     RayTracingOpenGLWidget(QWidget* parent = 0);
-    ~RayTracingOpenGLWidget();
+    ~RayTracingOpenGLWidget() = default;
     QSharedPointer<RayTracingRenderer> getRayTracingRenderer();
+    virtual void destoryData() override;
 
 protected:
     virtual void initializeGL() override;

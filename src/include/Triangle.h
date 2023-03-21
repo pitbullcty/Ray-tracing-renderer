@@ -27,8 +27,6 @@ struct Triangle
 	{
 		bound.maxpos = max(a.pos, max(b.pos, c.pos));
 		bound.minpos = min(a.pos, min(b.pos, c.pos));
-		//qDebug() << a.normal;
-		//qDebug() << QVector3D::crossProduct(b.pos-a.pos,c.pos-a.pos).normalized();
 	};
 	QVector3D getCenter() const {
 		return (a.pos + b.pos + c.pos) / 3;

@@ -78,7 +78,7 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model, bool isLigh
     } //若模型已经加载过则直接复制
     pathLoaded.push_back(path);
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(path.toStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals| aiProcess_CalcTangentSpace); //读入场景,基于y轴翻转纹理坐标,换所有的模型的原始几何形状为三角形
+    const aiScene* scene = import.ReadFile(path.toStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals); //读入场景,基于y轴翻转纹理坐标,换所有的模型的原始几何形状为三角形
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)//检查场景和其根节点不为null，并且检查了标记(Flag)，查看返回的数据完整性。
     {
         auto error = import.GetErrorString();

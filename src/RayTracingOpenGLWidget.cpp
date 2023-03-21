@@ -11,10 +11,6 @@ RayTracingOpenGLWidget::RayTracingOpenGLWidget(QWidget* parent):
     }
 }
 
-RayTracingOpenGLWidget::~RayTracingOpenGLWidget()
-{
-    rayTracingRenderer->destoryData();
-}
 
 QSharedPointer<RayTracingRenderer> RayTracingOpenGLWidget::getRayTracingRenderer()
 {
@@ -60,7 +56,7 @@ void RayTracingOpenGLWidget::keyPressEvent(QKeyEvent* event)
         isLongPressing = true;
     } //长按键盘
     else if (changeFullScreen(key)) {
-        rayTracingRenderer->render();
+        rayTracingRenderer->clearFrameCounter();
     }
     else if (key == Qt::Key_F10) {
         getSnapshot();
@@ -138,6 +134,11 @@ void RayTracingOpenGLWidget::initRenderer()
     rayTracingRenderer->initSkyboxTexture();
     rayTracingRenderer->initFBOs();
 
+}
+
+void RayTracingOpenGLWidget::destoryData()
+{
+    rayTracingRenderer->destoryData();
 }
 
 void RayTracingOpenGLWidget::getSnapshot()

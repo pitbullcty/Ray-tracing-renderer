@@ -11,8 +11,9 @@ class EditorOpenGLWidget: public BaseOpenGLWidget
 public:
 
     EditorOpenGLWidget(QWidget* parent = 0);
-    ~EditorOpenGLWidget();
+    ~EditorOpenGLWidget() = default;
     bool closeApp();
+    virtual void destoryData() override;
     QSharedPointer<EditorRenderer> getEditorRenderer() const;
 
 protected:
@@ -22,6 +23,7 @@ protected:
 
     virtual void initShaders() override;
     virtual void initRenderer() override;
+
 
     virtual void keyPressEvent(QKeyEvent* event) override;
     virtual void keyReleaseEvent(QKeyEvent* event) override;

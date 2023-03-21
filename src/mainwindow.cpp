@@ -33,6 +33,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
         return;
     }
     if (ui->editor->closeApp()) {
+        ui->editor->destoryData();
+        ui->rayTracing->destoryData();
         event->accept();
     }
     else {

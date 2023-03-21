@@ -133,7 +133,9 @@ void DataBuilder::flattenAndBuildData()
 	if (!bvh.isEmpty()) bvh.clear();
 	bvh.emplace_back(BVHNode());
 	if (!texInfo.isEmpty()) texInfo.clear();
-	if (!modelMaterialsFlatten.isEmpty()) modelMaterialsFlatten.clear(); //清空原有数据
+	if (!textureIndex.isEmpty()) textureIndex.clear();
+	if (!modelMaterialsFlatten.isEmpty()) modelMaterialsFlatten.clear();
+	data.clear(); //清空原有数据
 	for (auto it = models->begin(); it != models->end(); it++) {
 		auto& model = it.value();
 		auto modelMatrix = model.transform.getModel();
@@ -143,20 +145,36 @@ void DataBuilder::flattenAndBuildData()
 		}
 		else meshes = model.getMeshes();
 		for (auto& mesh : meshes) {
-			QVector<QPair<QString, int>> temp;
 			for (int i = 0; i < mesh->indices.size() / 3; i++) {
 				auto a = mesh->vertices[mesh->indices[i * 3]];
 				auto b = mesh->vertices[mesh->indices[i * 3 + 1]];
 				auto c = mesh->vertices[mesh->indices[i * 3 + 2]];
-				Triangle tri(a.map(modelMatrix), b.map(modelMatrix),c.map(modelMatrix),
+				Triangle tri(a.map(modelMatrix), b.map(modelMatrix), c.map(modelMatrix),
 					meshindex, modelIndex);
 				triangles.emplace_back(tri);
-			}
+			} //建立三角形
+			QVector<QPair<QString, int>> temp;
 			for (auto& texture : mesh->textures) {
-				if (!model.isCopy()) textureImageFlatten.emplace_back(QImage(texture.path).convertToFormat(QImage::Format_RGBA8888)); //不为复制则直接复制路径便于加载,同时转换格式
-				temp.emplace_back(std::make_pair(texture.type, texture.id));
+				if (!model.isCopy()) {
+					QImage tex(texture.path);
+					tex = tex.convertToFormat(QImage::Format_RGBA8888);
+					int texWidth = tex.width();
+					int texHeight = tex.height();
+					if (texWidth != Texturesize || texHeight != Texturesize){
+						tex = tex.scaled(Texturesize, Texturesize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation); //改变图片大小
+					}
+					data.encodedTexture.emplace_back(tex);
+					int index = data.encodedTexture.size() - 1;
+					textureIndex.insert(texture.id, index);
+					temp.emplace_back(qMakePair<>(texture.type, index));
+				}
+				else {
+					int index = textureIndex[texture.id];
+					temp.emplace_back(qMakePair<>(texture.type, index));
+				}
+				
 			}
-			texInfo.emplace_back(temp);
+			texInfo.insert(meshindex, temp);
 			meshindex++; //meshID增加
 		}
 		if (model.isLight()) modelMaterialsFlatten.emplace_back(model.lightMaterial.toModelMaterial());
@@ -177,7 +195,7 @@ RenderData& DataBuilder::getData()
 
 void DataBuilder::encodeData()
 {
-	data.clear();
+
 	for (auto& triangle : triangles) {
 		TriangleEncoded tri;
 
@@ -192,35 +210,24 @@ void DataBuilder::encodeData()
 		tri.n2 = triangle.b.normal;
 		tri.n3 = triangle.c.normal;
 
+		tri.texcoord1 = { triangle.a.texCoords, -1.0f};
+		tri.texcoord2 = { triangle.b.texCoords, -1.0f};
+		tri.texcoord3 = { triangle.c.texCoords, -1.0f};
+
 		data.encodedTriangles.emplace_back(tri);
 
 		auto& material = modelMaterialsFlatten.at(modelIndex); //获取材质
-		auto& info = texInfo.at(meshIndex);
+		auto& infos = texInfo[meshIndex];
 		auto encoded = material.encode();
 
-		for (auto& texture : info) {
-			if (texture.first == "texture_diffuse") encoded.param4.setY(texture.second);
-			if (texture.first == "texture_metalness") encoded.param4.setZ(texture.second);
-			if (texture.first == "texture_normal") encoded.param5.setX(texture.second);
-			if (texture.first == "texture_emissive") encoded.param5.setY(texture.second);
+		for (auto& info : infos) {
+			if (info.first == "texture_diffuse") encoded.param4.setY(info.second);
+			if (info.first == "texture_metalness") encoded.param4.setZ(info.second);
+			if (info.first == "texture_normal") encoded.param5.setX(info.second);
+			if (info.first == "texture_emissive") encoded.param5.setY(info.second);
 		} //设置材质类型
 		data.encodedMaterials.emplace_back(encoded);
 	}  //编码材质，三角形
-
-	int texBytes = Texturesize * Texturesize * 4; //贴图大小
-	data.encodedTexture.resize(texBytes * textureImageFlatten.size());
-	int i = 0;
-	for (auto& texture : textureImageFlatten)
-	{
-		int texWidth = texture.width();
-		int texHeight = texture.height();
-		if (texWidth != Texturesize || texHeight != Texturesize)
-		{
-			texture = texture.scaled(Texturesize, Texturesize); //改变图片大小成缓冲区大小
-		}
-		std::copy(texture.constBits(), texture.constBits() + texBytes, &data.encodedTexture[i * texBytes]);
-		i++;
-	}
 
 	for (auto& node:bvh) {
 		BVHNodeEncoded encodeNode;
@@ -231,8 +238,8 @@ void DataBuilder::encodeData()
 		data.encodedBVH.emplace_back(encodeNode);
 	} //编码
 
-	textureImageFlatten.clear();
 	texInfo.clear();
+	textureIndex.clear();
 	modelMaterialsFlatten.clear();
 	bvh.clear(); //释放临时内存
 }

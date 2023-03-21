@@ -12,14 +12,16 @@ EditorOpenGLWidget::EditorOpenGLWidget(QWidget* parent)
 {
 }
 
-EditorOpenGLWidget::~EditorOpenGLWidget()
-{
-    editorRenderer->destoryData();
-}
 
 bool EditorOpenGLWidget::closeApp()
 {
     return sceneManager->closeApp();
+}
+
+void EditorOpenGLWidget::destoryData()
+{
+    editorRenderer->destoryData();
+    sceneManager->clearModels();
 }
 
 QSharedPointer<EditorRenderer> EditorOpenGLWidget::getEditorRenderer() const

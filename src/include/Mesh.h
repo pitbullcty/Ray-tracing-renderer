@@ -21,6 +21,7 @@ struct Vertex
 	Vertex& map(const QMatrix4x4& model) {
 		pos = model.map(pos);
 		normal = (model.inverted().transposed() * QVector4D(normal, 0.0)).toVector3D().normalized();
+		texCoords = this->texCoords;
 		return *this;
 	}
 };

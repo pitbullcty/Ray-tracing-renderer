@@ -6,6 +6,7 @@
 #include "Console.h"
 #include "Triangle.h"
 #include <QElapsedTimer>
+#include <QtConcurrent>
 
 const int Texturesize = 1024;
 
@@ -19,7 +20,7 @@ struct RenderData {
 	QVector<BVHNodeEncoded> encodedBVH; //编码后BVH
 	QVector<LightEncoded> encodedLight; //编码后灯光数据
 	QVector<MaterialEncoded> encodedMaterials; //编码后材质
-	QVector<unsigned char> encodedTexture; //编码后的贴图数组
+	QVector<QImage> encodedTexture; //编码后的贴图数组
 	void clear() {
 		encodedTriangles.clear();
 		encodedBVH.clear();
@@ -35,7 +36,7 @@ class DataBuilder:public QObject
 public:
 	static QSharedPointer<DataBuilder>& GetInstance();
 	static void destory(DataBuilder* builder);
-	void buildData(bool needTips= true);
+	void buildData(bool needTips = true);
 	void setModels(QMap<QString, Model>* models);
 	RenderData& getData(); //返回渲染数据的引用
 
@@ -48,8 +49,8 @@ private:
 
 	QVector<BVHNode> bvh; //未编码bvh树
 	QVector<Triangle> triangles;  //未编码顶点数据
-	QVector<QVector<QPair<QString, int>>> texInfo; //展平后贴图信息
-	QVector<QImage> textureImageFlatten; //展平后贴图路径
+	QMap<int, QVector<QPair<QString,int>>> texInfo; //展平后贴图信息
+	QMap<int, int> textureIndex; //用于记录复制信息
 	QVector<ModelMaterial> modelMaterialsFlatten; //展平后材质
 
 	RenderData data; //渲染数据

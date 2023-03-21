@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include "OpenImageDenoise/oidn.hpp"
 
+
 class RayTracingRenderer :public Renderer {
 public:
 
@@ -16,11 +17,13 @@ public:
 
 	unsigned int getFrameCounter();
 	void clearFrameCounter();
-	virtual void destoryData();
 
-	void initFBOs();
-	virtual void resize(int w, int h);
 	void resizeFBO();
+	void initFBOs();
+
+	virtual void destoryData();
+	virtual void resize(int w, int h);
+
 	static QSharedPointer<RayTracingRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram,
 		QOpenGLExtraFunctions* _functions, int width, int height);
 
@@ -28,7 +31,6 @@ public:
 
 public slots:
 	void sendDataToGPU();  //收到信号发送编码好数据至gpu端
-
 
 private:
 	bool isResized;  //是否发生resize事件
@@ -56,7 +58,6 @@ private:
 	unsigned int materialBuffer; 
 	unsigned int materialTexture; //材质
 
-	unsigned int lightsTexture; //灯光
 	unsigned int textureMapsArrayTex; //贴图
 
 	bool isRealTimeDenoising;

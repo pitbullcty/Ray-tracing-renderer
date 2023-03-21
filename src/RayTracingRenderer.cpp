@@ -12,7 +12,7 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	BVHbuffer(-1), BVHTexture(-1),
 	triangleBuffer(-1), triangleTexture(-1),
 	materialBuffer(-1), materialTexture(-1),
-	lightsTexture(-1), textureMapsArrayTex(-1),
+	textureMapsArrayTex(-1),
 	accumFBO(-1), accumTexture(-1),
 	outputFBO(-1), outputTexture(-1),
 	pathTracingFBO(-1), pathTracingTexture(-1),
@@ -106,11 +106,8 @@ void RayTracingRenderer::bindTexture()
 	functions->glActiveTexture(GL_TEXTURE3);
 	functions->glBindTexture(GL_TEXTURE_BUFFER, materialTexture);
 
-	functions->glActiveTexture(GL_TEXTURE4);
-	functions->glBindTexture(GL_TEXTURE_2D, lightsTexture);
-
 	functions->glActiveTexture(GL_TEXTURE5);
-	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, textureMapsArrayTex); 
+	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, textureMapsArrayTex);
 
 	functions->glActiveTexture(GL_TEXTURE6);
 	functions->glBindTexture(GL_TEXTURE_2D, pathTracingTexture);
@@ -162,7 +159,6 @@ void RayTracingRenderer::destoryTexture()
 	functions->glDeleteTextures(1, &materialTexture);
 	functions->glDeleteBuffers(1, &materialBuffer);
 
-	functions->glDeleteTextures(1, &lightsTexture);
 	functions->glDeleteTextures(1, &textureMapsArrayTex); //删除材质以及缓冲区
 	
 }
@@ -203,7 +199,14 @@ void RayTracingRenderer::resizeFBO()
 
 void RayTracingRenderer::sendDataToGPU()
 {
-	
+	QThreadPool* global = QThreadPool::globalInstance();
+	if (global->activeThreadCount() != 0) {
+		global->clear();
+		global->waitForDone(); //等待目前线程完成
+		DataBuilder::GetInstance()->buildData(false);
+		return;
+	} //如果线程池还有耗时任务,则取消重新构建
+
 	auto& data = DataBuilder::GetInstance()->getData(); //获取渲染数据
 	hasData = !data.encodedTriangles.isEmpty();
 
@@ -221,7 +224,7 @@ void RayTracingRenderer::sendDataToGPU()
 
 	functions->glGenBuffers(1, &triangleBuffer);
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, triangleBuffer);
-	functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(TriangleEncoded) * (unsigned int)data.encodedTriangles.size(), data.encodedTriangles.data(), GL_STATIC_DRAW);
+    functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(TriangleEncoded) * (unsigned int)data.encodedTriangles.size(), data.encodedTriangles.data(), GL_STATIC_DRAW);
 	functions->glGenTextures(1, &triangleTexture);
 	functions->glBindTexture(GL_TEXTURE_BUFFER, triangleTexture);
 	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, triangleBuffer); //发送三角形数据
@@ -235,25 +238,19 @@ void RayTracingRenderer::sendDataToGPU()
 	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, materialBuffer); 
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);//发送材质数据
 	
-	functions->glGenTextures(1, &lightsTexture);
-	functions->glBindTexture(GL_TEXTURE_2D, lightsTexture);
-	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, (sizeof(LightEncoded) / sizeof(QVector3D)) * data.encodedLight.size(), 1, 0, GL_RGB, GL_FLOAT, data.encodedLight.data());
-	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	functions->glBindTexture(GL_TEXTURE_2D, 0);
-	
-	functions->glGenTextures(1, &textureMapsArrayTex);
+ 	functions->glGenTextures(1, &textureMapsArrayTex);
 	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, textureMapsArrayTex);
-	functions->glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, Texturesize, Texturesize, data.encodedTexture.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, data.encodedTexture.data());
-	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	functions->glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, Texturesize, Texturesize, data.encodedTexture.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	for (int i = 0; i < data.encodedTexture.size(); ++i)
+	{
+		functions->glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, Texturesize, Texturesize, 1, GL_RGBA, GL_UNSIGNED_BYTE, data.encodedTexture[i].bits());
+	}
 	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	
-
 }
 
 void RayTracingRenderer::initFBOs()
@@ -300,7 +297,7 @@ void RayTracingRenderer::render()
 	shaderProgram["pathTracing"]->setUniformValue("BVHnodes", 1);
 	shaderProgram["pathTracing"]->setUniformValue("triangles", 2);
 	shaderProgram["pathTracing"]->setUniformValue("materials", 3);
-	shaderProgram["pathTracing"]->setUniformValue("lights", 4);
+	shaderProgram["pathTracing"]->setUniformValue("textureMapsArrayTex", 5);
 	shaderProgram["pathTracing"]->setUniformValue("lastFrame", 7);
 	shaderProgram["pathTracing"]->setUniformValue("width", width);
 	shaderProgram["pathTracing"]->setUniformValue("height", height);
@@ -353,6 +350,7 @@ void RayTracingRenderer::render()
 	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //绘制到outputFBO保存结果
 
 	shaderProgram["output"]->release();
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	outputVAO.release();
 
 	if (isSaving) {

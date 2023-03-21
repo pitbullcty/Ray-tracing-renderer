@@ -19,10 +19,6 @@ BaseOpenGLWidget::BaseOpenGLWidget(QWidget* parent):
     setFocusPolicy(Qt::ClickFocus);
 }
 
-BaseOpenGLWidget::~BaseOpenGLWidget()
-{
-	sceneManager->clearModels();
-}
 
 void BaseOpenGLWidget::compileShader(QOpenGLShaderProgram* shaderProgram, const QString& shaderName, const QString& vertName)
 {
@@ -60,9 +56,6 @@ void BaseOpenGLWidget::clacFPS()
 
 void BaseOpenGLWidget::drawTips(const QString& tips)
 {
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_STENCIL_TEST); //禁用深度测试和模板测试
-    glDisable(GL_BLEND);
 
     QPainter painter(this);
     painter.setPen(QColor(0, 0, 0));//设置画笔颜色
@@ -74,9 +67,6 @@ void BaseOpenGLWidget::drawTips(const QString& tips)
     painter.drawText(rect(), Qt::AlignCenter, tips);
     painter.end();
 
-    glEnable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_STENCIL_TEST);
 }
 
 bool BaseOpenGLWidget::isIgnore()
