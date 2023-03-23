@@ -112,7 +112,7 @@ void MainWindowManager::loadModel(const QString& path)
 	if (currentIndex) {
 		changeRenderWindow();
 	}
-	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), isShow);
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), isShow, true);
 	ui->renderWidget->show();
 }
 
@@ -127,7 +127,7 @@ void MainWindowManager::crateScene()
 		changeRenderWindow();
 	}
 	ui->renderWidget->show();
-	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
 }
 
 void MainWindowManager::loadScene(const QString& path)
@@ -155,7 +155,7 @@ void MainWindowManager::loadScene(const QString& path)
 		changeRenderWindow();
 	}
 	isBusy = false;
-	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(),true);
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(),true, true);
 	ui->renderWidget->show();
 }
 

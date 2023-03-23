@@ -2,7 +2,7 @@
 cloc src --exclude-list-file=ignore.txt
 
 1.光源实现,待与发光颜色匹配,（shader分拆）
-2.解决拖影
+2.bvh构建提示，渲染选项提示，fps过低时提示
 
 ui方面：
 1.编辑器

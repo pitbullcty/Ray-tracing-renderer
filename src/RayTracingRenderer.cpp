@@ -197,15 +197,16 @@ void RayTracingRenderer::resizeFBO()
 }
 
 
-void RayTracingRenderer::sendDataToGPU()
+void RayTracingRenderer::sendDataToGPU(bool needSend)
 {
-	QThreadPool* global = QThreadPool::globalInstance();
-	if (global->activeThreadCount() != 0) {
-		global->clear();
-		global->waitForDone(); //等待目前线程完成
-		DataBuilder::GetInstance()->buildData(false);
-		return;
-	} //如果线程池还有耗时任务,则取消重新构建
+	if (needSend) {
+		QThreadPool* global = QThreadPool::globalInstance();
+		if (global->activeThreadCount() != 0) {
+			global->clear();
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false);
+			return;
+		} //如果线程池还有耗时任务,则取消重新构建
+	}
 
 	auto& data = DataBuilder::GetInstance()->getData(); //获取渲染数据
 	hasData = !data.encodedTriangles.isEmpty();

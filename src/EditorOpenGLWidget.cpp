@@ -204,7 +204,7 @@ void EditorOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
                     break;
                 }
             }
-            QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false); //位置改变则建立
+            QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true); //位置改变则建立
             sceneManager->addRevertModel(MOVEPOS, modelToRevert, name);
             modelToRevert = *selected;
         }

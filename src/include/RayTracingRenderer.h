@@ -30,7 +30,7 @@ public:
 	static void destory(RayTracingRenderer* rayTracingRenderer);
 
 public slots:
-	void sendDataToGPU();  //收到信号发送编码好数据至gpu端
+	void sendDataToGPU(bool needSend);  //收到信号发送编码好数据至gpu端
 
 private:
 	bool isResized;  //是否发生resize事件

@@ -105,7 +105,7 @@ void SceneManager::revertAction()
 			Model model = action.first.second;
 			models[name] = model;
 			modelLoader->addPath(model.getPath());
-			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
 		}
 		else if (action.first.first == REMOVE) {
 			removeModelByName(action.second);
@@ -119,14 +119,14 @@ void SceneManager::revertAction()
 			revertActions.pop();
 			revertActions.pop();
 			revertActions.pop();
-			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
 		}
 		else {
 			QString name = action.second;
 			auto& model = models[name];
 			model.transform = action.first.second.transform;
 			model.updateBound();
-			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
 		}
 		emit sendEditModel(nullptr);
 		emit updateList(&models, nullptr);
@@ -185,7 +185,7 @@ Model* SceneManager::removeModelByName(const QString& name)
 	} //如果要删除的是原始数据
 	addRevertModel(ADD, model, name);
 	models.remove(name);
-	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
 	emit updateList(&models, nullptr);
 	emit sendEditModel(nullptr);
 	return change;
@@ -235,7 +235,7 @@ void SceneManager::pasteModel(QVector3D pos)
 		newModel.transform.translationZ = pos.z();
 		newModel.transform.calcModel();
 		newModel.updateBound();
-		QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false);
+		QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
 		emit sendEditModel(&models[name]);
 		emit updateList(&models, &models[name]);
 	} //如果有要复制的模型

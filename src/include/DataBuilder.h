@@ -36,13 +36,13 @@ class DataBuilder:public QObject
 public:
 	static QSharedPointer<DataBuilder>& GetInstance();
 	static void destory(DataBuilder* builder);
-	void buildData(bool needTips = true);
+	void buildData(bool needTips = true, bool needSend=true);
 	void setModels(QMap<QString, Model>* models);
 	RenderData& getData(); //返回渲染数据的引用
 
 signals:
 	void Info(QString info);
-	void sendDataDone(); //数据准备好信号
+	void sendDataDone(bool needSend); //数据准备好信号
 
 private:
 	QMap<QString, Model>* models; //存放当前数据复制

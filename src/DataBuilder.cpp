@@ -25,11 +25,11 @@ void DataBuilder::destory(DataBuilder* builder)
 	delete builder;
 }
 
-void DataBuilder::buildData(bool needTips) {
+void DataBuilder::buildData(bool needTips, bool needSend) {
 
 	if (models->empty()) {
 		data.clear();
-		emit sendDataDone();
+		emit sendDataDone(false);
 		return;
 	} //模型为空则直接清空
 	QElapsedTimer timer;
@@ -39,7 +39,7 @@ void DataBuilder::buildData(bool needTips) {
 	int maxcount = int(log2(triangles.size())) + 1;
 	buildBVHHelp(0, triangles.size() - 1, maxcount, -2, MAXDIM);
 	encodeData();
-	emit sendDataDone();
+	emit sendDataDone(needSend);
 	if (needTips) emit Info("BVH建立完成，耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms");
 }
 
