@@ -4,7 +4,7 @@
 
 int main(int argc, char* argv[])
 {
-    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts); //全局共享OpenGL上下文
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts); //全局共享OpenGL上下文，全屏切换
     QApplication a(argc, argv);
 
     QTranslator translator;

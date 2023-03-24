@@ -1,14 +1,26 @@
-﻿#ifndef __INSPECTOR__
-#define __INSPECTOR__
+﻿#ifndef TOOLBOX_H
+#define TOOLBOX_H
 
-#include <QToolBox>
+#include <QWidget>
+#include <QVBoxLayout>
+#include "UiInspector.h"
+#include "InspectorPage.h"
+#include <QVBoxLayout>
 
-class Inspector :public QToolBox {
-	Q_OBJECT
+class Inspector : public QWidget
+{
+    Q_OBJECT
 
 public:
-	Inspector(QWidget* parent = 0);
+    explicit Inspector(QWidget *parent = nullptr);
+    ~Inspector();
+
+    void addWidget(const QString &title, QWidget *widget);
+
+private:
+    Ui::Inspector*ui;
+
+    QVBoxLayout *contentVBoxLayout;
 };
 
-
-#endif // !__INSPECTOR__
+#endif // TOOLBOX_H

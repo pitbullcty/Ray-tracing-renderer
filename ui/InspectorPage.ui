@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ToolPage</class>
- <widget class="QWidget" name="ToolPage">
+ <class>InspectorPage</class>
+ <widget class="QWidget" name="InspectorPage">
   <property name="geometry">
    <rect>
     <x>0</x>

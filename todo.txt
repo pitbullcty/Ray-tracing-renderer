@@ -1,4 +1,7 @@
-﻿uic ./ui/mainwindow.ui -o ./src/include/UIMainWindow.h
+﻿uic ./ui/mainwindow.ui -o ./src/Ui/UiMainWindow.h
+uic ./ui/Inspector.ui -o ./src/Ui/UiInspector.h
+uic ./ui/InspectorPage.ui -o ./src/Ui/UiInspectorPage.h
+
 cloc src --exclude-list-file=ignore.txt
 
 1.光源实现,待与发光颜色匹配,（shader分拆）

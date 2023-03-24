@@ -1,4 +1,4 @@
-/********************************************************************************
+﻿/********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
 ** Created by: Qt User Interface Compiler version 6.2.4
@@ -27,6 +27,7 @@
 #include <QtWidgets/QWidget>
 #include "src/Ui/Console.h"
 #include "src/Ui/EditorOpenGLWidget.h"
+#include "src/Ui/Inspector.h"
 #include "src/Ui/ModelListWidget.h"
 #include "src/Ui/RayTracingOpenGLWidget.h"
 
@@ -71,13 +72,14 @@ public:
     QWidget *widget_2;
     QVBoxLayout *verticalLayout_2;
     ModelListWidget *listWidget;
-    QDockWidget *dockWidgetDetails;
-    QWidget *dockWidgetContents_10;
-    QVBoxLayout *verticalLayout_5;
     QDockWidget *dockWidgetConsole;
     QWidget *consoleContents;
     QVBoxLayout *verticalLayout;
     Console *console;
+    QDockWidget *dockWidgetDetails;
+    QWidget *dockWidgetContents_10;
+    QVBoxLayout *verticalLayout_5;
+    Inspector *inspector;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -208,17 +210,6 @@ public:
 
         dockWidgetInfos->setWidget(widget_2);
         MainWindow->addDockWidget(Qt::LeftDockWidgetArea, dockWidgetInfos);
-        dockWidgetDetails = new QDockWidget(MainWindow);
-        dockWidgetDetails->setObjectName(QString::fromUtf8("dockWidgetDetails"));
-        dockWidgetDetails->setMinimumSize(QSize(200, 170));
-        dockWidgetDetails->setMaximumSize(QSize(500, 524287));
-        dockWidgetDetails->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
-        dockWidgetContents_10 = new QWidget();
-        dockWidgetContents_10->setObjectName(QString::fromUtf8("dockWidgetContents_10"));
-        verticalLayout_5 = new QVBoxLayout(dockWidgetContents_10);
-        verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
-        dockWidgetDetails->setWidget(dockWidgetContents_10);
-        MainWindow->addDockWidget(Qt::RightDockWidgetArea, dockWidgetDetails);
         dockWidgetConsole = new QDockWidget(MainWindow);
         dockWidgetConsole->setObjectName(QString::fromUtf8("dockWidgetConsole"));
         QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Minimum);
@@ -240,6 +231,22 @@ public:
 
         dockWidgetConsole->setWidget(consoleContents);
         MainWindow->addDockWidget(Qt::BottomDockWidgetArea, dockWidgetConsole);
+        dockWidgetDetails = new QDockWidget(MainWindow);
+        dockWidgetDetails->setObjectName(QString::fromUtf8("dockWidgetDetails"));
+        dockWidgetDetails->setMinimumSize(QSize(200, 170));
+        dockWidgetDetails->setMaximumSize(QSize(500, 524287));
+        dockWidgetDetails->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
+        dockWidgetContents_10 = new QWidget();
+        dockWidgetContents_10->setObjectName(QString::fromUtf8("dockWidgetContents_10"));
+        verticalLayout_5 = new QVBoxLayout(dockWidgetContents_10);
+        verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
+        inspector = new Inspector(dockWidgetContents_10);
+        inspector->setObjectName(QString::fromUtf8("inspector"));
+
+        verticalLayout_5->addWidget(inspector);
+
+        dockWidgetDetails->setWidget(dockWidgetContents_10);
+        MainWindow->addDockWidget(Qt::RightDockWidgetArea, dockWidgetDetails);
 
         menubar->addAction(menu->menuAction());
         menubar->addAction(menu_5->menuAction());
@@ -302,8 +309,8 @@ public:
         menu_5->setTitle(QCoreApplication::translate("MainWindow", "\350\256\276\347\275\256(&S)", nullptr));
         toolBar->setWindowTitle(QCoreApplication::translate("MainWindow", "toolBar", nullptr));
         dockWidgetInfos->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\250\241\345\236\213", nullptr));
-        dockWidgetDetails->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\243\200\346\237\245\345\231\250", nullptr));
         dockWidgetConsole->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\216\247\345\210\266\345\217\260", nullptr));
+        dockWidgetDetails->setWindowTitle(QCoreApplication::translate("MainWindow", "\346\243\200\346\237\245\345\231\250", nullptr));
     } // retranslateUi
 
 };

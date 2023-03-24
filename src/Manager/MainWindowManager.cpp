@@ -22,6 +22,8 @@ MainWindowManager::MainWindowManager(Ui::MainWindow* ui) : ui(ui),currentIndex(0
 	QFont font("宋体",15, QFont::Bold);
 	ui->fpslabel->setFont(font);
 	//相关设置
+	ui->inspector->addWidget("变换", new InspectorPage());
+	ui->inspector->addWidget("材质", new InspectorPage());
 
 	connect(&fpsTimer, &QTimer::timeout, this, &MainWindowManager::showSceneInfo);
 	fpsTimer.setInterval(50);
@@ -223,7 +225,6 @@ void MainWindowManager::setStyle(int style)
 void MainWindowManager::readSettings()
 {
 	if (!QFile::exists("settings.ini")) {
-		ui->console->Warning("未找到ini文件，已采用默认配置！");
 		return;
 	} //不存在文件
 	QSettings settings("settings.ini", QSettings::IniFormat);
@@ -234,6 +235,7 @@ void MainWindowManager::readSettings()
 void MainWindowManager::saveSettings()
 {
 	QSettings settings("settings.ini", QSettings::IniFormat);
+	if (lastModelPath.isEmpty() && lastScenePath.isEmpty()) return;
 	settings.setValue("dir/model", lastModelPath);
 	settings.setValue("dir/scene", lastScenePath);
 }
