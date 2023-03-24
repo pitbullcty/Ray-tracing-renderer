@@ -6,5 +6,7 @@
         <file>title.ico</file>
         <file>play.ico</file>
         <file>pause.ico</file>
+        <file>downArrow.png</file>
+        <file>leftArrow.png</file>
     </qresource>
 </RCC>

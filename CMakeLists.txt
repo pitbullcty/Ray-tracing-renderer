@@ -24,18 +24,16 @@ find_package(OpenMP REQUIRED)
 
 
 file(GLOB_RECURSE src_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE inc_files ${CMAKE_CURRENT_SOURCE_DIR}/src/include/*.h)
+file(GLOB_RECURSE inc_files ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h)
 file(GLOB_RECURSE gizmo_src_files ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libgizmo/*.cpp)
 file(GLOB_RECURSE gizmo_inc_files ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/libgizmo/*.h)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include 
-                ${ASSIMP_INCLUDE_DIR} 
-                ${OIDN_INCLUDE_DIR}
-)
+include_directories(${ASSIMP_INCLUDE_DIR} ${OIDN_INCLUDE_DIR})
 
 qt_add_resources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/shader/shader.qrc
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/theme/dark/darkstyle.qrc
-    ${CMAKE_CURRENT_SOURCE_DIR}/resources/theme/light/lightstyle.qrc
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/theme/theme.qrc
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/theme/messagebox.qrc
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/fonts/font.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/icons/icons.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/translator/translator.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/lights/lights.qrc

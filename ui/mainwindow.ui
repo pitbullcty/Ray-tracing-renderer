@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
-    <height>533</height>
+    <width>1031</width>
+    <height>692</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -108,7 +108,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>850</width>
+     <width>1031</width>
      <height>22</height>
     </rect>
    </property>
@@ -141,8 +141,8 @@
      <rect>
       <x>477</x>
       <y>126</y>
-      <width>117</width>
-      <height>44</height>
+      <width>120</width>
+      <height>50</height>
      </rect>
     </property>
     <property name="title">
@@ -214,7 +214,7 @@
    <property name="minimumSize">
     <size>
      <width>200</width>
-     <height>39</height>
+     <height>170</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -227,12 +227,14 @@
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>模型信息</string>
+    <string>检查器</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_10"/>
+   <widget class="QWidget" name="dockWidgetContents_10">
+    <layout class="QVBoxLayout" name="verticalLayout_5"/>
+   </widget>
   </widget>
   <widget class="QDockWidget" name="dockWidgetConsole">
    <property name="sizePolicy">
@@ -341,22 +343,22 @@
   <customwidget>
    <class>Console</class>
    <extends>QTextBrowser</extends>
-   <header>Console.h</header>
+   <header>src/Ui/Console.h</header>
   </customwidget>
   <customwidget>
    <class>ModelListWidget</class>
    <extends>QListWidget</extends>
-   <header>ModelListWidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>EditorOpenGLWidget</class>
-   <extends>QOpenGLWidget</extends>
-   <header>EditorOpenglWidget.h</header>
+   <header>src/Ui/ModelListWidget.h</header>
   </customwidget>
   <customwidget>
    <class>RayTracingOpenGLWidget</class>
    <extends>QOpenGLWidget</extends>
-   <header>RayTracingOpenGLWidget.h</header>
+   <header>src/Ui/RayTracingOpenGLWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EditorOpenGLWidget</class>
+   <extends>QOpenGLWidget</extends>
+   <header>src/Ui/EditorOpenGLWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

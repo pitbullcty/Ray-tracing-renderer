@@ -1,4 +1,4 @@
-﻿uic ./ui/mainwindow.ui -o ./src/include/ui_mainwindow.h
+﻿uic ./ui/mainwindow.ui -o ./src/include/UIMainWindow.h
 cloc src --exclude-list-file=ignore.txt
 
 1.光源实现,待与发光颜色匹配,（shader分拆）
