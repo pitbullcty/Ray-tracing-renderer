@@ -38,6 +38,8 @@ private:
 
 	int currentIndex;  //当前index
 
+	TransformInspector* transformInspector;
+
 	void copyLightsModel();
 	void setButtonStyle(int index);
 	void setStyle(int style = 0);

@@ -93,7 +93,9 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 
 void SceneManager::getEditModel(const QString& name)
 {
-	emit sendEditModel(&models[name]);
+	auto model = &models[name];
+	emit sendEditModel(model);
+	emit sendInspectorModel(model);
 }
 
 void SceneManager::revertAction()
@@ -130,6 +132,7 @@ void SceneManager::revertAction()
 		}
 		emit sendEditModel(nullptr);
 		emit updateList(&models, nullptr);
+		emit sendInspectorModel(nullptr);
 	}
 }
 
@@ -303,6 +306,7 @@ Model* SceneManager::getSelected(int posx, int posy)
 		} //寻找最近交点
 	}
 	emit updateList(&models, selected);
+	emit sendInspectorModel(selected);
 	return selected;
 }
 

@@ -9,11 +9,13 @@
 #include <QLabel>
 #include <QFile>
 
+
 class InspectorPage : public QWidget
 {
     Q_OBJECT
 
 public:
+
     explicit InspectorPage(QWidget *parent = nullptr);
     ~InspectorPage();
 

@@ -13,12 +13,14 @@ enum GIZMO_TYPE {
 	SCALE
 };
 
-class Gizmo {
+class Gizmo:public QObject{
+
+	Q_OBJECT
+
 public:
 	Gizmo(QOpenGLExtraFunctions* _functions, QOpenGLShaderProgram* _program);
 	Gizmo() = default;
 	~Gizmo();
-	void setEditModel(Model* model);
 	void setSize(int w, int h);
 	void setScale(float scale);
 	void setCamera(const QMatrix4x4& view, const QMatrix4x4& proj);
@@ -29,6 +31,12 @@ public:
 	void setLocate(IGizmo::LOCATION location);
 	bool isChange(const QMatrix4x4& modelMatrix);
 	void Draw();
+
+signals:
+	void sendChanged();
+
+public slots:
+	void setEditModel(Model* model);
 
 private:
 	Model* model; //挂载的模型

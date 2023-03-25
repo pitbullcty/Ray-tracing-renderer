@@ -14,39 +14,13 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
+   <item row="9" column="0">
+    <widget class="QLabel" name="label_9">
      <property name="toolTip">
-      <string>编辑物体三维坐标</string>
-     </property>
-     <property name="whatsThis">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>编辑物体缩放</string>
      </property>
      <property name="text">
-      <string>位置</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_3">
-     <property name="toolTip">
-      <string>物体的y坐标</string>
-     </property>
-     <property name="text">
-      <string>y:</string>
+      <string>缩放</string>
      </property>
     </widget>
    </item>
@@ -60,107 +34,42 @@
      </property>
     </widget>
    </item>
-   <item row="10" column="0">
-    <widget class="QLabel" name="label_10">
-     <property name="toolTip">
-      <string>物体x轴缩放大小</string>
+   <item row="1" column="3">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxPosX">
+     <property name="minimum">
+      <double>-1000000000.000000000000000</double>
      </property>
-     <property name="text">
-      <string>Sx:</string>
+     <property name="maximum">
+      <double>1000000000.000000000000000</double>
      </property>
-    </widget>
-   </item>
-   <item row="7" column="1">
-    <widget class="QSpinBox" name="spinBox_5"/>
-   </item>
-   <item row="3" column="1">
-    <widget class="QSpinBox" name="spinBox_3"/>
-   </item>
-   <item row="8" column="1">
-    <widget class="QSpinBox" name="spinBox_6"/>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="toolTip">
-      <string>物体的x坐标</string>
-     </property>
-     <property name="text">
-      <string>x:</string>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
      </property>
     </widget>
    </item>
-   <item row="9" column="0">
-    <widget class="QLabel" name="label_9">
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
      <property name="toolTip">
-      <string>编辑物体缩放</string>
+      <string>物体的y坐标</string>
      </property>
      <property name="text">
-      <string>缩放</string>
+      <string>y:</string>
      </property>
     </widget>
    </item>
-   <item row="11" column="1">
-    <widget class="QSpinBox" name="spinBox_8"/>
-   </item>
-   <item row="8" column="0">
-    <widget class="QLabel" name="label_8">
-     <property name="toolTip">
-      <string>物体绕z轴旋转角度</string>
+   <item row="7" column="3">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxRotationY">
+     <property name="suffix">
+      <string>°</string>
      </property>
-     <property name="text">
-      <string>γ:</string>
+     <property name="maximum">
+      <double>1000000000.000000000000000</double>
      </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="1">
-    <widget class="QSpinBox" name="spinBox_2"/>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="label_5">
-     <property name="toolTip">
-      <string>编辑物体的旋转角度</string>
-     </property>
-     <property name="text">
-      <string>旋转</string>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="1">
-    <spacer name="horizontalSpacer_3">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="10" column="1">
-    <widget class="QSpinBox" name="spinBox_7"/>
-   </item>
-   <item row="11" column="0">
-    <widget class="QLabel" name="label_11">
-     <property name="toolTip">
-      <string>物体y轴缩放大小</string>
-     </property>
-     <property name="text">
-      <string>Sy:</string>
+     <property name="value">
+      <double>0.000000000000000</double>
      </property>
     </widget>
    </item>
@@ -174,11 +83,18 @@
      </property>
     </widget>
    </item>
-   <item row="5" column="1">
-    <widget class="QSpinBox" name="spinBox_4"/>
-   </item>
-   <item row="1" column="1">
-    <widget class="QSpinBox" name="spinBox"/>
+   <item row="2" column="3">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxPosY">
+     <property name="minimum">
+      <double>-1000000000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+     </property>
+    </widget>
    </item>
    <item row="7" column="0">
     <widget class="QLabel" name="label_7">
@@ -187,6 +103,85 @@
      </property>
      <property name="text">
       <string>β:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="3">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="3" column="3">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxPosZ">
+     <property name="minimum">
+      <double>-1000000000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="toolTip">
+      <string>物体的x坐标</string>
+     </property>
+     <property name="text">
+      <string>x:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <widget class="QLabel" name="label_10">
+     <property name="toolTip">
+      <string>物体x轴缩放大小</string>
+     </property>
+     <property name="text">
+      <string>Sx:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="11" column="0">
+    <widget class="QLabel" name="label_11">
+     <property name="toolTip">
+      <string>物体y轴缩放大小</string>
+     </property>
+     <property name="text">
+      <string>Sy:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="toolTip">
+      <string>编辑物体的旋转角度</string>
+     </property>
+     <property name="text">
+      <string>旋转</string>
      </property>
     </widget>
    </item>
@@ -200,8 +195,121 @@
      </property>
     </widget>
    </item>
-   <item row="12" column="1">
-    <widget class="QSpinBox" name="spinBox_9"/>
+   <item row="8" column="3">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxRotationZ">
+     <property name="suffix">
+      <string>°</string>
+     </property>
+     <property name="minimum">
+      <double>-1000000000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+     </property>
+     <property name="value">
+      <double>0.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="label_8">
+     <property name="toolTip">
+      <string>物体绕z轴旋转角度</string>
+     </property>
+     <property name="text">
+      <string>γ:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="3">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxRotationX">
+     <property name="suffix">
+      <string>°</string>
+     </property>
+     <property name="minimum">
+      <double>-1000000000.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="toolTip">
+      <string>编辑物体三维坐标</string>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>位置</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="3">
+    <spacer name="horizontalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="10" column="3">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxScaleX">
+     <property name="minimum">
+      <double>0.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+     </property>
+     <property name="value">
+      <double>0.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="3">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxScaleY">
+     <property name="minimum">
+      <double>0.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+     </property>
+     <property name="value">
+      <double>0.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="3">
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxScaleZ">
+     <property name="minimum">
+      <double>0.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1000000000.000000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

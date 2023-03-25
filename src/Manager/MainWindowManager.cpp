@@ -2,7 +2,10 @@
 
 extern bool isBusy;
 
-MainWindowManager::MainWindowManager(Ui::MainWindow* ui) : ui(ui),currentIndex(0)
+MainWindowManager::MainWindowManager(Ui::MainWindow* ui) : 
+	ui(ui),
+	transformInspector(new TransformInspector),
+	currentIndex(0)
 {
 	copyLightsModel(); 
 	setStyle();
@@ -22,13 +25,14 @@ MainWindowManager::MainWindowManager(Ui::MainWindow* ui) : ui(ui),currentIndex(0
 	QFont font("宋体",15, QFont::Bold);
 	ui->fpslabel->setFont(font);
 	//相关设置
-	ui->inspector->addWidget("变换", new TransformInspector);
+	ui->inspector->addWidget("变换", transformInspector);
 
 }
 
 MainWindowManager::~MainWindowManager()
 {
 	ui = nullptr;
+	transformInspector = nullptr;
 	saveSettings();
 }
 
@@ -57,6 +61,7 @@ void MainWindowManager::bindSignals()
 	connect(seceneManager.data(), &SceneManager::Error, ui->console, &Console::Error);
 	connect(seceneManager.data(), &SceneManager::Clear, ui->console, &Console::Clear);
 	connect(seceneManager.data(), &SceneManager::sendSceneName, this, &MainWindowManager::showSceneName);
+	connect(seceneManager.data(), &SceneManager::sendInspectorModel, transformInspector, &TransformInspector::bindModel);
 
 	auto& modelLoader = ModelLoader::GetInstance();
 	connect(modelLoader.data(), &ModelLoader::Info, ui->console, &Console::Info);
@@ -73,6 +78,12 @@ void MainWindowManager::bindSignals()
 
 	connect(ui->editor, &EditorOpenGLWidget::sendHideRenderWidget, this, &MainWindowManager::hideRenderWidget);
 	connect(ui->editor, &EditorOpenGLWidget::sendFPS, this, &MainWindowManager::showFPS);
+
+	auto gizmo = ui->editor->getEditorRenderer()->getGizmo();
+	connect(transformInspector, &TransformInspector::sendEditModel, gizmo.data(), &Gizmo::setEditModel);
+	connect(gizmo.data(), &Gizmo::sendChanged, transformInspector, &TransformInspector::setData);
+
+	connect(transformInspector, &TransformInspector::sendRevertModel, ui->editor, &EditorOpenGLWidget::addRevertModel);
 
 	connect(ui->renderButton, &QPushButton::clicked, this, &MainWindowManager::changeRenderWindow);
 
@@ -103,6 +114,7 @@ void MainWindowManager::loadModel(const QString& path)
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	if (sceneManager->getState() == NONE) {
 		sceneManager->createScene();
+		ui->inspector->expandAll();
 	}
 	if (path.contains("/lights/rectlight.obj") || path.contains("/lights/spherelight.obj")) {
 		sceneManager->addModel(fileName, "", false, true); //路径为添加灯光
@@ -132,6 +144,7 @@ void MainWindowManager::crateScene()
 		changeRenderWindow();
 	}
 	ui->renderWidget->show();
+	ui->inspector->expandAll();
 	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
 }
 
@@ -160,6 +173,7 @@ void MainWindowManager::loadScene(const QString& path)
 		changeRenderWindow();
 	}
 	isBusy = false;
+	ui->inspector->expandAll();
 	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(),true, true);
 	ui->renderWidget->show();
 }
@@ -197,6 +211,7 @@ void MainWindowManager::closeScene()
 	if (currentIndex) {
 		changeRenderWindow();
 	}
+	ui->inspector->collapseAll();
 	ui->renderWidget->hide();
 }
 

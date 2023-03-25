@@ -19,12 +19,6 @@ InspectorPage::InspectorPage(QWidget *parent) :
     layout->addStretch(1);
     layout->addWidget(label);
 
-    QFile file(":/qss/toolpage.qss");
-    if (file.open(QIODevice::ReadOnly)) {
-        setStyleSheet(file.readAll());
-    }
-    file.close();
-
     connect(ui->pushButtonFold, &QPushButton::clicked, this, &InspectorPage::onPushButtonFoldClicked);
 }
 
@@ -37,6 +31,7 @@ void InspectorPage::addWidget(const QString &title, QWidget *widget)
 {
     ui->pushButtonFold->setText(title);
     ui->verticalLayoutContent->addWidget(widget);
+    collapse();
 }
 
 void InspectorPage::expand()

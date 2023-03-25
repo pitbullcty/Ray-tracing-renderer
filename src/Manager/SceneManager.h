@@ -71,6 +71,7 @@ signals:
 	void Clear();
 	void sendEditModel(Model* model);
 	void sendSceneName(const QString& name);
+	void sendInspectorModel(Model* model);
 
 public slots:
 	Model* removeModelByName(const QString& name);

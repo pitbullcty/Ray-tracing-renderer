@@ -196,18 +196,9 @@ void EditorOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
     if (isLeftClicked) {
         editorRenderer->getGizmo()->mouseUp(x, y);
         if (editorRenderer->getGizmo()->isChange(lastEdit)) {
-            auto models = sceneManager->getModels();
-            auto selected = editorRenderer->getSelected();
-            QString name;
-            for (auto it = models->begin(); it != models->end(); it++) {
-                if (&it.value() == selected) {
-                    name = it.key();
-                    break;
-                }
-            }
             QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true); //位置改变则建立
-            sceneManager->addRevertModel(MOVEPOS, modelToRevert, name);
-            modelToRevert = *selected;
+            auto selected = editorRenderer->getSelected();
+            addRevertModel(selected);
         }
         isLeftClicked = false;
     }
@@ -233,4 +224,15 @@ void EditorOpenGLWidget::wheelEvent(QWheelEvent* event)
     processWheel(event);
 }
 
-
+void EditorOpenGLWidget::addRevertModel(Model* model){
+    auto models = sceneManager->getModels();
+    QString name;
+    for (auto it = models->begin(); it != models->end(); it++) {
+        if (&it.value() == model) {
+            name = it.key();
+            break;
+        }
+    }
+    sceneManager->addRevertModel(MOVEPOS, modelToRevert, name);
+    modelToRevert = *model;
+}

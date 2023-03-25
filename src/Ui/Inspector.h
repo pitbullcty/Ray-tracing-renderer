@@ -16,11 +16,13 @@ public:
     ~Inspector();
 
     void addWidget(const QString &title, QWidget *widget);
+    void expandAll();
+    void collapseAll();
 
 private:
     Ui::Inspector*ui;
-
     QVBoxLayout *contentVBoxLayout;
+
 };
 
 #endif // TOOLBOX_H

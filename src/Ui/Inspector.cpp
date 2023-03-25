@@ -29,6 +29,24 @@ void Inspector::addWidget(const QString &title, QWidget *widget)
 {
     InspectorPage* page = new InspectorPage(this);
     page->addWidget(title, widget);
-
     contentVBoxLayout->addWidget(page);
+
 }
+
+void Inspector::expandAll()
+{
+    for (int i = 0; i < contentVBoxLayout->count(); i++) {
+        auto page = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(i)->widget());
+        page->expand();
+    }
+}
+
+void Inspector::collapseAll()
+{
+    for (int i = 0; i < contentVBoxLayout->count(); i++) {
+        auto page = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(i)->widget());
+        page->collapse();
+    }
+}
+
+

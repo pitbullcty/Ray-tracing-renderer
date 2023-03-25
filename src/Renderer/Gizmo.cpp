@@ -108,6 +108,7 @@ void Gizmo::mouseMove(int x, int y)
 	if (!model) return;
 	gizmo->OnMouseMove(x, y);  //采用消除旋转策略
 	applyToModel();
+	emit sendChanged();
 }
 
 bool Gizmo::mouseDown(int x, int y)
