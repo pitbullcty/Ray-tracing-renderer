@@ -45,6 +45,7 @@ void RayTracingOpenGLWidget::paintGL()
         }
         else rayTracingRenderer->render();
         clacFPS();
+        emit sendFPS(fps);
     }
     update();
 }

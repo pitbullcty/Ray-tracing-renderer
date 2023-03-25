@@ -22,12 +22,8 @@ MainWindowManager::MainWindowManager(Ui::MainWindow* ui) : ui(ui),currentIndex(0
 	QFont font("宋体",15, QFont::Bold);
 	ui->fpslabel->setFont(font);
 	//相关设置
-	ui->inspector->addWidget("变换", new InspectorPage());
-	ui->inspector->addWidget("材质", new InspectorPage());
+	ui->inspector->addWidget("变换", new TransformInspector);
 
-	connect(&fpsTimer, &QTimer::timeout, this, &MainWindowManager::showSceneInfo);
-	fpsTimer.setInterval(50);
-	fpsTimer.start();
 }
 
 MainWindowManager::~MainWindowManager()
@@ -60,6 +56,7 @@ void MainWindowManager::bindSignals()
 	connect(seceneManager.data(), &SceneManager::Info, ui->console, &Console::Info);
 	connect(seceneManager.data(), &SceneManager::Error, ui->console, &Console::Error);
 	connect(seceneManager.data(), &SceneManager::Clear, ui->console, &Console::Clear);
+	connect(seceneManager.data(), &SceneManager::sendSceneName, this, &MainWindowManager::showSceneName);
 
 	auto& modelLoader = ModelLoader::GetInstance();
 	connect(modelLoader.data(), &ModelLoader::Info, ui->console, &Console::Info);
@@ -71,9 +68,11 @@ void MainWindowManager::bindSignals()
 	connect(dataBuilder.data(), &DataBuilder::Info, ui->console, &Console::Info);
 
 	connect(ui->rayTracing, &RayTracingOpenGLWidget::Info, ui->console, &Console::Info);
-	connect(ui->rayTracing, &RayTracingOpenGLWidget::SendHideRenderWidget, this, &MainWindowManager::hideRenderWidget);
+	connect(ui->rayTracing, &RayTracingOpenGLWidget::sendHideRenderWidget, this, &MainWindowManager::hideRenderWidget);
+	connect(ui->rayTracing, &RayTracingOpenGLWidget::sendFPS, this, &MainWindowManager::showFPS);
 
-	connect(ui->editor, &EditorOpenGLWidget::SendHideRenderWidget, this, &MainWindowManager::hideRenderWidget);
+	connect(ui->editor, &EditorOpenGLWidget::sendHideRenderWidget, this, &MainWindowManager::hideRenderWidget);
+	connect(ui->editor, &EditorOpenGLWidget::sendFPS, this, &MainWindowManager::showFPS);
 
 	connect(ui->renderButton, &QPushButton::clicked, this, &MainWindowManager::changeRenderWindow);
 
@@ -240,6 +239,18 @@ void MainWindowManager::saveSettings()
 	settings.setValue("dir/scene", lastScenePath);
 }
 
+void MainWindowManager::showFPS(int fps)
+{
+	if (fps) {
+		ui->fpslabel->setText("FPS:" + QString::number(fps));
+	}
+}
+
+void MainWindowManager::showSceneName(const QString& sceneName)
+{
+	ui->groupBox->setTitle(sceneName);
+}
+
 void MainWindowManager::loadSceneFromAction()
 {
 	loadScene("");
@@ -278,22 +289,6 @@ void MainWindowManager::copyLightsModel()
 		QFile::copy(":/light/rectlight.obj", rectPath);
 }
 
-void MainWindowManager::showSceneInfo()
-{
-	auto sceneManager = ui->editor->getSceneManager();
-	ui->groupBox->setTitle(sceneManager->getSceneName());
-	if (ui->renderWidget->isHidden()) {
-		ui->fpslabel->setText("");
-		return;
-	}
-	int fps = 0;
-	if (currentIndex) fps = ui->rayTracing->getFPS();
-	else fps = ui->editor->getFPS();
-	if (fps) {
-		ui->fpslabel->setText("FPS:" + QString::number(fps));
-	}
-}
-
 void MainWindowManager::setButtonStyle(int index)
 {
 	if (index) {
@@ -308,7 +303,6 @@ void MainWindowManager::setButtonStyle(int index)
 		ui->editor->setFocus();
 	}
 }
-
 
 void MainWindowManager::loadModelFromAction() 
 {

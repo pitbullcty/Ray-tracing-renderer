@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TransformInspector</class>
+ <widget class="QWidget" name="TransformInspector">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>558</width>
+    <height>346</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="toolTip">
+      <string>编辑物体三维坐标</string>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>位置</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="toolTip">
+      <string>物体的y坐标</string>
+     </property>
+     <property name="text">
+      <string>y:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="toolTip">
+      <string>物体的z坐标</string>
+     </property>
+     <property name="text">
+      <string>z:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="0">
+    <widget class="QLabel" name="label_10">
+     <property name="toolTip">
+      <string>物体x轴缩放大小</string>
+     </property>
+     <property name="text">
+      <string>Sx:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1">
+    <widget class="QSpinBox" name="spinBox_5"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="QSpinBox" name="spinBox_3"/>
+   </item>
+   <item row="8" column="1">
+    <widget class="QSpinBox" name="spinBox_6"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="toolTip">
+      <string>物体的x坐标</string>
+     </property>
+     <property name="text">
+      <string>x:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QLabel" name="label_9">
+     <property name="toolTip">
+      <string>编辑物体缩放</string>
+     </property>
+     <property name="text">
+      <string>缩放</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="1">
+    <widget class="QSpinBox" name="spinBox_8"/>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="label_8">
+     <property name="toolTip">
+      <string>物体绕z轴旋转角度</string>
+     </property>
+     <property name="text">
+      <string>γ:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="1">
+    <widget class="QSpinBox" name="spinBox_2"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="toolTip">
+      <string>编辑物体的旋转角度</string>
+     </property>
+     <property name="text">
+      <string>旋转</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <spacer name="horizontalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="10" column="1">
+    <widget class="QSpinBox" name="spinBox_7"/>
+   </item>
+   <item row="11" column="0">
+    <widget class="QLabel" name="label_11">
+     <property name="toolTip">
+      <string>物体y轴缩放大小</string>
+     </property>
+     <property name="text">
+      <string>Sy:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="label_6">
+     <property name="toolTip">
+      <string>物体绕x轴旋转角度</string>
+     </property>
+     <property name="text">
+      <string>α:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QSpinBox" name="spinBox_4"/>
+   </item>
+   <item row="1" column="1">
+    <widget class="QSpinBox" name="spinBox"/>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="toolTip">
+      <string>物体绕y轴旋转角度</string>
+     </property>
+     <property name="text">
+      <string>β:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="0">
+    <widget class="QLabel" name="label_12">
+     <property name="toolTip">
+      <string>物体z轴缩放大小</string>
+     </property>
+     <property name="text">
+      <string>Sz:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1">
+    <widget class="QSpinBox" name="spinBox_9"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

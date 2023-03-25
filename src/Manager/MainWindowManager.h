@@ -2,6 +2,7 @@
 #define __MAIN_WINDOW_MANAGER__
 
 #include "src/Ui/UIMainWindow.h"
+#include "src/Ui/TransformInspector.h"
 #include <QtConcurrent>
 #include <QAction>
 #include <QFile>
@@ -34,17 +35,18 @@ private:
 	Ui::MainWindow* ui;
 	QString lastModelPath;
 	QString lastScenePath; //上次打开位置
-	QTimer fpsTimer;
 
 	int currentIndex;  //当前index
 
 	void copyLightsModel();
-	void showSceneInfo();
 	void setButtonStyle(int index);
 	void setStyle(int style = 0);
+
 	void readSettings();
 	void saveSettings();
 
+	void showFPS(int fps);
+	void showSceneName(const QString& sceneName);
 };
 
 #endif

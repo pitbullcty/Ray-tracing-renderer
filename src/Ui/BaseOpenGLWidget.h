@@ -24,7 +24,8 @@ public:
 
 signals:
     void Info(QString info);
-    void SendHideRenderWidget(bool isHide);
+    void sendHideRenderWidget(bool isHide);
+    void sendFPS(int fps);
 
 protected:
 

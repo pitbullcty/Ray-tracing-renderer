@@ -58,6 +58,7 @@ void EditorOpenGLWidget::paintGL()
         editorRenderer->renderAABB();
         editorRenderer->renderGizmo(); //最后渲染gizmo避免被遮挡 
         clacFPS();
+        emit sendFPS(fps);
     }
     update();
 }

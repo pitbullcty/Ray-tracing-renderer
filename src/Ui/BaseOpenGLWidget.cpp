@@ -158,7 +158,7 @@ bool BaseOpenGLWidget::changeFullScreen(Qt::Key key)
         if (!isFullScreen) {
             setWindowFlags(Qt::Window);
             isFullScreen = true;
-            emit SendHideRenderWidget(isFullScreen);
+            emit sendHideRenderWidget(isFullScreen);
             setFocus();
             showFullScreen();
         }
@@ -169,7 +169,7 @@ bool BaseOpenGLWidget::changeFullScreen(Qt::Key key)
             setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint); //去除边框和按钮
             setWindowFlag(Qt::SubWindow);
             isFullScreen = false;
-            emit SendHideRenderWidget(isFullScreen);
+            emit sendHideRenderWidget(isFullScreen);
             setFocus();
             showNormal();
         }

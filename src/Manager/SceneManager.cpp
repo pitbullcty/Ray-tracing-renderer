@@ -421,6 +421,7 @@ void SceneManager::loadScene(const QString& path)
 		camera->reSet();
 		sceneFileName = "";
 		sceneName = "";
+		emit sendSceneName(sceneName);
 		state = NONE;
 		return;
 	}
@@ -428,6 +429,7 @@ void SceneManager::loadScene(const QString& path)
 		QString loadSceneTime = "场景加载成功！耗时：" + QString::number(timer.elapsed(), 'f', 2) + "ms";
 		sceneFileName = path;
 		sceneName = QFileInfo(sceneFileName).baseName();
+		emit sendSceneName(sceneName);
 		emit Info(loadSceneTime);
 	}
 	state = CREATED;
@@ -443,6 +445,7 @@ bool SceneManager::saveScene()
 		if (!savePath.isEmpty()) {
 			sceneFileName = savePath;
 			sceneName = QFileInfo(sceneFileName).baseName();
+			emit sendSceneName(sceneName);
 		}
 		else
 			return false;
@@ -475,6 +478,7 @@ void SceneManager::createScene()
 	emit Clear();
 	sceneFileName =""; 
 	sceneName = "新场景";
+	emit sendSceneName(sceneName);
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();
@@ -488,6 +492,7 @@ void SceneManager::closeScene()
 	emit Clear();
 	sceneFileName =""; 
 	sceneName ="";//清除保存文件名
+	emit sendSceneName(sceneName);
 	clearModels();
 	modelLoader->clearPathes(); //清除现有模型
 	camera->reSet();

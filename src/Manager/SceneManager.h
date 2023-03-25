@@ -70,6 +70,7 @@ signals:
 	void Error(QString error);
 	void Clear();
 	void sendEditModel(Model* model);
+	void sendSceneName(const QString& name);
 
 public slots:
 	Model* removeModelByName(const QString& name);
