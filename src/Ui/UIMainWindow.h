@@ -1,4 +1,4 @@
-﻿/********************************************************************************
+/********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
 ** Created by: Qt User Interface Compiler version 6.2.4
@@ -233,7 +233,7 @@ public:
         MainWindow->addDockWidget(Qt::BottomDockWidgetArea, dockWidgetConsole);
         dockWidgetDetails = new QDockWidget(MainWindow);
         dockWidgetDetails->setObjectName(QString::fromUtf8("dockWidgetDetails"));
-        dockWidgetDetails->setMinimumSize(QSize(200, 170));
+        dockWidgetDetails->setMinimumSize(QSize(270, 170));
         dockWidgetDetails->setMaximumSize(QSize(500, 524287));
         dockWidgetDetails->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
         dockWidgetContents_10 = new QWidget();

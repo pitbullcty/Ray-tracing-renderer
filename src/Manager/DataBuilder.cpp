@@ -25,20 +25,27 @@ void DataBuilder::destory(DataBuilder* builder)
 	delete builder;
 }
 
-void DataBuilder::buildData(bool needTips, bool needSend) {
+void DataBuilder::buildData(bool needTips, bool needRebuild, bool needSend) {
 
 	if (models->empty()) {
 		data.clear();
 		emit sendDataDone(false);
 		return;
 	} //模型为空则直接清空
+
 	QElapsedTimer timer;
 	timer.start();
-	if(needTips) emit Info("正在构建BVH...");
-	flattenAndBuildData(); //展平数据并且构建BVH
-	int maxcount = int(log2(triangles.size())) + 1;
-	buildBVHHelp(0, triangles.size() - 1, maxcount, -2, MAXDIM);
-	encodeData();
+	if (needTips) emit Info("正在构建BVH...");
+
+	flattenAndBuildData(needRebuild);
+
+	if (needRebuild) {
+		int maxcount = int(log2(triangles.size())) + 1;
+		buildBVHHelp(0, triangles.size() - 1, maxcount, -2, MAXDIM);
+	}  //展平数据并且构建BVH
+
+	encodeData(needRebuild);
+
 	emit sendDataDone(needSend);
 	if (needTips) emit Info("BVH建立完成，耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms");
 }
@@ -125,58 +132,69 @@ int DataBuilder::buildBVHHelp(int l, int r, int maxCount, int parent, STRATEGY s
 	return id;
 }
 
-void DataBuilder::flattenAndBuildData()
+void DataBuilder::flattenAndBuildData(bool needRebuild)
 {
 	int meshindex = 0;
 	int modelIndex = 0;
-	if (!triangles.isEmpty()) triangles.clear();
-	if (!bvh.isEmpty()) bvh.clear();
-	bvh.emplace_back(BVHNode());
-	if (!texInfo.isEmpty()) texInfo.clear();
-	if (!textureIndex.isEmpty()) textureIndex.clear();
-	if (!modelMaterialsFlatten.isEmpty()) modelMaterialsFlatten.clear();
-	data.clear(); //清空原有数据
+
+	if (needRebuild) {
+		triangles.clear();
+		bvh.clear();
+		bvh.emplace_back(BVHNode());
+		texInfo.clear();
+		textureIndex.clear();
+		modelMaterialsFlatten.clear();
+		data.clear(); //清空相关数据
+	}
+	modelMaterialsFlatten.clear();
+
+	if (models->empty()) return;
+
 	for (auto it = models->begin(); it != models->end(); it++) {
 		auto& model = it.value();
-		auto modelMatrix = model.transform.getModel();
-		QVector<QSharedPointer<Mesh>> meshes;
-		if (model.isCopy()) {
-			meshes = model.getCopy()->getMeshes();
-		}
-		else meshes = model.getMeshes();
-		for (auto& mesh : meshes) {
-			for (int i = 0; i < mesh->indices.size() / 3; i++) {
-				auto a = mesh->vertices[mesh->indices[i * 3]];
-				auto b = mesh->vertices[mesh->indices[i * 3 + 1]];
-				auto c = mesh->vertices[mesh->indices[i * 3 + 2]];
-				Triangle tri(a.map(modelMatrix), b.map(modelMatrix), c.map(modelMatrix),
-					meshindex, modelIndex);
-				triangles.emplace_back(tri);
-			} //建立三角形
-			QVector<QPair<QString, int>> temp;
-			for (auto& texture : mesh->textures) {
-				if (!model.isCopy()) {
-					QImage tex(texture.path);
-					tex = tex.convertToFormat(QImage::Format_RGBA8888);
-					int texWidth = tex.width();
-					int texHeight = tex.height();
-					if (texWidth != Texturesize || texHeight != Texturesize){
-						tex = tex.scaled(Texturesize, Texturesize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation); //改变图片大小
-					}
-					data.encodedTexture.emplace_back(tex);
-					int index = data.encodedTexture.size() - 1;
-					textureIndex.insert(texture.id, index);
-					temp.emplace_back(qMakePair<>(texture.type, index));
-				}
-				else {
-					int index = textureIndex[texture.id];
-					temp.emplace_back(qMakePair<>(texture.type, index));
-				}
-				
+		
+		if (needRebuild) {
+			auto modelMatrix = model.transform.getModel();
+			QVector<QSharedPointer<Mesh>> meshes;
+			if (model.isCopy()) {
+				meshes = model.getCopy()->getMeshes();
 			}
-			texInfo.insert(meshindex, temp);
-			meshindex++; //meshID增加
-		}
+			else meshes = model.getMeshes();
+			for (auto& mesh : meshes) {
+				for (int i = 0; i < mesh->indices.size() / 3; i++) {
+					auto a = mesh->vertices[mesh->indices[i * 3]];
+					auto b = mesh->vertices[mesh->indices[i * 3 + 1]];
+					auto c = mesh->vertices[mesh->indices[i * 3 + 2]];
+					Triangle tri(a.map(modelMatrix), b.map(modelMatrix), c.map(modelMatrix),
+						meshindex, modelIndex);
+					triangles.emplace_back(tri);
+				} //建立三角形
+				QVector<QPair<QString, int>> temp;
+				for (auto& texture : mesh->textures) {
+					if (!model.isCopy()) {
+						QImage tex(texture.path);
+						tex = tex.convertToFormat(QImage::Format_RGBA8888);
+						int texWidth = tex.width();
+						int texHeight = tex.height();
+						if (texWidth != Texturesize || texHeight != Texturesize) {
+							tex = tex.scaled(Texturesize, Texturesize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation); //改变图片大小
+						}
+						data.encodedTexture.emplace_back(tex);
+						int index = data.encodedTexture.size() - 1;
+						textureIndex.insert(texture.id, index);
+						temp.emplace_back(qMakePair<>(texture.type, index));
+					}
+					else {
+						int index = textureIndex[texture.id];
+						temp.emplace_back(qMakePair<>(texture.type, index));
+					}
+
+				}
+				texInfo.insert(meshindex, temp);
+				meshindex++; //meshID增加
+			}
+		} //重建所有数据
+		
 		if (model.isLight()) modelMaterialsFlatten.emplace_back(model.lightMaterial.toModelMaterial());
 		else modelMaterialsFlatten.emplace_back(model.modelMaterial);
 		modelIndex++;
@@ -193,28 +211,15 @@ RenderData& DataBuilder::getData()
 	return data;
 }
 
-void DataBuilder::encodeData()
+void DataBuilder::encodeData(bool needRebuild)
 {
+	if (!needRebuild) data.encodedMaterials.clear();
 
 	for (auto& triangle : triangles) {
 		TriangleEncoded tri;
 
 		int meshIndex = triangle.meshIndex; //获取纹理索引
 		int modelIndex = triangle.modelIndex; //获取顶点索引
-
-		tri.a = triangle.a.pos;
-		tri.b = triangle.b.pos;
-		tri.c = triangle.c.pos;
-		
-		tri.n1 = triangle.a.normal;
-		tri.n2 = triangle.b.normal;
-		tri.n3 = triangle.c.normal;
-
-		tri.texcoord1 = { triangle.a.texCoords, -1.0f};
-		tri.texcoord2 = { triangle.b.texCoords, -1.0f};
-		tri.texcoord3 = { triangle.c.texCoords, -1.0f};
-
-		data.encodedTriangles.emplace_back(tri);
 
 		auto& material = modelMaterialsFlatten.at(modelIndex); //获取材质
 		auto& infos = texInfo[meshIndex];
@@ -227,7 +232,26 @@ void DataBuilder::encodeData()
 			if (info.first == "texture_emissive") encoded.param5.setY(info.second);
 		} //设置材质类型
 		data.encodedMaterials.emplace_back(encoded);
+
+		if (needRebuild) {
+			tri.a = triangle.a.pos;
+			tri.b = triangle.b.pos;
+			tri.c = triangle.c.pos;
+
+			tri.n1 = triangle.a.normal;
+			tri.n2 = triangle.b.normal;
+			tri.n3 = triangle.c.normal;
+
+			tri.texcoord1 = { triangle.a.texCoords, -1.0f };
+			tri.texcoord2 = { triangle.b.texCoords, -1.0f };
+			tri.texcoord3 = { triangle.c.texCoords, -1.0f };
+
+			data.encodedTriangles.emplace_back(tri);
+		}
+
 	}  //编码材质，三角形
+
+	if (!needRebuild) return; //不需要重建则直接返回
 
 	for (auto& node:bvh) {
 		BVHNodeEncoded encodeNode;
@@ -238,13 +262,10 @@ void DataBuilder::encodeData()
 		data.encodedBVH.emplace_back(encodeNode);
 	} //编码
 
-	texInfo.clear();
-	textureIndex.clear();
-	modelMaterialsFlatten.clear();
-	bvh.clear(); //释放临时内存
 }
 
-DataBuilder::DataBuilder():models(nullptr)
+DataBuilder::DataBuilder():
+	models(nullptr)
 {
 	;
 }

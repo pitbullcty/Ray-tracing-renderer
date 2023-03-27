@@ -36,7 +36,7 @@ class DataBuilder:public QObject
 public:
 	static QSharedPointer<DataBuilder>& GetInstance();
 	static void destory(DataBuilder* builder);
-	void buildData(bool needTips = true, bool needSend=true);
+	void buildData(bool needTips = true, bool needRebuild = true, bool needSend=true);
 	void setModels(QMap<QString, Model>* models);
 	RenderData& getData(); //返回渲染数据的引用
 
@@ -61,8 +61,8 @@ private:
 
 	int buildBVHHelp(int l, int r, int maxCount, int parent = -2, STRATEGY stratgey = MAXDIM);
 	int findSplitAxis(int l, int r, float& cost); //找到最佳分割轴
-	void flattenAndBuildData();
-	void encodeData();
+	void flattenAndBuildData(bool needRebuild);
+	void encodeData(bool needRebuild);
 };
 
 #endif 

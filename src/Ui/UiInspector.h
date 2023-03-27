@@ -1,4 +1,4 @@
-﻿/********************************************************************************
+/********************************************************************************
 ** Form generated from reading UI file 'Inspector.ui'
 **
 ** Created by: Qt User Interface Compiler version 6.2.4
@@ -11,6 +11,7 @@
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QScrollArea>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -21,6 +22,7 @@ class Ui_Inspector
 {
 public:
     QVBoxLayout *verticalLayout_2;
+    QLabel *modelName;
     QScrollArea *scrollArea;
     QWidget *scrollAreaWidgetContents;
     QVBoxLayout *verticalLayout_3;
@@ -34,12 +36,17 @@ public:
         verticalLayout_2->setSpacing(3);
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         verticalLayout_2->setContentsMargins(3, 3, 3, 3);
+        modelName = new QLabel(Inspector);
+        modelName->setObjectName(QString::fromUtf8("modelName"));
+
+        verticalLayout_2->addWidget(modelName);
+
         scrollArea = new QScrollArea(Inspector);
         scrollArea->setObjectName(QString::fromUtf8("scrollArea"));
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QString::fromUtf8("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 402, 367));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 402, 348));
         verticalLayout_3 = new QVBoxLayout(scrollAreaWidgetContents);
         verticalLayout_3->setSpacing(0);
         verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
@@ -57,6 +64,7 @@ public:
     void retranslateUi(QWidget *Inspector)
     {
         Inspector->setWindowTitle(QCoreApplication::translate("Inspector", "Form", nullptr));
+        modelName->setText(QString());
     } // retranslateUi
 
 };

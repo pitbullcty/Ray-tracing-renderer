@@ -1,10 +1,11 @@
 ﻿#include "InspectorPage.h"
 
 
-InspectorPage::InspectorPage(QWidget *parent) :
+InspectorPage::InspectorPage(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::InspectorPage),
     isExpanded(true),
+    isEnabled(true),
     label(nullptr)
 {
     ui->setupUi(this);
@@ -25,6 +26,11 @@ InspectorPage::InspectorPage(QWidget *parent) :
 InspectorPage::~InspectorPage()
 {
     delete ui;
+}
+
+void InspectorPage::setEnabled(bool isEnabled)
+{
+    this->isEnabled = isEnabled;
 }
 
 void InspectorPage::addWidget(const QString &title, QWidget *widget)
@@ -52,6 +58,8 @@ void InspectorPage::collapse()
 
 void InspectorPage::onPushButtonFoldClicked()
 {
+    if (!isEnabled) return;
+
     if (isExpanded) {
         collapse();
     } else {

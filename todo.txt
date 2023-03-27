@@ -2,6 +2,7 @@
 uic ./ui/Inspector.ui -o ./src/Ui/UiInspector.h
 uic ./ui/InspectorPage.ui -o ./src/Ui/UiInspectorPage.h
 uic ./ui/TransformInspector.ui -o ./src/Ui/UiTransformInspector.h
+uic ./ui/MaterialInspector.ui -o ./src/Ui/UiMaterialInspector.h
 
 cloc src --exclude-list-file=ignore.txt
 

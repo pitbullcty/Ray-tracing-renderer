@@ -18,6 +18,7 @@ Inspector::Inspector(QWidget *parent) :
     vBoxLayout->addStretch(1);
 
     ui->scrollArea->setWidget(widget);
+    ui->modelName->hide();
 }
 
 Inspector::~Inspector()
@@ -33,20 +34,47 @@ void Inspector::addWidget(const QString &title, QWidget *widget)
 
 }
 
+void Inspector::setEnabled(bool isEnabled)
+{
+    for (int i = 0; i < contentVBoxLayout->count(); i++) {
+        auto page = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(i)->widget());
+        page->setEnabled(isEnabled);
+    }
+}
+
 void Inspector::expandAll()
 {
     for (int i = 0; i < contentVBoxLayout->count(); i++) {
         auto page = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(i)->widget());
         page->expand();
+        page->setEnabled(true);
     }
 }
 
-void Inspector::collapseAll()
+void Inspector::collapseAll(bool isClose)
 {
+    if (isClose) {
+        ui->modelName->hide();
+        ui->modelName->setText("");
+    }
     for (int i = 0; i < contentVBoxLayout->count(); i++) {
         auto page = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(i)->widget());
         page->collapse();
+        page->setEnabled(false);
     }
 }
 
+void Inspector::setModelName(const QString& name) {
 
+    ui->modelName->show();
+    QString text("<font size = \"5\"><b>%1</b></font>");
+    if (name.isEmpty()) {
+        collapseAll();
+        ui->modelName->setText(text.arg("未选中物体"));
+    }
+    else{
+        expandAll();
+        ui->modelName->setText(text.arg(name));
+    }
+
+}

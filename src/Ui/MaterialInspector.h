@@ -1,23 +1,23 @@
-﻿#ifndef __TRANSFORMINSPECTOR__
-#define __TRANSFORMINSPECTOR__
+﻿#ifndef __MATERIAL__INSPECTOR__
+#define __MATERIAL__INSPECTOR__
 
-#include "UiTransformInspector.h"
+#include "UiMaterialInspector.h"
 #include <QWidget>
 #include "src/Data/Model.h"
+#include <QColorDialog>
 #include <QtConcurrent>
 #include "src/Manager/DataBuilder.h"
 
-class TransformInspector:public QWidget
+class MaterialInspector :public QWidget
 {
 	Q_OBJECT
 
 public:
-	TransformInspector(QWidget* parent = nullptr);
-	~TransformInspector();
+	MaterialInspector(QWidget* parent = nullptr);
+	~MaterialInspector();
 	void setEdittable(bool edittable);
 
 signals:
-	void sendEditModel(Model* model);
 	void sendRevertModel(Model* model);
 
 public slots:
@@ -25,16 +25,13 @@ public slots:
 	void setData();
 
 private:
-	Ui::TransformInspector* ui;
+	Ui::MaterialInspector* ui;
 	Model* model; //挂载的模型
 
 	void clearData();
 	void applyData();
 
-	void upDateModel();
-
 };
 
 
-
-#endif // !__TRANSFORMINSPECTOR__
+#endif // !__MATERIAL__INSPECTOR__

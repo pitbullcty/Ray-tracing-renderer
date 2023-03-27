@@ -16,8 +16,13 @@ public:
     ~Inspector();
 
     void addWidget(const QString &title, QWidget *widget);
+    void setEnabled(bool isEnabled);
+    void collapseAll(bool isClose=false);
     void expandAll();
-    void collapseAll();
+
+public slots:
+    void setModelName(const QString& name);
+
 
 private:
     Ui::Inspector*ui;

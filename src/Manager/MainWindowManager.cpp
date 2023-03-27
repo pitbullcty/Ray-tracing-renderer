@@ -5,6 +5,7 @@ extern bool isBusy;
 MainWindowManager::MainWindowManager(Ui::MainWindow* ui) : 
 	ui(ui),
 	transformInspector(new TransformInspector),
+	materialInspector(new MaterialInspector),
 	currentIndex(0)
 {
 	copyLightsModel(); 
@@ -26,13 +27,15 @@ MainWindowManager::MainWindowManager(Ui::MainWindow* ui) :
 	ui->fpslabel->setFont(font);
 	//相关设置
 	ui->inspector->addWidget("变换", transformInspector);
-
+	ui->inspector->addWidget("材质", materialInspector);
+	ui->inspector->setEnabled(false); //设置不可展开
 }
 
 MainWindowManager::~MainWindowManager()
 {
 	ui = nullptr;
 	transformInspector = nullptr;
+	materialInspector = nullptr;
 	saveSettings();
 }
 
@@ -62,6 +65,8 @@ void MainWindowManager::bindSignals()
 	connect(seceneManager.data(), &SceneManager::Clear, ui->console, &Console::Clear);
 	connect(seceneManager.data(), &SceneManager::sendSceneName, this, &MainWindowManager::showSceneName);
 	connect(seceneManager.data(), &SceneManager::sendInspectorModel, transformInspector, &TransformInspector::bindModel);
+	connect(seceneManager.data(), &SceneManager::sendInspectorModel, materialInspector, &MaterialInspector::bindModel);
+	connect(seceneManager.data(), &SceneManager::sendInspectorName, ui->inspector, &Inspector::setModelName);
 
 	auto& modelLoader = ModelLoader::GetInstance();
 	connect(modelLoader.data(), &ModelLoader::Info, ui->console, &Console::Info);
@@ -114,7 +119,7 @@ void MainWindowManager::loadModel(const QString& path)
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	if (sceneManager->getState() == NONE) {
 		sceneManager->createScene();
-		ui->inspector->expandAll();
+		ui->inspector->setModelName("");
 	}
 	if (path.contains("/lights/rectlight.obj") || path.contains("/lights/spherelight.obj")) {
 		sceneManager->addModel(fileName, "", false, true); //路径为添加灯光
@@ -129,7 +134,8 @@ void MainWindowManager::loadModel(const QString& path)
 	if (currentIndex) {
 		changeRenderWindow();
 	}
-	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), isShow, true);
+	ui->editor->update(); //刷新界面显示
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), isShow, true, true);
 	ui->renderWidget->show();
 }
 
@@ -140,12 +146,13 @@ void MainWindowManager::crateScene()
 	editorRenderer->setSelected(nullptr);
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	sceneManager->createScene();
+	ui->inspector->setModelName("");
+	ui->editor->update(); //刷新界面显示
 	if (currentIndex) {
 		changeRenderWindow();
 	}
 	ui->renderWidget->show();
-	ui->inspector->expandAll();
-	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true);
 }
 
 void MainWindowManager::loadScene(const QString& path)
@@ -158,10 +165,10 @@ void MainWindowManager::loadScene(const QString& path)
 	else {
 		fileName = path;
 	}
-	QFileInfo fileInfo(fileName);
 	if (fileName.isEmpty()) {
 		return;
 	}
+	QFileInfo fileInfo(fileName);
 	lastScenePath = fileInfo.absolutePath();
 	auto sceneManager = ui->editor->getSceneManager();
 	auto editorRenderer = ui->editor->getEditorRenderer();
@@ -173,8 +180,9 @@ void MainWindowManager::loadScene(const QString& path)
 		changeRenderWindow();
 	}
 	isBusy = false;
-	ui->inspector->expandAll();
-	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(),true, true);
+	ui->editor->update(); //刷新界面显示
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), true, true, true);
+	ui->inspector->setModelName("");
 	ui->renderWidget->show();
 }
 
@@ -211,7 +219,7 @@ void MainWindowManager::closeScene()
 	if (currentIndex) {
 		changeRenderWindow();
 	}
-	ui->inspector->collapseAll();
+	ui->inspector->collapseAll(true);
 	ui->renderWidget->hide();
 }
 

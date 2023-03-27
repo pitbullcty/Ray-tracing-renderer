@@ -83,3 +83,8 @@ void MainWindow::bindSignals()
     connect(ui->closeWindow, &QAction::triggered, this, &MainWindow::close);
     connect(this, &MainWindow::sendChangeWindow, mainWindowManager, &MainWindowManager::changeRenderWindow);
 }
+
+
+void QAbstractSpinBox::wheelEvent(QWheelEvent* e) {
+    e->ignore();
+} //屏蔽滚轮事件

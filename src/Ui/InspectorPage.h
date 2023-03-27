@@ -16,8 +16,9 @@ class InspectorPage : public QWidget
 
 public:
 
-    explicit InspectorPage(QWidget *parent = nullptr);
+    InspectorPage(QWidget *parent = nullptr);
     ~InspectorPage();
+    void setEnabled(bool isEnabled);
 
 public slots:
     void addWidget(const QString &title, QWidget *widget);
@@ -30,7 +31,9 @@ private slots:
 private:
     Ui::InspectorPage* ui;
 
+    bool isEnabled; //是否开启按钮
     bool isExpanded;
+
     QLabel *label;
 
 };

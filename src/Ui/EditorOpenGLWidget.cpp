@@ -196,7 +196,7 @@ void EditorOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
     if (isLeftClicked) {
         editorRenderer->getGizmo()->mouseUp(x, y);
         if (editorRenderer->getGizmo()->isChange(lastEdit)) {
-            QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true); //位置改变则建立
+            QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true); //位置改变则建立
             auto selected = editorRenderer->getSelected();
             addRevertModel(selected);
         }

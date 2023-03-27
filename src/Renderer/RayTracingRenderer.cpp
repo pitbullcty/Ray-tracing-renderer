@@ -202,8 +202,8 @@ void RayTracingRenderer::sendDataToGPU(bool needSend)
 	if (needSend) {
 		QThreadPool* global = QThreadPool::globalInstance();
 		if (global->activeThreadCount() != 0) {
-			global->clear();
-			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false);
+			global->clear() ;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, false);
 			return;
 		} //如果线程池还有耗时任务,则取消重新构建
 	}

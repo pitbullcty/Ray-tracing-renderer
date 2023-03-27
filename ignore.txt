@@ -1,1 +1,5 @@
-﻿./src/include/ui_mainwindow.h
+﻿./src/Ui/UiInspector.h
+./src/Ui/UiInspectorPage.h
+./src/Ui/UiTransformInspector.h
+./src/Ui/UiMaterialInspector.h
+./src/Ui/UiMainWindow.h

@@ -3,6 +3,7 @@
 
 #include "src/Ui/UIMainWindow.h"
 #include "src/Ui/TransformInspector.h"
+#include "src/Ui/MaterialInspector.h"
 #include <QtConcurrent>
 #include <QAction>
 #include <QFile>
@@ -39,6 +40,7 @@ private:
 	int currentIndex;  //当前index
 
 	TransformInspector* transformInspector;
+	MaterialInspector* materialInspector;
 
 	void copyLightsModel();
 	void setButtonStyle(int index);

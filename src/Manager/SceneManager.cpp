@@ -96,6 +96,7 @@ void SceneManager::getEditModel(const QString& name)
 	auto model = &models[name];
 	emit sendEditModel(model);
 	emit sendInspectorModel(model);
+	emit sendInspectorName(name);
 }
 
 void SceneManager::revertAction()
@@ -107,7 +108,7 @@ void SceneManager::revertAction()
 			Model model = action.first.second;
 			models[name] = model;
 			modelLoader->addPath(model.getPath());
-			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true);
 		}
 		else if (action.first.first == REMOVE) {
 			removeModelByName(action.second);
@@ -121,18 +122,19 @@ void SceneManager::revertAction()
 			revertActions.pop();
 			revertActions.pop();
 			revertActions.pop();
-			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true);
 		}
 		else {
 			QString name = action.second;
 			auto& model = models[name];
 			model.transform = action.first.second.transform;
 			model.updateBound();
-			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true);
 		}
 		emit sendEditModel(nullptr);
 		emit updateList(&models, nullptr);
 		emit sendInspectorModel(nullptr);
+		emit sendInspectorName("");
 	}
 }
 
@@ -188,9 +190,11 @@ Model* SceneManager::removeModelByName(const QString& name)
 	} //如果要删除的是原始数据
 	addRevertModel(ADD, model, name);
 	models.remove(name);
-	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true);
 	emit updateList(&models, nullptr);
 	emit sendEditModel(nullptr);
+	emit sendInspectorModel(nullptr);
+	emit sendInspectorName("");
 	return change;
 }
 
@@ -238,9 +242,11 @@ void SceneManager::pasteModel(QVector3D pos)
 		newModel.transform.translationZ = pos.z();
 		newModel.transform.calcModel();
 		newModel.updateBound();
-		QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true);
-		emit sendEditModel(&models[name]);
+		QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true);
+		emit sendEditModel(&newModel);
 		emit updateList(&models, &models[name]);
+		emit sendInspectorModel(&newModel);
+		emit sendInspectorName(name);
 	} //如果有要复制的模型
 }
 
@@ -264,6 +270,8 @@ void SceneManager::rename(const QString& oldname, const QString& newname)
 	modelLoader->addPath(model.getPath());
 	addRevertModel(RENAME, model, oldname + "$@$" + newname);
 	emit sendEditModel(nullptr);
+	emit sendInspectorModel(nullptr);
+	emit sendInspectorName("");
 	emit updateList(&models, nullptr);
 }
 
@@ -294,6 +302,7 @@ Model* SceneManager::getSelected(int posx, int posy)
 	Model* selected = nullptr;
 
 	float t = 1e10; //存储最大t值
+	QString name;
 
 	for (auto it = models.begin(); it != models.end(); it++) {
 		auto& model = it.value();
@@ -302,11 +311,13 @@ Model* SceneManager::getSelected(int posx, int posy)
 			if (t0 < t) {
 				t = t0;
 				selected = &model;
+				name = it.key();
 			}
 		} //寻找最近交点
 	}
 	emit updateList(&models, selected);
 	emit sendInspectorModel(selected);
+	emit sendInspectorName(name);
 	return selected;
 }
 
