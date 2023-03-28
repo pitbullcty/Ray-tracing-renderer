@@ -7,6 +7,13 @@ void RayTracingRenderer::destory(RayTracingRenderer* rayTracingRenderer)
 	delete rayTracingRenderer;
 }
 
+void RayTracingRenderer::setRenderOption(const RenderOption& option)
+{
+	this->option = option;
+	isOffScreenRendering = true;
+	isResized = true;
+}
+
 RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height) :
 	Renderer(_shaderProgram, _functions, width, height),
 	BVHbuffer(-1), BVHTexture(-1),
@@ -19,13 +26,11 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	pathTraceVBO(QOpenGLBuffer::VertexBuffer),
 	accumVBO(QOpenGLBuffer::VertexBuffer),
 	outputVBO(QOpenGLBuffer::VertexBuffer),
+	snapShotquality(50),
 	isResized(false),
-	isSaving(false),
-	hasData(false),
-	isRealTimeDenoising(false),
-	frameCounter(0),
-	quality(50),
-	denoiserStep(40)
+	isSavingSnapshot(false),
+	isOffScreenRendering(false),
+	hasData(false)
 {
 	outputVBO.create();
 	accumVBO.create();
@@ -165,33 +170,47 @@ void RayTracingRenderer::destoryTexture()
 
 unsigned int RayTracingRenderer::getFrameCounter()
 {
-	return frameCounter;
+	return option.frameCounter;
 }
 
 void RayTracingRenderer::clearFrameCounter()
 {
-	frameCounter = 0;
+	option.frameCounter = 0;
 }
 
 void RayTracingRenderer::resize(int w, int h)
 {
-	frameCounter = 0;
+	option.frameCounter = 0;
 	isResized = true;
+}
+
+bool RayTracingRenderer::getIsOffScreenRendering()
+{
+	return isOffScreenRendering;
 }
 
 void RayTracingRenderer::resizeFBO()
 {
 	if (isResized) {
+
 		int viewport[4];
 		functions->glGetIntegerv(GL_VIEWPORT, viewport);
-		width = viewport[2];
-		height = viewport[3];
 
+		if (isOffScreenRendering) {
+			width = option.resolutionX;
+			height = option.resolutionY;
+		}
+		else{
+			width = viewport[2];
+			height = viewport[3];
+		}
+		
 		denoiserInputBuffer.resize(width * height);
 		denoiserOutputBuffer.resize(width * height); //根据FBO大小创建缓冲区
 
 		destoryFBOs();
 		initFBOs();
+
 		isResized = false;
 	}
 }
@@ -212,7 +231,7 @@ void RayTracingRenderer::sendDataToGPU(bool needSend)
 	hasData = !data.encodedTriangles.isEmpty();
 
 	destoryTexture();
-	frameCounter = 0;
+	option.frameCounter = 0;
 
 	functions->glGenBuffers(1, &BVHbuffer);
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, BVHbuffer);
@@ -282,11 +301,15 @@ void RayTracingRenderer::initFBOs()
 
 }
 
+int count = 1;
+
 void RayTracingRenderer::render()
 {
 	
 	resizeFBO(); //判断是否需要变换FBO大小
 	bindTexture();
+
+	functions->glViewport(0, 0, width, height);
 
 	projection = QMatrix4x4();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
@@ -302,11 +325,12 @@ void RayTracingRenderer::render()
 	shaderProgram["pathTracing"]->setUniformValue("lastFrame", 7);
 	shaderProgram["pathTracing"]->setUniformValue("width", width);
 	shaderProgram["pathTracing"]->setUniformValue("height", height);
+	shaderProgram["pathTracing"]->setUniformValue("depth", option.depth);
 	shaderProgram["pathTracing"]->setUniformValue("projection", projection.inverted());
 	shaderProgram["pathTracing"]->setUniformValue("eye", camera->getPos());
 	shaderProgram["pathTracing"]->setUniformValue("cameraRotate", camera->getView().inverted());
 	auto location = shaderProgram["pathTracing"]->programId();
-	functions->glUniform1ui(functions->glGetUniformLocation(location,"frameCounter"), frameCounter++);
+	functions->glUniform1ui(functions->glGetUniformLocation(location,"frameCounter"), option.frameCounter++);
 
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, pathTracingFBO);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -328,20 +352,13 @@ void RayTracingRenderer::render()
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	accumVAO.release();
 
-	if (isRealTimeDenoising && frameCounter % denoiserStep == 0) {
-		denoise(accumFBO, accumTexture, true);
-	} //达到要求则降噪
+	if (isOffScreenRendering) {
 
-	outputVAO.bind();
-	shaderProgram["output"]->bind();
-	shaderProgram["output"]->setUniformValue("lastFrame", 7);
+		if (option.isRealTimeDenoising && option.frameCounter % option.denoiserStep == 0) {
+			denoise(accumFBO, accumTexture, true);
+		} //达到要求则降噪
 
-	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //显示到屏幕
-
-	shaderProgram["output"]->release();
-	outputVAO.release();
+	}
 
 	outputVAO.bind();
 	shaderProgram["output"]->bind();
@@ -354,11 +371,32 @@ void RayTracingRenderer::render()
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	outputVAO.release();
 
-	if (isSaving) {
-		saveRenderResult();
-		isSaving = false;
+	if (isOffScreenRendering && option.frameCounter == option.maxFrameCounter) {
+		saveRenderResult(option.outputPath, option.quality);
+		option.reset();
+		isResized = true;
+		isOffScreenRendering = false;
 	}
-	
+
+	if (!isOffScreenRendering) {
+		outputVAO.bind();
+		shaderProgram["output"]->bind();
+		shaderProgram["output"]->setUniformValue("lastFrame", 7);
+
+		functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		functions->glDrawArrays(GL_TRIANGLES, 0, 6); //显示到屏幕
+
+		shaderProgram["output"]->release();
+		outputVAO.release();
+		//非离屏渲染不用输出到屏幕
+	}
+
+	if (isSavingSnapshot) {
+		saveRenderResult(snapShotSavingPath, snapShotquality);
+		isSavingSnapshot = false;
+	}
+
 }
 
 template<typename T>
@@ -371,17 +409,17 @@ void RayTracingRenderer::getPixels(QVector<T>& pixels, unsigned int FBO, unsigne
 	functions->glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void RayTracingRenderer::saveRenderResult()
+void RayTracingRenderer::saveRenderResult(const QString& path, int quality)
 {
 	denoise(outputFBO, outputTexture, true);
-	saveFBO(savePath, outputFBO, outputTexture, quality);
+	saveFBO(path, outputFBO, outputTexture, quality);
 }
 
-void RayTracingRenderer::setSavingParam(const QString& savePath, int quality)
+void RayTracingRenderer::setSnapshotParam(const QString& savePath, int quality)
 {
-	this->savePath = savePath;
-	this->quality = quality;
-	isSaving = true;
+	this->snapShotSavingPath = savePath;
+	this->snapShotquality = quality;
+	isSavingSnapshot = true;
 }
 
 void RayTracingRenderer::saveFBO(const QString& path, unsigned int FBO, unsigned int texture, int quality)
@@ -422,4 +460,5 @@ void RayTracingRenderer::denoise(unsigned int FBO, unsigned int texture, bool ne
 	}
 
 }
+
 

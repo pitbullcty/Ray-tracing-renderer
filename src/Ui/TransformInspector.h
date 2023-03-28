@@ -1,5 +1,5 @@
-﻿#ifndef __TRANSFORMINSPECTOR__
-#define __TRANSFORMINSPECTOR__
+﻿#ifndef __TRANSFORM__INSPECTOR__
+#define __TRANSFORM__INSPECTOR__
 
 #include "UiTransformInspector.h"
 #include <QWidget>

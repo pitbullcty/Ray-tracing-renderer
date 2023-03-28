@@ -67,6 +67,11 @@ void Camera::removeKey(Qt::Key key)
     keys.remove(key);
 }
 
+void Camera::clearAllKey()
+{
+    keys.clear();
+}
+
 void Camera::setPos(const QVector3D& _pos)
 {
     pos = _pos;

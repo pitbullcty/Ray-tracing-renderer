@@ -101,8 +101,11 @@ void SceneManager::getEditModel(const QString& name)
 
 void SceneManager::revertAction()
 {
+	
 	if (!revertActions.empty()) {
 		auto action = revertActions.pop();
+		Model* editModel = nullptr;
+		QString editModelName = "";
 		if (action.first.first == ADD) {
 			QString name = action.second;
 			Model model = action.first.second;
@@ -127,15 +130,31 @@ void SceneManager::revertAction()
 		else {
 			QString name = action.second;
 			auto& model = models[name];
+			editModel = &model;
+			editModelName = name;
 			model.transform = action.first.second.transform;
+			model.lightMaterial = action.first.second.lightMaterial;
+			model.modelMaterial = action.first.second.modelMaterial;
 			model.updateBound();
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true);
 		}
-		emit sendEditModel(nullptr);
-		emit updateList(&models, nullptr);
-		emit sendInspectorModel(nullptr);
-		emit sendInspectorName("");
+		emit sendEditModel(editModel);
+		emit updateList(&models, editModel);
+		emit sendInspectorModel(editModel);
+		emit sendInspectorName(editModelName);
 	}
+}
+
+void SceneManager::addInspectorRevertModel(Model* model)
+{
+	QString name;
+	for (auto it = models.begin(); it != models.end(); it++) {
+		if (&it.value() == model) {
+			name = it.key();
+			break;
+		}
+	}
+	addRevertModel(MOVEPOS, *model, name);
 }
 
 void SceneManager::pasteModel(QPoint pos)

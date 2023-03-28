@@ -36,6 +36,9 @@
    </item>
    <item row="6" column="3">
     <widget class="QDoubleSpinBox" name="doubleSpinBoxPosY">
+     <property name="keyboardTracking">
+      <bool>false</bool>
+     </property>
      <property name="minimum">
       <double>-1000000000.000000000000000</double>
      </property>
@@ -121,6 +124,9 @@
    </item>
    <item row="12" column="3">
     <widget class="QDoubleSpinBox" name="doubleSpinBoxRotationZ">
+     <property name="keyboardTracking">
+      <bool>false</bool>
+     </property>
      <property name="suffix">
       <string>°</string>
      </property>
@@ -150,6 +156,9 @@
    </item>
    <item row="11" column="3">
     <widget class="QDoubleSpinBox" name="doubleSpinBoxRotationY">
+     <property name="keyboardTracking">
+      <bool>false</bool>
+     </property>
      <property name="suffix">
       <string>°</string>
      </property>
@@ -179,6 +188,9 @@
    </item>
    <item row="16" column="3">
     <widget class="QDoubleSpinBox" name="doubleSpinBoxScaleZ">
+     <property name="keyboardTracking">
+      <bool>false</bool>
+     </property>
      <property name="minimum">
       <double>0.000000000000000</double>
      </property>
@@ -202,6 +214,9 @@
    </item>
    <item row="15" column="3">
     <widget class="QDoubleSpinBox" name="doubleSpinBoxScaleY">
+     <property name="keyboardTracking">
+      <bool>false</bool>
+     </property>
      <property name="minimum">
       <double>0.000000000000000</double>
      </property>
@@ -228,6 +243,9 @@
    </item>
    <item row="7" column="3">
     <widget class="QDoubleSpinBox" name="doubleSpinBoxPosZ">
+     <property name="keyboardTracking">
+      <bool>false</bool>
+     </property>
      <property name="minimum">
       <double>-1000000000.000000000000000</double>
      </property>
@@ -241,6 +259,9 @@
    </item>
    <item row="9" column="3">
     <widget class="QDoubleSpinBox" name="doubleSpinBoxRotationX">
+     <property name="keyboardTracking">
+      <bool>false</bool>
+     </property>
      <property name="suffix">
       <string>°</string>
      </property>
@@ -267,6 +288,9 @@
    </item>
    <item row="5" column="3">
     <widget class="QDoubleSpinBox" name="doubleSpinBoxPosX">
+     <property name="keyboardTracking">
+      <bool>false</bool>
+     </property>
      <property name="minimum">
       <double>-1000000000.000000000000000</double>
      </property>
@@ -310,6 +334,9 @@
    </item>
    <item row="14" column="3">
     <widget class="QDoubleSpinBox" name="doubleSpinBoxScaleX">
+     <property name="keyboardTracking">
+      <bool>false</bool>
+     </property>
      <property name="minimum">
       <double>0.000000000000000</double>
      </property>
@@ -424,7 +451,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

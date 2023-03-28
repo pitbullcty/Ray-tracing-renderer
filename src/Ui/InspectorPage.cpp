@@ -44,7 +44,6 @@ void InspectorPage::expand()
 {
     ui->widgetContent->show();
     isExpanded = true;
-
     label->setPixmap(QPixmap(":/icons/downArrow.png").scaled(label->size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 }
 

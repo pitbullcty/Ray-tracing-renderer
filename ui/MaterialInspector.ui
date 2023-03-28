@@ -39,7 +39,7 @@
         <item>
          <widget class="QToolButton" name="toolButtonBaseColor">
           <property name="text">
-           <string>...</string>
+           <string>编辑</string>
           </property>
          </widget>
         </item>
@@ -385,7 +385,7 @@
         <item>
          <widget class="QToolButton" name="toolButtonEmissive">
           <property name="text">
-           <string>...</string>
+           <string>编辑</string>
           </property>
          </widget>
         </item>

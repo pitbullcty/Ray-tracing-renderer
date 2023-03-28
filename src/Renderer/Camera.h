@@ -21,10 +21,13 @@ public:
 
     void addKey(Qt::Key key);
     void removeKey(Qt::Key key);
+    void clearAllKey();
+
     void processKeyboard(float deltaTime);
     void processKeyboard(Qt::Key key, float deltaTime);
     void processMouseMovement(float xoffset, float yoffset);
     void processMouseScroll(float yoffset);
+
     void updateState();
     void reSet();
     QVector3D getDirection();

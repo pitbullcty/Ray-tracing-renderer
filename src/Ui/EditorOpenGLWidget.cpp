@@ -242,5 +242,5 @@ void EditorOpenGLWidget::addRevertModel(Model* model){
         }
     }
     sceneManager->addRevertModel(MOVEPOS, modelToRevert, name);
-    modelToRevert = *model;
+    if(model) modelToRevert = *model;
 }

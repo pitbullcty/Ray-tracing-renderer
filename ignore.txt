@@ -3,3 +3,4 @@
 ./src/Ui/UiTransformInspector.h
 ./src/Ui/UiMaterialInspector.h
 ./src/Ui/UiMainWindow.h
+./src/Ui/UiRenderOptionInspector.h

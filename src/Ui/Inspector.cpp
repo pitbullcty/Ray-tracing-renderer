@@ -51,6 +51,39 @@ void Inspector::expandAll()
     }
 }
 
+void Inspector::changeCurrentIndex(int index)
+{
+    auto transform = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(0)->widget());
+    auto material = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(1)->widget());
+    auto renderOption = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(2)->widget());
+
+    if (index) {
+        material->show();
+        transform->show();
+        renderOption->hide();
+    }
+    else {
+        ui->modelName->hide();
+        material->hide();
+        transform->hide();
+        renderOption->expand();
+        renderOption->setEnabled(true);
+        renderOption->show();
+    }
+}
+
+void Inspector::hideWidget(int index)
+{
+    auto page = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(index)->widget());
+    page->hide();
+}
+
+void Inspector::showWidget(int index)
+{
+    auto page = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(index)->widget());
+    page->show();
+}
+
 void Inspector::collapseAll(bool isClose)
 {
     if (isClose) {

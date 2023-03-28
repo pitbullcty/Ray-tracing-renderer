@@ -333,7 +333,7 @@ public:
 #endif // QT_CONFIG(tooltip)
         label_2->setText(QCoreApplication::translate("MaterialInspector", "\345\237\272\346\234\254\351\242\234\350\211\262", nullptr));
         labelBaseColor->setText(QString());
-        toolButtonBaseColor->setText(QCoreApplication::translate("MaterialInspector", "...", nullptr));
+        toolButtonBaseColor->setText(QCoreApplication::translate("MaterialInspector", "\347\274\226\350\276\221", nullptr));
 #if QT_CONFIG(tooltip)
         label_10->setToolTip(QCoreApplication::translate("MaterialInspector", "\350\241\250\347\244\272\347\211\251\344\275\223\350\241\250\351\235\242\347\232\204\346\270\205\346\274\206\345\261\202\345\274\272\345\272\246\357\274\214\346\225\260\345\200\274\350\266\212\345\244\247\345\274\272\345\272\246\350\266\212\351\253\230", nullptr));
 #endif // QT_CONFIG(tooltip)
@@ -389,7 +389,7 @@ public:
 #endif // QT_CONFIG(tooltip)
         label->setText(QCoreApplication::translate("MaterialInspector", "\345\217\221\345\205\211\351\242\234\350\211\262", nullptr));
         labelEmissive->setText(QString());
-        toolButtonEmissive->setText(QCoreApplication::translate("MaterialInspector", "...", nullptr));
+        toolButtonEmissive->setText(QCoreApplication::translate("MaterialInspector", "\347\274\226\350\276\221", nullptr));
     } // retranslateUi
 
 };

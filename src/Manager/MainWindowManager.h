@@ -4,6 +4,7 @@
 #include "src/Ui/UIMainWindow.h"
 #include "src/Ui/TransformInspector.h"
 #include "src/Ui/MaterialInspector.h"
+#include "src/ui/RenderOptionInspector.h"
 #include <QtConcurrent>
 #include <QAction>
 #include <QFile>
@@ -41,6 +42,7 @@ private:
 
 	TransformInspector* transformInspector;
 	MaterialInspector* materialInspector;
+	RenderOptionInspector* renderOptionInspector;
 
 	void copyLightsModel();
 	void setButtonStyle(int index);

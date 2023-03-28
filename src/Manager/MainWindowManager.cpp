@@ -6,6 +6,7 @@ MainWindowManager::MainWindowManager(Ui::MainWindow* ui) :
 	ui(ui),
 	transformInspector(new TransformInspector),
 	materialInspector(new MaterialInspector),
+	renderOptionInspector(new RenderOptionInspector),
 	currentIndex(0)
 {
 	copyLightsModel(); 
@@ -28,6 +29,8 @@ MainWindowManager::MainWindowManager(Ui::MainWindow* ui) :
 	//相关设置
 	ui->inspector->addWidget("变换", transformInspector);
 	ui->inspector->addWidget("材质", materialInspector);
+	ui->inspector->addWidget("渲染设置", renderOptionInspector);
+	ui->inspector->hideWidget(2);
 	ui->inspector->setEnabled(false); //设置不可展开
 }
 
@@ -92,7 +95,11 @@ void MainWindowManager::bindSignals()
 	connect(gizmo.data(), &Gizmo::sendCheckedLocationButton, transformInspector, &TransformInspector::setCheckedLocationButton);
 	connect(gizmo.data(), &Gizmo::sendCheckedTransformButton, transformInspector, &TransformInspector::setCheckedTransformButton);
 
-	connect(transformInspector, &TransformInspector::sendRevertModel, ui->editor, &EditorOpenGLWidget::addRevertModel);
+	connect(transformInspector, &TransformInspector::sendRevertModel, seceneManager.data(), &SceneManager::addInspectorRevertModel);
+	connect(materialInspector, &MaterialInspector::sendRevertModel, seceneManager.data(), &SceneManager::addInspectorRevertModel);
+
+	auto rayTarcingRenderer = ui->rayTracing->getRayTracingRenderer();
+	connect(renderOptionInspector, &RenderOptionInspector::sendRenderOption, rayTarcingRenderer.data(), &RayTracingRenderer::setRenderOption);
 
 	connect(ui->renderButton, &QPushButton::clicked, this, &MainWindowManager::changeRenderWindow);
 
@@ -286,6 +293,7 @@ void MainWindowManager::loadSceneFromAction()
 void MainWindowManager::changeRenderWindow()
 {
 	if (ui->renderWidget->isHidden()) return;
+	ui->inspector->changeCurrentIndex(currentIndex);
 	currentIndex = (currentIndex == 0) ? 1 : 0;
 	ui->stackedWidget->setCurrentIndex(currentIndex);
 	setButtonStyle(currentIndex);

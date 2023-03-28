@@ -8,6 +8,19 @@ QVector3D QColor2QVector3D(const QColor& v) {
 	return QVector3D(v.red(), v.green(), v.blue());
 }
 
+QColor Emissive2Color(const QVector3D& emissive) {
+	float factor = std::max(std::max(emissive.x(), emissive.y()), emissive.z());
+	if (factor != 0) {
+		QVector3D newEmissive = emissive / factor * 255;
+		return QVector3D2QColor(newEmissive);
+	}
+}
+
+QVector3D Color2Emissive(const QColor& color, int factor) {
+	auto colorV = QColor2QVector3D(color);
+	return colorV / 255 * factor;
+}
+
 MaterialInspector::MaterialInspector(QWidget* parent):
 	QWidget(parent),
 	ui(new Ui::MaterialInspector),
@@ -25,113 +38,179 @@ MaterialInspector::~MaterialInspector()
 
 void MaterialInspector::applyData()
 {
-	connect(ui->horizontalSliderAnisotropic, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderAnisotropic, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderAnisotropic->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.anisotropic-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.anisotropic - value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.anisotropic = value;
 			ui->anisotropic->setText(QString::number(model->modelMaterial.anisotropic, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
-	connect(ui->horizontalSliderClearcoat, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderAnisotropic, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderAnisotropic->value() / 100.0f;
+		if (model != nullptr) {
+			ui->anisotropic->setText(QString::number(value, 'f', 2));
+		}
+	});
+	connect(ui->horizontalSliderClearcoat, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderClearcoat->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.clearcoat-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.clearcoat-value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.clearcoat = value;
 			ui->clearcoat->setText(QString::number(model->modelMaterial.clearcoat, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
-	connect(ui->horizontalSliderClearcoatGloss, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderClearcoat, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderClearcoat->value() / 100.0f;
+		if (model != nullptr) {
+			ui->clearcoat->setText(QString::number(value, 'f', 2));
+		}
+	});
+	connect(ui->horizontalSliderClearcoatGloss, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderClearcoatGloss->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.clearcoatGloss-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.clearcoatGloss-value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.clearcoatGloss = value;
 			ui->clearcoatGloss->setText(QString::number(model->modelMaterial.clearcoatGloss, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
-	connect(ui->horizontalSliderMetallic, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderClearcoatGloss, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderClearcoatGloss->value() / 100.0f;
+		if (model != nullptr && abs(model->modelMaterial.clearcoatGloss - value) > 1e-6) {
+			ui->clearcoatGloss->setText(QString::number(value, 'f', 2));
+		}
+	});
+	connect(ui->horizontalSliderMetallic, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderMetallic->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.metallic-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.metallic-value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.metallic = value;
 			ui->metallic->setText(QString::number(model->modelMaterial.metallic, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
-	connect(ui->horizontalSliderRoughness, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderMetallic, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderMetallic->value() / 100.0f;
+		if (model != nullptr) {
+			ui->metallic->setText(QString::number(value, 'f', 2));
+		}
+	});
+	connect(ui->horizontalSliderRoughness, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderRoughness->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.roughness-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.roughness-value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.roughness = value;
 			ui->roughness->setText(QString::number(model->modelMaterial.roughness, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
-	connect(ui->horizontalSliderSheen, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderRoughness, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderRoughness->value() / 100.0f;
+		if (model != nullptr) {
+			ui->roughness->setText(QString::number(value, 'f', 2));
+		}
+	});
+	connect(ui->horizontalSliderSheen, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderSheen->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.sheen-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.sheen-value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.sheen = value;
 			ui->sheen->setText(QString::number(model->modelMaterial.sheen, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
-	connect(ui->horizontalSliderSheenTint, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderSheen, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderSheen->value() / 100.0f;
+		if (model != nullptr) {
+			ui->sheen->setText(QString::number(value, 'f', 2));
+		}
+	});
+	connect(ui->horizontalSliderSheenTint, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderSheenTint->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.sheenTint-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.sheenTint-value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.sheenTint = value;
 			ui->sheenTint->setText(QString::number(model->modelMaterial.sheenTint, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
-	connect(ui->horizontalSliderSpecular, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderSheenTint, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderSheenTint->value() / 100.0f;
+		if (model != nullptr) {
+			ui->sheenTint->setText(QString::number(value, 'f', 2));
+		}
+	});
+	connect(ui->horizontalSliderSpecular, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderSpecular->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.specular-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.specular-value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.specular = value;
 			ui->specular->setText(QString::number(model->modelMaterial.specular, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
-	connect(ui->horizontalSliderSpecularTint, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderSpecular, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderSpecular->value() / 100.0f;
+		if (model != nullptr) {
+			ui->specular->setText(QString::number(value, 'f', 2));
+		}
+	});
+	connect(ui->horizontalSliderSpecularTint, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderSpecularTint->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.specularTint-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.specularTint-value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.specularTint = value;
 			ui->specularTint->setText(QString::number(model->modelMaterial.specularTint, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
-	connect(ui->horizontalSliderSubsurface, &QSlider::valueChanged, [=]() {
+	connect(ui->horizontalSliderSpecularTint, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderSpecularTint->value() / 100.0f;
+		if (model != nullptr) {
+			ui->specularTint->setText(QString::number(value, 'f', 2));
+		}
+	});
+	connect(ui->horizontalSliderSubsurface, &QSlider::sliderReleased, [=]() {
 		auto value = ui->horizontalSliderSubsurface->value() / 100.0f;
-		if (model != nullptr && (model->modelMaterial.subsurface-value) < 1e-6) {
+		if (model != nullptr && abs(model->modelMaterial.subsurface-value) > 1e-6) {
 			emit sendRevertModel(model);
 			model->modelMaterial.subsurface = value;
 			ui->subsurface->setText(QString::number(model->modelMaterial.subsurface, 'f', 2));
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 		}
 	});
+	connect(ui->horizontalSliderSubsurface, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderSubsurface->value() / 100.0f;
+		if (model != nullptr) {
+			ui->subsurface->setText(QString::number(value, 'f', 2));
+		}
+	});
 	connect(ui->toolButtonEmissive, &QToolButton::clicked, [=]() {
 		if(model != nullptr){
+			
 			QVector3D emissive;
 			if (model->getType() == NORMAL) 
 				emissive = model->modelMaterial.emissive;
 			else 
 				emissive = model->lightMaterial.emissive;
 
-			QColor color = QColorDialog::getColor(QVector3D2QColor(emissive), this, "请选择自发光颜色", QColorDialog::DontUseNativeDialog);
+			QColor color = QColorDialog::getColor(Emissive2Color(emissive), this, "请选择自发光颜色", QColorDialog::DontUseNativeDialog);
 
 			if (color.isValid()) {
+				emit sendRevertModel(model);
+
 				ui->labelEmissive->setStyleSheet(QString("background-color: %1;").arg(color.name()));
+				ui->labelEmissive->setToolTip(QString("R:%1 G:%2 B:%3").arg(color.red()).arg(color.green()).arg(color.blue()));
 
 				if (model->getType() == NORMAL)
-					model->modelMaterial.emissive = QColor2QVector3D(color);
-				else
-					model->lightMaterial.emissive = QColor2QVector3D(color);
+					model->modelMaterial.emissive = Color2Emissive(color, 20);
+				else {
+					model->lightMaterial.baseColor = QColor2QVector3D(color) / 255.0f;
+					model->lightMaterial.emissive = Color2Emissive(color, 20);
+				}
 
 				QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			}
@@ -140,6 +219,7 @@ void MaterialInspector::applyData()
 	});
 	connect(ui->toolButtonBaseColor, &QToolButton::clicked, [=]() {
 		if (model != nullptr) {
+			
 			QVector3D baseColor;
 			if (model->getType() == NORMAL)
 				baseColor = model->modelMaterial.baseColor * 255;
@@ -149,13 +229,13 @@ void MaterialInspector::applyData()
 			QColor color = QColorDialog::getColor(QVector3D2QColor(baseColor), this, "请选择基本颜色", QColorDialog::DontUseNativeDialog);
 
 			if (color.isValid()) {
+				emit sendRevertModel(model);
+
 				ui->labelBaseColor->setStyleSheet(QString("background-color: %1;").arg(color.name()));
+				ui->labelBaseColor->setToolTip(QString("R:%1 G:%2 B:%3").arg(color.red()).arg(color.green()).arg(color.blue()));
 
-				if (model->getType() == NORMAL)
-					model->modelMaterial.baseColor = QColor2QVector3D(color) / 255.0f;
-				else
-					model->lightMaterial.baseColor = QColor2QVector3D(color) / 255.0f;
-
+				model->modelMaterial.baseColor = QColor2QVector3D(color) / 255.0f;
+			
 				QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			}
 
@@ -261,7 +341,7 @@ void MaterialInspector::setData()
 	}
 
 	QString emissiveColorText("background-color:%1");
-	auto emissiveColor = QVector3D2QColor(emissive);
+	auto emissiveColor = Emissive2Color(emissive);
 	emissiveColorText = emissiveColorText.arg(emissiveColor.name());
 	ui->labelEmissive->setToolTip(QString("R:%1 G:%2 B:%3").arg(emissiveColor.red()).arg(emissiveColor.green()).arg(emissiveColor.blue()));
 	ui->labelEmissive->setStyleSheet(emissiveColorText);

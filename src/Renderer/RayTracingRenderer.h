@@ -5,15 +5,15 @@
 #include "src/Manager/DataBuilder.h"
 #include <QFileInfo>
 #include "OpenImageDenoise/oidn.hpp"
-
+#include "RenderOption.h"
 
 class RayTracingRenderer :public Renderer {
 public:
 
 	void render();
 
-	void saveRenderResult();
-	void setSavingParam(const QString& savePath, int quality=50);
+	void saveRenderResult(const QString& path, int quality);
+	void setSnapshotParam(const QString& savePath, int quality=50);
 
 	unsigned int getFrameCounter();
 	void clearFrameCounter();
@@ -24,6 +24,8 @@ public:
 	virtual void destoryData();
 	virtual void resize(int w, int h);
 
+	bool getIsOffScreenRendering();
+
 	static QSharedPointer<RayTracingRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram,
 		QOpenGLExtraFunctions* _functions, int width, int height);
 
@@ -31,11 +33,14 @@ public:
 
 public slots:
 	void sendDataToGPU(bool needSend);  //收到信号发送编码好数据至gpu端
+	void setRenderOption(const RenderOption& option);
 
 private:
 	bool isResized;  //是否发生resize事件
 	bool hasData; //是否有数据传输
-	unsigned int frameCounter; //帧计数器
+
+	bool isOffScreenRendering; //开启离屏渲染
+	RenderOption option;
 
 	QOpenGLBuffer pathTraceVBO;
 	QOpenGLVertexArrayObject pathTracingVAO;
@@ -60,13 +65,11 @@ private:
 
 	unsigned int textureMapsArrayTex; //贴图
 
-	bool isRealTimeDenoising;
-	unsigned int denoiserStep; //降噪帧数间隔
 	QVector<QVector3D> denoiserInputBuffer, denoiserOutputBuffer; //降噪使用的缓冲区
 
-	bool isSaving;
-	QString savePath;
-	int quality; //保存参数
+	bool isSavingSnapshot;
+	int snapShotquality; 
+	QString snapShotSavingPath; //快照相关参数
 
 	static QSharedPointer<RayTracingRenderer> instance;
 

@@ -58,69 +58,80 @@ void TransformInspector::clearData()
 
 void TransformInspector::applyData()
 {
+
     connect(ui->doubleSpinBoxPosX, &QDoubleSpinBox::editingFinished, [=]() {
-        if (model != nullptr) {
+        auto value = ui->doubleSpinBoxPosX->value();
+        if (model != nullptr && abs(model->transform.translationX-value) > 1e-6) {
             emit sendRevertModel(model);
-            model->transform.translationX = ui->doubleSpinBoxPosX->value();
+            model->transform.translationX = value;
             upDateModel();
         }
     });
     connect(ui->doubleSpinBoxPosY, &QDoubleSpinBox::editingFinished, [=]() {
-        if (model != nullptr) {
+        auto value = ui->doubleSpinBoxPosY->value();;
+        if (model != nullptr && abs(model->transform.translationY -value) > 1e-6) {
             emit sendRevertModel(model);
-            model->transform.translationY = ui->doubleSpinBoxPosY->value();
+            model->transform.translationY = value;
             upDateModel();
         }
     });
     connect(ui->doubleSpinBoxPosZ, &QDoubleSpinBox::editingFinished, [=]() {
-        if (model != nullptr) {
+        auto value = ui->doubleSpinBoxPosZ->value();
+        if (model != nullptr && abs(model->transform.translationZ - value) > 1e-6) {
             emit sendRevertModel(model);
-            model->transform.translationZ = ui->doubleSpinBoxPosZ->value();
+            model->transform.translationZ = value;
             upDateModel();
         }
     });
     connect(ui->doubleSpinBoxRotationX, &QDoubleSpinBox::editingFinished, [=]() {
-        if (model != nullptr) {
+        auto value = ui->doubleSpinBoxRotationX->value();
+        if (model != nullptr && abs(model->transform.rotationX - value) > 1e-6) {
             emit sendRevertModel(model);
-            model->transform.rotationX = ui->doubleSpinBoxRotationX->value();
+            model->transform.rotationX = value;
             upDateModel();
         }
     });
     connect(ui->doubleSpinBoxRotationY, &QDoubleSpinBox::editingFinished, [=]() {
-        if (model != nullptr) {
+        auto value = ui->doubleSpinBoxRotationY->value();
+        if (model != nullptr && abs(model->transform.rotationY - value) > 1e-6) {
             emit sendRevertModel(model);
-            model->transform.rotationY = ui->doubleSpinBoxRotationY->value();
+            model->transform.rotationY = value;
             upDateModel();
         }
     });
     connect(ui->doubleSpinBoxRotationZ, &QDoubleSpinBox::editingFinished, [=]() {
-        if (model != nullptr) {
+        auto value = ui->doubleSpinBoxRotationZ->value();
+        if (model != nullptr && abs(model->transform.rotationZ - value) > 1e-6) {
             emit sendRevertModel(model);
-            model->transform.rotationZ = ui->doubleSpinBoxRotationZ->value();
+            model->transform.rotationZ = value;
             upDateModel();
         }
     });
     connect(ui->doubleSpinBoxScaleX, &QDoubleSpinBox::editingFinished, [=]() {
-        if (model != nullptr) {
+        auto value = ui->doubleSpinBoxScaleX->value();
+        if (model != nullptr && abs(model->transform.scaleX - value) > 1e-6) {
             emit sendRevertModel(model);
-            model->transform.scaleX = ui->doubleSpinBoxScaleX->value();
+            model->transform.scaleX = value;
             upDateModel();
         }
     });
     connect(ui->doubleSpinBoxScaleY, &QDoubleSpinBox::editingFinished, [=]() {
-        if (model != nullptr) {
+        auto value = ui->doubleSpinBoxScaleY->value();
+        if (model != nullptr && abs(model->transform.scaleY - value) > 1e-6) {
             emit sendRevertModel(model);
-            model->transform.scaleY = ui->doubleSpinBoxScaleY->value();
+            model->transform.scaleY = value;
             upDateModel();
         }
     });
     connect(ui->doubleSpinBoxScaleZ, &QDoubleSpinBox::editingFinished, [=]() {
-        if (model != nullptr) {
+        auto value = ui->doubleSpinBoxScaleZ->value();
+        if (model != nullptr && abs(model->transform.scaleZ - value) > 1e-6) {
             emit sendRevertModel(model);
-            model->transform.scaleZ = ui->doubleSpinBoxScaleZ->value();
+            model->transform.scaleZ = value;
             upDateModel();
         }
     });
+
     connect(ui->radioButtonPos, &QRadioButton::clicked, this, &TransformInspector::getCheckedTransformType);
     connect(ui->radioButtonRotation, &QRadioButton::clicked, this, &TransformInspector::getCheckedTransformType);
     connect(ui->radioButtonScale, &QRadioButton::clicked, this, &TransformInspector::getCheckedTransformType);

@@ -78,6 +78,7 @@ void BaseOpenGLWidget::enterEvent(QEnterEvent* event)
 void BaseOpenGLWidget::leaveEvent(QEvent* event)
 {
     clearFocus();
+    sceneManager->getCamera()->clearAllKey();
 }
 
 bool BaseOpenGLWidget::isIgnore()

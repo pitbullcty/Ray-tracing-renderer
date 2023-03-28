@@ -19,6 +19,9 @@ public:
     void setEnabled(bool isEnabled);
     void collapseAll(bool isClose=false);
     void expandAll();
+    void changeCurrentIndex(int index);
+    void hideWidget(int index);
+    void showWidget(int index);
 
 public slots:
     void setModelName(const QString& name);

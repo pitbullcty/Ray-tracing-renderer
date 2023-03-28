@@ -63,8 +63,8 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QRadioButton *radioButtonWorld;
     QRadioButton *radioButtonLocal;
-    QButtonGroup *buttonGroup;
     QButtonGroup *buttonGroup2;
+    QButtonGroup *buttonGroup;
 
     void setupUi(QWidget *TransformInspector)
     {
@@ -85,6 +85,7 @@ public:
 
         doubleSpinBoxPosY = new QDoubleSpinBox(TransformInspector);
         doubleSpinBoxPosY->setObjectName(QString::fromUtf8("doubleSpinBoxPosY"));
+        doubleSpinBoxPosY->setKeyboardTracking(false);
         doubleSpinBoxPosY->setMinimum(-1000000000.000000000000000);
         doubleSpinBoxPosY->setMaximum(1000000000.000000000000000);
         doubleSpinBoxPosY->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
@@ -120,6 +121,7 @@ public:
 
         doubleSpinBoxRotationZ = new QDoubleSpinBox(TransformInspector);
         doubleSpinBoxRotationZ->setObjectName(QString::fromUtf8("doubleSpinBoxRotationZ"));
+        doubleSpinBoxRotationZ->setKeyboardTracking(false);
         doubleSpinBoxRotationZ->setMinimum(-1000000000.000000000000000);
         doubleSpinBoxRotationZ->setMaximum(1000000000.000000000000000);
         doubleSpinBoxRotationZ->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
@@ -134,6 +136,7 @@ public:
 
         doubleSpinBoxRotationY = new QDoubleSpinBox(TransformInspector);
         doubleSpinBoxRotationY->setObjectName(QString::fromUtf8("doubleSpinBoxRotationY"));
+        doubleSpinBoxRotationY->setKeyboardTracking(false);
         doubleSpinBoxRotationY->setMaximum(1000000000.000000000000000);
         doubleSpinBoxRotationY->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
         doubleSpinBoxRotationY->setValue(0.000000000000000);
@@ -146,6 +149,7 @@ public:
 
         doubleSpinBoxScaleZ = new QDoubleSpinBox(TransformInspector);
         doubleSpinBoxScaleZ->setObjectName(QString::fromUtf8("doubleSpinBoxScaleZ"));
+        doubleSpinBoxScaleZ->setKeyboardTracking(false);
         doubleSpinBoxScaleZ->setMinimum(0.000000000000000);
         doubleSpinBoxScaleZ->setMaximum(1000000000.000000000000000);
         doubleSpinBoxScaleZ->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
@@ -159,6 +163,7 @@ public:
 
         doubleSpinBoxScaleY = new QDoubleSpinBox(TransformInspector);
         doubleSpinBoxScaleY->setObjectName(QString::fromUtf8("doubleSpinBoxScaleY"));
+        doubleSpinBoxScaleY->setKeyboardTracking(false);
         doubleSpinBoxScaleY->setMinimum(0.000000000000000);
         doubleSpinBoxScaleY->setMaximum(1000000000.000000000000000);
         doubleSpinBoxScaleY->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
@@ -173,6 +178,7 @@ public:
 
         doubleSpinBoxPosZ = new QDoubleSpinBox(TransformInspector);
         doubleSpinBoxPosZ->setObjectName(QString::fromUtf8("doubleSpinBoxPosZ"));
+        doubleSpinBoxPosZ->setKeyboardTracking(false);
         doubleSpinBoxPosZ->setMinimum(-1000000000.000000000000000);
         doubleSpinBoxPosZ->setMaximum(1000000000.000000000000000);
         doubleSpinBoxPosZ->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
@@ -181,6 +187,7 @@ public:
 
         doubleSpinBoxRotationX = new QDoubleSpinBox(TransformInspector);
         doubleSpinBoxRotationX->setObjectName(QString::fromUtf8("doubleSpinBoxRotationX"));
+        doubleSpinBoxRotationX->setKeyboardTracking(false);
         doubleSpinBoxRotationX->setMinimum(-1000000000.000000000000000);
         doubleSpinBoxRotationX->setMaximum(1000000000.000000000000000);
         doubleSpinBoxRotationX->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
@@ -194,6 +201,7 @@ public:
 
         doubleSpinBoxPosX = new QDoubleSpinBox(TransformInspector);
         doubleSpinBoxPosX->setObjectName(QString::fromUtf8("doubleSpinBoxPosX"));
+        doubleSpinBoxPosX->setKeyboardTracking(false);
         doubleSpinBoxPosX->setMinimum(-1000000000.000000000000000);
         doubleSpinBoxPosX->setMaximum(1000000000.000000000000000);
         doubleSpinBoxPosX->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);
@@ -217,6 +225,7 @@ public:
 
         doubleSpinBoxScaleX = new QDoubleSpinBox(TransformInspector);
         doubleSpinBoxScaleX->setObjectName(QString::fromUtf8("doubleSpinBoxScaleX"));
+        doubleSpinBoxScaleX->setKeyboardTracking(false);
         doubleSpinBoxScaleX->setMinimum(0.000000000000000);
         doubleSpinBoxScaleX->setMaximum(1000000000.000000000000000);
         doubleSpinBoxScaleX->setStepType(QAbstractSpinBox::AdaptiveDecimalStepType);

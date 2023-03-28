@@ -84,7 +84,10 @@ void MainWindow::bindSignals()
     connect(this, &MainWindow::sendChangeWindow, mainWindowManager, &MainWindowManager::changeRenderWindow);
 }
 
-
 void QAbstractSpinBox::wheelEvent(QWheelEvent* e) {
+    e->ignore();
+} //屏蔽滚轮事件
+
+void QAbstractSlider::wheelEvent(QWheelEvent* e) {
     e->ignore();
 } //屏蔽滚轮事件

@@ -1,12 +1,16 @@
 ﻿uic ./ui/mainwindow.ui -o ./src/Ui/UiMainWindow.h
 uic ./ui/Inspector.ui -o ./src/Ui/UiInspector.h
 uic ./ui/InspectorPage.ui -o ./src/Ui/UiInspectorPage.h
+uic ./ui/RenderOptionInspector.ui -o ./src/Ui/UiRenderOptionInspector.h
 uic ./ui/TransformInspector.ui -o ./src/Ui/UiTransformInspector.h
 uic ./ui/MaterialInspector.ui -o ./src/Ui/UiMaterialInspector.h
 
+cloc src --exclude-list-file=ignore.txt
 
-1.光源实现,待与发光颜色匹配,（shader分拆）
-2.bvh构建提示，渲染选项提示，fps过低时提示
+1.离屏渲染？
+2.完善ui提示，完善离屏渲染过程设置（鼠标等事件）
+3.根据emissive比例计算还原rgb,添加强度因子
+
 
 ui方面：
 1.编辑器

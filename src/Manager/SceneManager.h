@@ -81,6 +81,7 @@ public slots:
 	QString addModel(const QString& path, const QString& modelName = "", bool isCopy = false, bool isLight = false, bool isLoadScene=false);
 	void getEditModel(const QString& name);
 	void revertAction(); //撤回
+	void addInspectorRevertModel(Model* model);
 
 private:
 

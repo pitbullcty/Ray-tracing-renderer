@@ -146,7 +146,7 @@ void RayTracingOpenGLWidget::getSnapshot()
 {
     QString filename(QDir::currentPath() + "/snapshots/%1%2.png");
     filename = filename.arg(sceneManager->getSceneName()).arg(rayTracingRenderer->getFrameCounter());
-    rayTracingRenderer->setSavingParam(filename);
+    rayTracingRenderer->setSnapshotParam(filename);
     QString info("快照保存至%1, <a href=\"file:///%2\">单击链接查看</a>");
     info = info.arg(filename).arg(filename);
     emit Info(info);
