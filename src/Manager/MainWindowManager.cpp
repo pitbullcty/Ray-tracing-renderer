@@ -86,7 +86,11 @@ void MainWindowManager::bindSignals()
 
 	auto gizmo = ui->editor->getEditorRenderer()->getGizmo();
 	connect(transformInspector, &TransformInspector::sendEditModel, gizmo.data(), &Gizmo::setEditModel);
+	connect(transformInspector, &TransformInspector::sendGizmoType, gizmo.data(), &Gizmo::setType);
+	connect(transformInspector, &TransformInspector::sendLocationType, gizmo.data(), &Gizmo::setLocation);
 	connect(gizmo.data(), &Gizmo::sendChanged, transformInspector, &TransformInspector::setData);
+	connect(gizmo.data(), &Gizmo::sendCheckedLocationButton, transformInspector, &TransformInspector::setCheckedLocationButton);
+	connect(gizmo.data(), &Gizmo::sendCheckedTransformButton, transformInspector, &TransformInspector::setCheckedTransformButton);
 
 	connect(transformInspector, &TransformInspector::sendRevertModel, ui->editor, &EditorOpenGLWidget::addRevertModel);
 

@@ -6,6 +6,7 @@
 #include "src/Data/Model.h"
 #include <QtConcurrent>
 #include "src/Manager/DataBuilder.h"
+#include "src/Renderer/Gizmo.h"
 
 class TransformInspector:public QWidget
 {
@@ -19,10 +20,14 @@ public:
 signals:
 	void sendEditModel(Model* model);
 	void sendRevertModel(Model* model);
+	void sendGizmoType(GIZMOTYPE type);
+	void sendLocationType(IGizmo::LOCATION location);
 
 public slots:
 	void bindModel(Model* model);
 	void setData();
+	void setCheckedTransformButton(int id);
+	void setCheckedLocationButton(int id);
 
 private:
 	Ui::TransformInspector* ui;
@@ -30,9 +35,10 @@ private:
 
 	void clearData();
 	void applyData();
-
 	void upDateModel();
 
+	void getCheckedTransformType();
+	void getCheckedLocationType();
 };
 
 

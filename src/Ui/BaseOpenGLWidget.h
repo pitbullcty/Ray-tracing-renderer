@@ -58,6 +58,8 @@ protected:
  
     QSharedPointer<SceneManager> sceneManager; //场景管理器
 
+    void enterEvent(QEnterEvent* event) override;
+    void leaveEvent(QEvent* event) override;
 };
 
 

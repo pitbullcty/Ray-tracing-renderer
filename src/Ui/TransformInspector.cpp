@@ -1,5 +1,8 @@
 ﻿#include "TransformInspector.h"
 
+extern int changeCount;
+extern int locationCount;
+
 TransformInspector::TransformInspector(QWidget* parent):
 	QWidget(parent),
 	ui(new Ui::TransformInspector),
@@ -118,6 +121,13 @@ void TransformInspector::applyData()
             upDateModel();
         }
     });
+    connect(ui->radioButtonPos, &QRadioButton::clicked, this, &TransformInspector::getCheckedTransformType);
+    connect(ui->radioButtonRotation, &QRadioButton::clicked, this, &TransformInspector::getCheckedTransformType);
+    connect(ui->radioButtonScale, &QRadioButton::clicked, this, &TransformInspector::getCheckedTransformType);
+
+    connect(ui->radioButtonWorld, &QRadioButton::clicked, this, &TransformInspector::getCheckedLocationType);
+    connect(ui->radioButtonLocal, &QRadioButton::clicked, this, &TransformInspector::getCheckedLocationType);
+
 }
 
 void TransformInspector::upDateModel()
@@ -126,6 +136,42 @@ void TransformInspector::upDateModel()
     model->updateBound();
     emit sendEditModel(model);
     QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, false);
+}
+
+void TransformInspector::getCheckedTransformType()
+{
+    if (model != nullptr) {
+        int id = ui->buttonGroup->checkedId();
+        if (id == -2) {
+            changeCount = 0;
+            emit sendGizmoType(MOVE);
+        }
+        else if (id == -3) {
+            changeCount = 1;
+            emit sendGizmoType(ROTATE);
+        }
+        else {
+            changeCount = 2;
+            emit sendGizmoType(SCALE);
+        }
+    }
+    locationCount = 0;
+    emit sendLocationType(IGizmo::LOCATION::LOCATE_WORLD);
+}
+
+void TransformInspector::getCheckedLocationType()
+{
+    if (model != nullptr) {
+        int id = ui->buttonGroup2->checkedId();
+        if (id == -2) {
+            locationCount = 0;
+            emit sendLocationType(IGizmo::LOCATION::LOCATE_WORLD);
+        }
+        else {
+            locationCount = 1;
+            emit sendLocationType(IGizmo::LOCATION::LOCATE_LOCAL);
+        }
+    }
 }
 
 void TransformInspector::setData()
@@ -140,4 +186,31 @@ void TransformInspector::setData()
     ui->doubleSpinBoxScaleX->setValue(transform.scaleX);
     ui->doubleSpinBoxScaleY->setValue(transform.scaleY);
     ui->doubleSpinBoxScaleZ->setValue(transform.scaleZ);
+}
+
+void TransformInspector::setCheckedTransformButton(int id)
+{
+    if (id == ui->buttonGroup->checkedId()) return;
+    
+    if (id == -2) {
+        ui->radioButtonPos->setChecked(true);
+    }
+    else if (id == -3) {
+        ui->radioButtonRotation->setChecked(true);
+    }
+    else {
+        ui->radioButtonScale->setChecked(true);
+    }
+}
+
+void TransformInspector::setCheckedLocationButton(int id)
+{
+    if (id == ui->buttonGroup2->checkedId()) return;
+
+    if (id == -2) {
+        ui->radioButtonWorld->setChecked(true);
+    }
+    else {
+        ui->radioButtonLocal->setChecked(true);
+    }
 }

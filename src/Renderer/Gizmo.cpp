@@ -90,16 +90,19 @@ void Gizmo::setCamera(const QMatrix4x4& view, const QMatrix4x4& proj)
 	gizmo->SetCameraMatrix(gizmoView, gizmoProj);
 }
 
-void Gizmo::setType(GIZMO_TYPE type)
+void Gizmo::setType(GIZMOTYPE type)
 {
 	if (type == MOVE) {
 		gizmo = gizmoMove;
+		sendCheckedTransformButton(-2);
 	}
 	else if (type == ROTATE) {
 		gizmo = gizmoRotate;
+		sendCheckedTransformButton(-3);
 	}
 	else {
 		gizmo = gizmoScale;
+		sendCheckedTransformButton(-4);
 	}
 }
 
@@ -137,8 +140,11 @@ void Gizmo::mouseUp(int x, int y)
 	gizmo->OnMouseUp(x, y);
 }
 
-void Gizmo::setLocate(IGizmo::LOCATION location)
+void Gizmo::setLocation(IGizmo::LOCATION location)
 {
+	if (location == IGizmo::LOCATION::LOCATE_WORLD) emit sendCheckedLocationButton(-2);
+	else emit sendCheckedLocationButton(-1);
+
 	gizmo->SetLocation(location);
 }
 

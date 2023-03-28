@@ -17,6 +17,7 @@ BaseOpenGLWidget::BaseOpenGLWidget(QWidget* parent):
     surfaceFormat.setDepthBufferSize(24); //深度测试缓冲区位数
     setFormat(surfaceFormat); //开启多重采样抗锯齿
     setFocusPolicy(Qt::ClickFocus);
+    setMouseTracking(true);
 }
 
 
@@ -67,6 +68,16 @@ void BaseOpenGLWidget::drawTips(const QString& tips)
     painter.drawText(rect(), Qt::AlignCenter, tips);
     painter.end();
 
+}
+
+void BaseOpenGLWidget::enterEvent(QEnterEvent* event)
+{
+    setFocus();
+}
+
+void BaseOpenGLWidget::leaveEvent(QEvent* event)
+{
+    clearFocus();
 }
 
 bool BaseOpenGLWidget::isIgnore()
@@ -134,6 +145,7 @@ void BaseOpenGLWidget::processMouseMove(QMouseEvent* event)
         lastPos = event->pos();
         sceneManager->getCamera()->processMouseMovement(xoffset, yoffset);
     }
+    return; 
 }
 
 bool BaseOpenGLWidget::processCameraKey(QKeyEvent* event)

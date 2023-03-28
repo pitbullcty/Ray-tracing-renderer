@@ -7,7 +7,7 @@
 #include <QMatrix4x4>
 #include "src/Data/Model.h"
 
-enum GIZMO_TYPE {
+enum GIZMOTYPE {
 	MOVE,
 	ROTATE,
 	SCALE
@@ -21,22 +21,28 @@ public:
 	Gizmo(QOpenGLExtraFunctions* _functions, QOpenGLShaderProgram* _program);
 	Gizmo() = default;
 	~Gizmo();
+
 	void setSize(int w, int h);
 	void setScale(float scale);
 	void setCamera(const QMatrix4x4& view, const QMatrix4x4& proj);
-	void setType(GIZMO_TYPE type);
+	
+
 	void mouseMove(int x, int y);
 	bool mouseDown(int x, int y);
 	void mouseUp(int x, int y);
-	void setLocate(IGizmo::LOCATION location);
+
 	bool isChange(const QMatrix4x4& modelMatrix);
 	void Draw();
 
 signals:
 	void sendChanged();
+	void sendCheckedTransformButton(int id);
+	void sendCheckedLocationButton(int id);
 
 public slots:
 	void setEditModel(Model* model);
+	void setType(GIZMOTYPE type);
+	void setLocation(IGizmo::LOCATION location);
 
 private:
 	Model* model; //挂载的模型

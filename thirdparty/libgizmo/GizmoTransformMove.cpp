@@ -132,6 +132,7 @@ bool CGizmoTransformMove::OnMouseDown(unsigned int x, unsigned int y)
 
 void CGizmoTransformMove::OnMouseMove(unsigned int x, unsigned int y)
 {
+	
 	if (m_MoveType != MOVE_NONE)
 	{
 		tvector3 rayOrigin,rayDir,df, inters;
