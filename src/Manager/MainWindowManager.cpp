@@ -132,6 +132,7 @@ void MainWindowManager::loadModel(const QString& path)
 	if (sceneManager->getState() == NONE) {
 		sceneManager->createScene();
 		ui->inspector->setModelName("");
+		renderOptionInspector->reset();
 	}
 	if (path.contains("/lights/rectlight.obj") || path.contains("/lights/spherelight.obj")) {
 		sceneManager->addModel(fileName, "", false, true); //路径为添加灯光
@@ -159,6 +160,7 @@ void MainWindowManager::crateScene()
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	sceneManager->createScene();
 	ui->inspector->setModelName("");
+	renderOptionInspector->reset();
 	ui->editor->update(); //刷新界面显示
 	if (currentIndex) {
 		changeRenderWindow();
@@ -188,6 +190,7 @@ void MainWindowManager::loadScene(const QString& path)
 	editorRenderer->getGizmo()->setEditModel(nullptr);
 	isBusy = true;
 	sceneManager->loadScene(fileName);
+	renderOptionInspector->reset();
 	if (currentIndex) {
 		changeRenderWindow();
 	}

@@ -71,6 +71,8 @@ private:
 	unsigned int materialBuffer; 
 	unsigned int materialTexture; //材质
 
+	unsigned int backgroundTexture; //背景材质；
+
 	unsigned int textureMapsArrayTex; //贴图
 
 	QVector<QVector3D> denoiserInputBuffer, denoiserOutputBuffer; //降噪使用的缓冲区
@@ -82,6 +84,8 @@ private:
 	static QSharedPointer<RayTracingRenderer> instance;
 
 	unsigned int generateAttachment(int w, int h);
+	unsigned int generateAttachment(const QImage& image);
+
 	void denoise(unsigned int FBO, unsigned int texture, bool needWriteBack=false); //降噪
 
 	template<typename T>

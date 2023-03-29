@@ -2,6 +2,7 @@
 
 QSharedPointer<RayTracingRenderer> RayTracingRenderer::instance = nullptr;
 
+
 void RayTracingRenderer::destory(RayTracingRenderer* rayTracingRenderer)
 {
 	delete rayTracingRenderer;
@@ -23,6 +24,7 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	accumFBO(-1), accumTexture(-1),
 	outputFBO(-1), outputTexture(-1),
 	pathTracingFBO(-1), pathTracingTexture(-1),
+	backgroundTexture(-1),
 	pathTraceVBO(QOpenGLBuffer::VertexBuffer),
 	accumVBO(QOpenGLBuffer::VertexBuffer),
 	outputVBO(QOpenGLBuffer::VertexBuffer),
@@ -62,6 +64,18 @@ unsigned int RayTracingRenderer::generateAttachment(int w, int h)
 	return id;
 }
 
+unsigned int RayTracingRenderer::generateAttachment(const QImage& image)
+{
+	unsigned int id;
+	functions->glGenTextures(1, &id);
+	functions->glBindTexture(GL_TEXTURE_2D, id);
+	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.width(), image.height(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.bits());
+	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	return id;
+}
 
 void RayTracingRenderer::bindVAO()
 {
@@ -120,6 +134,8 @@ void RayTracingRenderer::bindTexture()
 	functions->glActiveTexture(GL_TEXTURE7);
 	functions->glBindTexture(GL_TEXTURE_2D, accumTexture); //绑定纹理单元
 
+	functions->glActiveTexture(GL_TEXTURE8);
+	functions->glBindTexture(GL_TEXTURE_2D, backgroundTexture); //绑定纹理单元
 
 	functions->glActiveTexture(GL_TEXTURE0);
 }
@@ -163,6 +179,8 @@ void RayTracingRenderer::destoryTexture()
 
 	functions->glDeleteTextures(1, &materialTexture);
 	functions->glDeleteBuffers(1, &materialBuffer);
+
+	functions->glDeleteTextures(1, &backgroundTexture);
 
 	functions->glDeleteTextures(1, &textureMapsArrayTex); //删除材质以及缓冲区
 	
@@ -212,6 +230,7 @@ void RayTracingRenderer::resizeFBO()
 			width = option.resolutionX;
 			height = option.resolutionY;
 		}
+
 		else{
 			width = viewport[2];
 			height = viewport[3];
@@ -244,6 +263,8 @@ void RayTracingRenderer::sendDataToGPU(bool needSend)
 
 	destoryTexture();
 	option.frameCounter = 0;
+
+	backgroundTexture = generateAttachment(QImage(":/icons/background.png").convertToFormat(QImage::Format_RGB888).mirrored());
 
 	functions->glGenBuffers(1, &BVHbuffer);
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, BVHbuffer);
@@ -374,6 +395,7 @@ void RayTracingRenderer::render()
 	outputVAO.bind();
 	shaderProgram["output"]->bind();
 	shaderProgram["output"]->setUniformValue("lastFrame", 7);
+	shaderProgram["output"]->setUniformValue("needToneMapping", true);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, outputFBO);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //绘制到outputFBO保存结果
@@ -392,22 +414,26 @@ void RayTracingRenderer::render()
 		isOffScreenRendering = false;
 		emit Info(info, false);
 	}
-
-
+	
+	outputVAO.bind();
+	shaderProgram["output"]->bind();
 	if (!isOffScreenRendering) {
-		outputVAO.bind();
-		shaderProgram["output"]->bind();
 		shaderProgram["output"]->setUniformValue("lastFrame", 7);
-
-		functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		functions->glDrawArrays(GL_TRIANGLES, 0, 6); //显示到屏幕
-
-		shaderProgram["output"]->release();
-		outputVAO.release();
-		//非离屏渲染不用输出到屏幕
+		shaderProgram["output"]->setUniformValue("needToneMapping", true);
+	}
+	else {
+		functions->glViewport(0, 0, 1282, 604);
+		shaderProgram["output"]->setUniformValue("lastFrame", 8);
+		shaderProgram["output"]->setUniformValue("needToneMapping", false);
 	}
 
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //显示到屏幕
+	shaderProgram["output"]->release();
+	outputVAO.release();
+	//非离屏渲染不用输出到屏幕
+	
 	if (isSavingSnapshot && !isOffScreenRendering) {
 		saveRenderResult(snapShotSavingPath, snapShotquality);
 		isSavingSnapshot = false;

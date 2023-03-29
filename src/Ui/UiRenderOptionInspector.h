@@ -50,6 +50,7 @@ public:
     QComboBox *comboBoxQuality;
     QLabel *label_4;
     QLabel *labelOutputPath;
+    QPushButton *pushButtonReset;
 
     void setupUi(QWidget *RenderOptionInspector)
     {
@@ -183,6 +184,11 @@ public:
 
         gridLayout->addWidget(labelOutputPath, 6, 2, 1, 1);
 
+        pushButtonReset = new QPushButton(RenderOptionInspector);
+        pushButtonReset->setObjectName(QString::fromUtf8("pushButtonReset"));
+
+        gridLayout->addWidget(pushButtonReset, 8, 0, 1, 1);
+
 
         retranslateUi(RenderOptionInspector);
 
@@ -233,6 +239,7 @@ public:
 #endif // QT_CONFIG(tooltip)
         label_4->setText(QCoreApplication::translate("RenderOptionInspector", "\345\256\236\346\227\266\351\231\215\345\231\252", nullptr));
         labelOutputPath->setText(QString());
+        pushButtonReset->setText(QCoreApplication::translate("RenderOptionInspector", "\351\207\215\347\275\256", nullptr));
     } // retranslateUi
 
 };

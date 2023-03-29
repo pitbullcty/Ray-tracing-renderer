@@ -8,5 +8,6 @@
         <file>pause.ico</file>
         <file>downArrow.png</file>
         <file>leftArrow.png</file>
+        <file>background.png</file>
     </qresource>
 </RCC>

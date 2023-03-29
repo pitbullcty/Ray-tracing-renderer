@@ -19,6 +19,20 @@ RenderOptionInspector::~RenderOptionInspector()
 	delete ui;
 }
 
+void RenderOptionInspector::reset()
+{
+	option.reset();
+	ui->horizontalSliderMaxFrameCount->setValue(option.maxFrameCounter);
+	ui->horizontalSliderDepth->setValue(option.depth);
+	ui->horizontalSliderDenoiserStep->setValue(option.denoiserStep);
+	ui->checkBox->setChecked(false);
+	ui->comboBoxQuality->setCurrentIndex(1);
+	ui->comboBoxResolution->setCurrentIndex(1);
+	ui->labelOutputPath->setText(getOutputText(option.outputPath));
+	ui->labelOutputPath->setToolTip(option.outputPath);
+	ui->denoiserCount->hide();
+}
+
 void RenderOptionInspector::applyData()
 {
 
@@ -38,10 +52,6 @@ void RenderOptionInspector::applyData()
 		auto value = ui->horizontalSliderDenoiserStep->value();
 		option.denoiserStep = value;
 		ui->labelDenoiserStep->setText(QString::number(value));
-	});
-
-	connect(ui->labelOutputPath, &QLabel::linkActivated, [=](const QUrl& url) {
-		QDesktopServices::openUrl(url);
 	});
 
 	connect(ui->toolButton, &QToolButton::clicked, [=]() {
@@ -90,6 +100,8 @@ void RenderOptionInspector::applyData()
 	connect(ui->pushButton, &QPushButton::clicked, [=]() {
 		emit sendRenderOption(option);
 	});
+
+	connect(ui->pushButtonReset, &QPushButton::clicked, this, &RenderOptionInspector::reset);
 
 }
 

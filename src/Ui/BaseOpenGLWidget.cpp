@@ -57,7 +57,8 @@ void BaseOpenGLWidget::clacFPS()
 
 void BaseOpenGLWidget::drawTips(const QString& tips)
 {
-
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
     QPainter painter(this);
     painter.setPen(QColor(0, 0, 0));//设置画笔颜色
     painter.setRenderHint(QPainter::Antialiasing, true); // 反走样
@@ -67,7 +68,7 @@ void BaseOpenGLWidget::drawTips(const QString& tips)
     painter.setFont(font);
     painter.drawText(rect(), Qt::AlignCenter, tips);
     painter.end();
-
+    glEnable(GL_DEPTH_TEST);
 }
 
 void BaseOpenGLWidget::enterEvent(QEnterEvent* event)

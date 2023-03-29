@@ -48,13 +48,6 @@ void RayTracingOpenGLWidget::paintGL()
 
         if (rayTracingRenderer->getIsOffScreenRendering()) {
             auto& option = rayTracingRenderer->getOption();
-
-            //drawTips("正在离屏渲染..");
-            QPainter painter(this);
-            // 启用抗锯齿(反走样)
-            painter.setRenderHint(QPainter::Antialiasing, true);
-            // 指定要绘制的图片（将图片路径替换为有效的图片路径）
-            painter.drawPixmap(rect(), QPixmap("F:\\Ray-tracing-renderer\\out\\build\\x64-debug\\outputs\\default.png"));
           
             if (option.frameCounter % 10 == 0) {
                 QString info("渲染已完成%1\%,预计剩余时间%2s");

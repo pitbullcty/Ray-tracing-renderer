@@ -7,9 +7,8 @@ uic ./ui/MaterialInspector.ui -o ./src/Ui/UiMaterialInspector.h
 
 cloc src --exclude-list-file=ignore.txt
 
-1.离屏多线程渲染,存在问题
-2.完善ui提示，完善离屏渲染过程设置（鼠标等事件）
-3.根据emissive比例计算还原rgb,添加强度因子
+1.完善ui提示，完善离屏渲染过程设置（鼠标等事件）
+2.完善设置等Ui
 
 
 ui方面：

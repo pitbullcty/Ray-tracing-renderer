@@ -17,6 +17,9 @@ public:
 signals:
 	void sendRenderOption(const RenderOption& option);
 
+public slots:
+	void reset();
+
 private:
 	Ui::RenderOptionInspector* ui;
 	RenderOption option;

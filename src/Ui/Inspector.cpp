@@ -85,6 +85,7 @@ void Inspector::showWidget(int index)
     page->show();
 }
 
+
 void Inspector::collapseAll(bool isClose)
 {
     if (isClose) {
