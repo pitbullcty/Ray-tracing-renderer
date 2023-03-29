@@ -188,6 +188,25 @@ void MaterialInspector::applyData()
 			ui->subsurface->setText(QString::number(value, 'f', 2));
 		}
 	});
+	connect(ui->horizontalSliderFactor, &QSlider::valueChanged, [=]() {
+		auto value = ui->horizontalSliderFactor->value();
+		if (model != nullptr) {
+			ui->labelFactor ->setText(QString::number(value));
+			QVector3D emissive;
+			if (model->getType() == NORMAL)
+				emissive = model->modelMaterial.emissive;
+			else
+				emissive = model->lightMaterial.emissive;
+			auto color = Emissive2Color(emissive);
+			if (model->getType() == NORMAL)
+				model->modelMaterial.emissive = Color2Emissive(color, value);
+			else {
+				model->lightMaterial.baseColor = QColor2QVector3D(color) / 255.0f;
+				model->lightMaterial.emissive = Color2Emissive(color, value);
+			}
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
+		}
+	});
 	connect(ui->toolButtonEmissive, &QToolButton::clicked, [=]() {
 		if(model != nullptr){
 			
@@ -206,10 +225,10 @@ void MaterialInspector::applyData()
 				ui->labelEmissive->setToolTip(QString("R:%1 G:%2 B:%3").arg(color.red()).arg(color.green()).arg(color.blue()));
 
 				if (model->getType() == NORMAL)
-					model->modelMaterial.emissive = Color2Emissive(color, 20);
+					model->modelMaterial.emissive = Color2Emissive(color, ui->horizontalSliderFactor->value());
 				else {
 					model->lightMaterial.baseColor = QColor2QVector3D(color) / 255.0f;
-					model->lightMaterial.emissive = Color2Emissive(color, 20);
+					model->lightMaterial.emissive = Color2Emissive(color, ui->horizontalSliderFactor->value());
 				}
 
 				QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);

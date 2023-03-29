@@ -66,7 +66,7 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 	auto loadRes = modelLoader->loadModel(path, models[newname], isLight);
 	if (loadRes == RELOADED) {
 		models[newname].setCopy(&models[modelLoaded]); //如果已经加载过则直接复制
-		if(!isCopy && !isLight)  emit Info("模型" + path + "已加载！"); 
+		if(!isCopy && !isLight)  emit Info("模型" + path + "已加载！", true); 
 		if (!isLoadScene) addRevertModel(REMOVE, models[newname], newname);
 		emit updateList(&models, nullptr);
 	}
@@ -74,7 +74,7 @@ QString SceneManager::addModel(const QString& path, const QString& modelName, bo
 		models[newname].updateBound();
 		if (!isLight) {
 			QString loadModelTime = "模型" + newname + "加载耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms";
-			emit Info(loadModelTime);
+			emit Info(loadModelTime, true);
 		}
 		else {
 			MODELTYPE type;
@@ -464,7 +464,7 @@ void SceneManager::loadScene(const QString& path)
 		sceneFileName = path;
 		sceneName = QFileInfo(sceneFileName).baseName();
 		emit sendSceneName(sceneName);
-		emit Info(loadSceneTime);
+		emit Info(loadSceneTime, true);
 	}
 	state = CREATED;
 }
@@ -490,7 +490,7 @@ bool SceneManager::saveScene()
 	file.open(QFile::WriteOnly);
 	file.write(doc.toJson());
 	file.close(); //写入json
-	emit Info("场景保存至" + sceneFileName);
+	emit Info("场景保存至" + sceneFileName, true);
 	return true;
 }
 
@@ -502,7 +502,7 @@ void SceneManager::saveSceneAs(const QString& path)
 	QFile file(sceneFileName);
 	file.open(QFile::WriteOnly);
 	file.write(doc.toJson());
-	emit Info("场景保存至" + sceneFileName);
+	emit Info("场景保存至" + sceneFileName, true);
 	file.close(); //写入json
 }
 

@@ -41,7 +41,7 @@ public:
 	RenderData& getData(); //返回渲染数据的引用
 
 signals:
-	void Info(QString info);
+	void Info(QString info, bool needProcess);
 	void sendDataDone(bool needSend); //数据准备好信号
 
 private:

@@ -45,7 +45,8 @@ QMatrix4x4 Transform::getModel()
 void Transform::setModel(const QMatrix4x4& _model)
 {
 	model = _model;
-	                        
+
+	           
 	float data[16];
 	_model.copyDataTo(data);
 

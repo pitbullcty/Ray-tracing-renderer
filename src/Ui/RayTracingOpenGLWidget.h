@@ -5,6 +5,7 @@
 #include "src/Renderer/RayTracingRenderer.h"
 
 class RayTracingOpenGLWidget :public BaseOpenGLWidget {
+    Q_OBJECT
 
 public:
     RayTracingOpenGLWidget(QWidget* parent = 0);

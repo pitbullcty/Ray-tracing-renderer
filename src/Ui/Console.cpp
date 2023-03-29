@@ -27,14 +27,14 @@ void Console::Warning(const QString& text)
 	isBusy = false;
 }
 
-void Console::Info(const QString& text)
+void Console::Info(const QString& text, bool needProcess)
 {
 	QDateTime datetime = QDateTime::currentDateTime();
 	QString now = datetime.toString("[yyyy-MM-dd HH:mm:ss]");
 	append(info.arg(now).arg(text));
-	if (text.contains("BVH") || text.contains("保存至")) isBusy = false; //处理特殊时间
+	if (text.contains("BVH") || text.contains("保存至") || text.contains("渲染")) isBusy = false; //处理特殊时间
 	else isBusy = true;
-	QApplication::processEvents(); //显示数据，避免耗时任务太久
+	if(needProcess) QApplication::processEvents(); //显示数据，避免耗时任务太久
 	scrollToBottom();
 	isBusy = false;
 }

@@ -35,7 +35,7 @@ void DataBuilder::buildData(bool needTips, bool needRebuild, bool needSend) {
 
 	QElapsedTimer timer;
 	timer.start();
-	if (needTips) emit Info("正在构建BVH...");
+	if (needTips) emit Info("正在构建BVH...", true);
 
 	flattenAndBuildData(needRebuild);
 
@@ -47,7 +47,7 @@ void DataBuilder::buildData(bool needTips, bool needRebuild, bool needSend) {
 	encodeData(needRebuild);
 
 	emit sendDataDone(needSend);
-	if (needTips) emit Info("BVH建立完成，耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms");
+	if (needTips) emit Info("BVH建立完成，耗时" + QString::number(timer.elapsed(), 'f', 2) + "ms", true);
 }
 
 int DataBuilder::buildBVHHelp(int l, int r, int maxCount, int parent, STRATEGY stratgey)

@@ -86,7 +86,7 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model, bool isLigh
         return FAILED;
     }
     if(!isLight)
-        emit Info(QString("模型%1网格数量：").arg(path) + QString::number(scene->mNumMeshes) + " 模型材质数量：" + QString::number(scene->mNumMaterials) + " 模型纹理数量：" + QString::number(scene->mNumTextures));
+        emit Info(QString("模型%1 网格数量：").arg(path) + QString::number(scene->mNumMeshes) + " 模型材质数量：" + QString::number(scene->mNumMaterials) + " 模型纹理数量：" + QString::number(scene->mNumTextures), true);
     processNode(scene->mRootNode, scene);
     for (auto& nodeCenter : nodeCenters) {
         center += nodeCenter;

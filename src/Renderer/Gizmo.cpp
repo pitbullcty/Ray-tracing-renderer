@@ -41,7 +41,9 @@ void Gizmo::setEditModel(Model* model)
 	QMatrix4x4 gizmoModel ; //获取初始模型矩阵
 	gizmoModel = model->transform.getModel();
 	QMatrix4x4 trans;
-	trans.translate(model->getCenter());
+	QMatrix4x4 modelTrans;
+	modelTrans.scale( model->transform.scaleX , model->transform.scaleY ,model->transform.scaleZ );
+	trans.translate(modelTrans.map(model->getCenter()));
 	gizmoModel = trans * gizmoModel; //转移至中心位置
 	setModelMatrix(gizmoModel);
 }
@@ -51,8 +53,10 @@ void Gizmo::applyToModel()
 	QMatrix4x4 newmodel(gizmo->getEditMatrix());
 	newmodel = newmodel.transposed();
 	QMatrix4x4 trans;
-	trans.translate(-model->getCenter());
-	newmodel = trans * newmodel; //往回移动
+	QMatrix4x4 modelTrans;
+	modelTrans.scale(model->transform.scaleX, model->transform.scaleY, model->transform.scaleZ);
+	trans.translate(modelTrans.map(-model->getCenter()));
+	newmodel =  trans * newmodel; //往回移动
 	model->transform.setModel(newmodel);
 	model->updateBound(); //更新包围盒
 }

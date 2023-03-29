@@ -35,15 +35,35 @@ void RayTracingOpenGLWidget::resizeGL(int w, int h)
 void RayTracingOpenGLWidget::paintGL()
 {
     if (sceneManager->getState() == NONE) {
-        drawTips("请新建或打开文件！");
+        return;
     }
     else {
-        sceneManager->getCamera()->processKeyboard(deltaTime);
-        if (isLongPressing) {
-            rayTracingRenderer->clearFrameCounter();
-            rayTracingRenderer->render();
+        if (!rayTracingRenderer->getIsOffScreenRendering()) {
+            sceneManager->getCamera()->processKeyboard(deltaTime);
+            if (isLongPressing)
+                rayTracingRenderer->clearFrameCounter();
         }
-        else rayTracingRenderer->render();
+
+        rayTracingRenderer->render();
+
+        if (rayTracingRenderer->getIsOffScreenRendering()) {
+            auto& option = rayTracingRenderer->getOption();
+
+            //drawTips("正在离屏渲染..");
+            QPainter painter(this);
+            // 启用抗锯齿(反走样)
+            painter.setRenderHint(QPainter::Antialiasing, true);
+            // 指定要绘制的图片（将图片路径替换为有效的图片路径）
+            painter.drawPixmap(rect(), QPixmap("F:\\Ray-tracing-renderer\\out\\build\\x64-debug\\outputs\\default.png"));
+          
+            if (option.frameCounter % 10 == 0) {
+                QString info("渲染已完成%1\%,预计剩余时间%2s");
+                float remainTime = 1.0 / fps * (option.maxFrameCounter - option.frameCounter);
+                info = info.arg(QString::number((float)option.frameCounter / option.maxFrameCounter * 100, 'f', 2)).arg(QString::number(remainTime, 'f', 2));
+                emit Info(info, false);
+            }
+        }
+
         clacFPS();
         emit sendFPS(fps);
     }
@@ -52,6 +72,7 @@ void RayTracingOpenGLWidget::paintGL()
 
 void RayTracingOpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
+    if (rayTracingRenderer->getIsOffScreenRendering()) return;
     Qt::Key key = (Qt::Key)(event->key());
     if (processCameraKey(event)) {
         isLongPressing = true;
@@ -66,6 +87,7 @@ void RayTracingOpenGLWidget::keyPressEvent(QKeyEvent* event)
 
 void RayTracingOpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 {
+    if (rayTracingRenderer->getIsOffScreenRendering()) return;
     Qt::Key key = (Qt::Key)(event->key());
     processKeyRelease(event);
     if (key == Qt::Key_F10) return;
@@ -74,6 +96,8 @@ void RayTracingOpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 
 void RayTracingOpenGLWidget::mousePressEvent(QMouseEvent* event)
 {
+    if (rayTracingRenderer->getIsOffScreenRendering()) return;
+
     if (isIgnore()) {
         event->ignore();
         return;
@@ -91,6 +115,7 @@ void RayTracingOpenGLWidget::mousePressEvent(QMouseEvent* event)
 
 void RayTracingOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+    if (rayTracingRenderer->getIsOffScreenRendering()) return;
     if (isIgnore()) {
         event->ignore();
         return;
@@ -101,6 +126,7 @@ void RayTracingOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void RayTracingOpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
+    if (rayTracingRenderer->getIsOffScreenRendering()) return;
     processMouseMove(event);
     if (isRightClicked) {
         rayTracingRenderer->clearFrameCounter();
@@ -109,6 +135,7 @@ void RayTracingOpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 
 void RayTracingOpenGLWidget::wheelEvent(QWheelEvent* event)
 {
+    if (rayTracingRenderer->getIsOffScreenRendering()) return;
     processWheel(event);
     rayTracingRenderer->clearFrameCounter();
 }
@@ -149,5 +176,5 @@ void RayTracingOpenGLWidget::getSnapshot()
     rayTracingRenderer->setSnapshotParam(filename);
     QString info("快照保存至%1, <a href=\"file:///%2\">单击链接查看</a>");
     info = info.arg(filename).arg(filename);
-    emit Info(info);
+    emit Info(info, true);
 }

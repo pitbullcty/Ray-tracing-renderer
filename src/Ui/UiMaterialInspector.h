@@ -63,11 +63,13 @@ public:
     QSlider *horizontalSliderClearcoatGloss;
     QLabel *label_3;
     QWidget *emissiveWidget;
-    QHBoxLayout *horizontalLayout_4;
+    QGridLayout *gridLayout_2;
+    QLabel *label_13;
+    QLabel *labelFactor;
+    QSlider *horizontalSliderFactor;
     QLabel *label;
-    QHBoxLayout *horizontalLayout;
-    QLabel *labelEmissive;
     QToolButton *toolButtonEmissive;
+    QLabel *labelEmissive;
 
     void setupUi(QWidget *MaterialInspector)
     {
@@ -294,27 +296,41 @@ public:
 
         emissiveWidget = new QWidget(MaterialInspector);
         emissiveWidget->setObjectName(QString::fromUtf8("emissiveWidget"));
-        horizontalLayout_4 = new QHBoxLayout(emissiveWidget);
-        horizontalLayout_4->setObjectName(QString::fromUtf8("horizontalLayout_4"));
+        gridLayout_2 = new QGridLayout(emissiveWidget);
+        gridLayout_2->setObjectName(QString::fromUtf8("gridLayout_2"));
+        label_13 = new QLabel(emissiveWidget);
+        label_13->setObjectName(QString::fromUtf8("label_13"));
+
+        gridLayout_2->addWidget(label_13, 2, 0, 1, 1);
+
+        labelFactor = new QLabel(emissiveWidget);
+        labelFactor->setObjectName(QString::fromUtf8("labelFactor"));
+
+        gridLayout_2->addWidget(labelFactor, 2, 1, 1, 1);
+
+        horizontalSliderFactor = new QSlider(emissiveWidget);
+        horizontalSliderFactor->setObjectName(QString::fromUtf8("horizontalSliderFactor"));
+        horizontalSliderFactor->setMinimum(10);
+        horizontalSliderFactor->setMaximum(255);
+        horizontalSliderFactor->setValue(20);
+        horizontalSliderFactor->setOrientation(Qt::Horizontal);
+
+        gridLayout_2->addWidget(horizontalSliderFactor, 2, 2, 1, 1);
+
         label = new QLabel(emissiveWidget);
         label->setObjectName(QString::fromUtf8("label"));
 
-        horizontalLayout_4->addWidget(label);
-
-        horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
-        labelEmissive = new QLabel(emissiveWidget);
-        labelEmissive->setObjectName(QString::fromUtf8("labelEmissive"));
-
-        horizontalLayout->addWidget(labelEmissive);
+        gridLayout_2->addWidget(label, 1, 0, 1, 1);
 
         toolButtonEmissive = new QToolButton(emissiveWidget);
         toolButtonEmissive->setObjectName(QString::fromUtf8("toolButtonEmissive"));
 
-        horizontalLayout->addWidget(toolButtonEmissive);
+        gridLayout_2->addWidget(toolButtonEmissive, 1, 3, 1, 1);
 
+        labelEmissive = new QLabel(emissiveWidget);
+        labelEmissive->setObjectName(QString::fromUtf8("labelEmissive"));
 
-        horizontalLayout_4->addLayout(horizontalLayout);
+        gridLayout_2->addWidget(labelEmissive, 1, 1, 1, 2);
 
 
         gridLayout->addWidget(emissiveWidget, 0, 0, 1, 2);
@@ -385,11 +401,16 @@ public:
 #endif // QT_CONFIG(tooltip)
         label_3->setText(QCoreApplication::translate("MaterialInspector", "\346\254\241\350\241\250\351\235\242", nullptr));
 #if QT_CONFIG(tooltip)
+        label_13->setToolTip(QCoreApplication::translate("MaterialInspector", "\350\207\252\345\217\221\345\205\211\345\274\272\345\272\246\357\274\214\346\225\260\345\200\274\350\266\212\351\253\230\345\274\272\345\272\246\350\266\212\345\244\247", nullptr));
+#endif // QT_CONFIG(tooltip)
+        label_13->setText(QCoreApplication::translate("MaterialInspector", "\345\205\211\347\205\247\345\274\272\345\272\246", nullptr));
+        labelFactor->setText(QCoreApplication::translate("MaterialInspector", "20", nullptr));
+#if QT_CONFIG(tooltip)
         label->setToolTip(QCoreApplication::translate("MaterialInspector", "\344\275\234\344\270\272\345\205\211\346\272\220\346\227\266\347\232\204\345\217\221\345\205\211\351\242\234\350\211\262", nullptr));
 #endif // QT_CONFIG(tooltip)
         label->setText(QCoreApplication::translate("MaterialInspector", "\345\217\221\345\205\211\351\242\234\350\211\262", nullptr));
-        labelEmissive->setText(QString());
         toolButtonEmissive->setText(QCoreApplication::translate("MaterialInspector", "\347\274\226\350\276\221", nullptr));
+        labelEmissive->setText(QString());
     } // retranslateUi
 
 };

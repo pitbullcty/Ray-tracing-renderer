@@ -100,6 +100,7 @@ void MainWindowManager::bindSignals()
 
 	auto rayTarcingRenderer = ui->rayTracing->getRayTracingRenderer();
 	connect(renderOptionInspector, &RenderOptionInspector::sendRenderOption, rayTarcingRenderer.data(), &RayTracingRenderer::setRenderOption);
+	connect(rayTarcingRenderer.data(), &RayTracingRenderer::Info, ui->console, &Console::Info);
 
 	connect(ui->renderButton, &QPushButton::clicked, this, &MainWindowManager::changeRenderWindow);
 
@@ -297,6 +298,10 @@ void MainWindowManager::changeRenderWindow()
 	currentIndex = (currentIndex == 0) ? 1 : 0;
 	ui->stackedWidget->setCurrentIndex(currentIndex);
 	setButtonStyle(currentIndex);
+	if (currentIndex == 0) {
+		auto rayTracingRender = ui->rayTracing->getRayTracingRenderer();
+		rayTracingRender->stopRender(); //停止渲染
+	};
 	emit sendCurrentIndex(currentIndex);
 }
 

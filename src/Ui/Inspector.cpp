@@ -58,6 +58,7 @@ void Inspector::changeCurrentIndex(int index)
     auto renderOption = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(2)->widget());
 
     if (index) {
+        ui->modelName->show();
         material->show();
         transform->show();
         renderOption->hide();
@@ -99,15 +100,18 @@ void Inspector::collapseAll(bool isClose)
 
 void Inspector::setModelName(const QString& name) {
 
-    ui->modelName->show();
     QString text("<font size = \"5\"><b>%1</b></font>");
     if (name.isEmpty()) {
         collapseAll();
         ui->modelName->setText(text.arg("未选中物体"));
     }
-    else{
+    else {
         expandAll();
         ui->modelName->setText(text.arg(name));
     }
 
+    auto renderOption = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(2)->widget());
+    if (!renderOption->isHidden()) return;
+    ui->modelName->show();
+   
 }

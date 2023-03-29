@@ -35,7 +35,9 @@ public:
 
 	AABB& getBound();
 	AABB& getDectionBound();
+
 	void updateBound();
+	void updateCenter();
 
 	QJsonObject toJson();
 	void prase(const QJsonObject& transform, const QJsonObject& material);
@@ -51,6 +53,7 @@ public:
 private:
 	QString path;
 	QVector<QSharedPointer<Mesh>> meshes; //纹理
+
 	QVector3D center; //模型重心
 
 	Model* data; //指向正确数据的指针

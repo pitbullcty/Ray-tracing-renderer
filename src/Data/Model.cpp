@@ -31,6 +31,12 @@ void Model::updateBound()
 
     boundDetect.minpos = model.map(bound.minpos);
     boundDetect.maxpos = model.map(bound.maxpos);
+
+}
+
+void Model::updateCenter()
+{
+    ;
 }
 
 QJsonObject Model::toJson()

@@ -23,7 +23,7 @@ public:
     virtual void destoryData() = 0;
 
 signals:
-    void Info(QString info);
+    void Info(QString info, bool needProcess);
     void sendHideRenderWidget(bool isHide);
     void sendFPS(int fps);
 

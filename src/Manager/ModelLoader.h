@@ -27,7 +27,7 @@ public:
 	LOADRESULT loadModel(const QString& path, Model& model, bool isLight = false);
 
 signals:
-	void Info(QString info);
+	void Info(QString info, bool needProcess);
 	void Warning(QString warning);
 	void Error(QString error);
 

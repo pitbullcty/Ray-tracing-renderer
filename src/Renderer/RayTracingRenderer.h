@@ -8,8 +8,9 @@
 #include "RenderOption.h"
 
 class RayTracingRenderer :public Renderer {
-public:
+	Q_OBJECT
 
+public:
 	void render();
 
 	void saveRenderResult(const QString& path, int quality);
@@ -24,12 +25,19 @@ public:
 	virtual void destoryData();
 	virtual void resize(int w, int h);
 
+	RenderOption& getOption();
+
+	void stopRender();
+
 	bool getIsOffScreenRendering();
 
 	static QSharedPointer<RayTracingRenderer>& GetInstance(QMap<QString, QOpenGLShaderProgram*> _shaderProgram,
 		QOpenGLExtraFunctions* _functions, int width, int height);
 
 	static void destory(RayTracingRenderer* rayTracingRenderer);
+
+signals:
+	void Info(const QString& info, bool needProcess);
 
 public slots:
 	void sendDataToGPU(bool needSend);  //收到信号发送编码好数据至gpu端

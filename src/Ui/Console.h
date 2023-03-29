@@ -20,7 +20,7 @@ public:
 
 public slots:
 	void Warning(const QString& text);
-	void Info(const QString& text);
+	void Info(const QString& text, bool needProcess);
 	void Error(const QString& text);
 	void Clear();
 	void openImage(const QUrl& url);

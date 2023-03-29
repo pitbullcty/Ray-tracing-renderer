@@ -66,7 +66,7 @@ public:
 
 signals:
 	void updateList(QMap<QString, Model>* models, Model* model);
-	void Info(QString info);
+	void Info(QString info, bool needProcess);
 	void Error(QString error);
 	void Clear();
 	void sendEditModel(Model* model);

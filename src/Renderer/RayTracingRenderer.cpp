@@ -184,6 +184,18 @@ void RayTracingRenderer::resize(int w, int h)
 	isResized = true;
 }
 
+RenderOption& RayTracingRenderer::getOption()
+{
+	return option;
+}
+
+void RayTracingRenderer::stopRender()
+{
+	option.reset();
+	isOffScreenRendering = false;
+	isResized = true;
+}
+
 bool RayTracingRenderer::getIsOffScreenRendering()
 {
 	return isOffScreenRendering;
@@ -301,7 +313,6 @@ void RayTracingRenderer::initFBOs()
 
 }
 
-int count = 1;
 
 void RayTracingRenderer::render()
 {
@@ -371,12 +382,17 @@ void RayTracingRenderer::render()
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	outputVAO.release();
 
+
 	if (isOffScreenRendering && option.frameCounter == option.maxFrameCounter) {
 		saveRenderResult(option.outputPath, option.quality);
+		QString info("渲染已完成, 结果保存至%1, <a href=\"file:///%2\">单击链接查看</a>");
+		info = info.arg(option.outputPath).arg(option.outputPath);
 		option.reset();
 		isResized = true;
 		isOffScreenRendering = false;
+		emit Info(info, false);
 	}
+
 
 	if (!isOffScreenRendering) {
 		outputVAO.bind();
@@ -392,7 +408,7 @@ void RayTracingRenderer::render()
 		//非离屏渲染不用输出到屏幕
 	}
 
-	if (isSavingSnapshot) {
+	if (isSavingSnapshot && !isOffScreenRendering) {
 		saveRenderResult(snapShotSavingPath, snapShotquality);
 		isSavingSnapshot = false;
 	}
