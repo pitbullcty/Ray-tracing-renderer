@@ -37,6 +37,7 @@ qt_add_resources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/shader/shader.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/icons/icons.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/translator/translator.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/lights/lights.qrc
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/docs/docs.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/skybox/cubemap/Standard-Cube-Map1/skybox.qrc
 )
 

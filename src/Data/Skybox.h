@@ -7,16 +7,24 @@
 #include <QVector3D>
 #include <QImage>
 
-class Skybox
+class Skybox: public QObject
 {
+	Q_OBJECT
 public:
 	static QSharedPointer<Skybox>& GetInstance();
 	static void destory(Skybox* skybox);
+
     QVector<float> vertices;
 	QMap<QString, QString> pathes;
-	void setPath(const QString& location, const QString& path);
+	QMap<QString, QString> backUpPathes;
+
 	QJsonObject toJson();
 	void prase(const QJsonObject& skybox);
+
+	void reset();
+
+signals:
+	void sendUpdateSkybox(bool isEmpty);
 
 private:
 	static QSharedPointer<Skybox> instance;

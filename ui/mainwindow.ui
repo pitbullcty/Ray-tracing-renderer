@@ -68,8 +68,8 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>16777215</width>
-              <height>16777215</height>
+              <width>20</width>
+              <height>20</height>
              </size>
             </property>
             <property name="text">
@@ -126,8 +126,16 @@
      <addaction name="loadModel"/>
      <addaction name="loadSceneJson"/>
     </widget>
+    <widget class="QMenu" name="menuClear">
+     <property name="title">
+      <string>加载最近(&amp;R)</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="actionClear"/>
+    </widget>
     <addaction name="createScene"/>
     <addaction name="menu_3"/>
+    <addaction name="menuClear"/>
     <addaction name="separator"/>
     <addaction name="saveSceneJson"/>
     <addaction name="saveAsSceneJson"/>
@@ -139,25 +147,47 @@
    <widget class="QMenu" name="menu_2">
     <property name="geometry">
      <rect>
-      <x>477</x>
-      <y>126</y>
-      <width>120</width>
-      <height>50</height>
+      <x>396</x>
+      <y>154</y>
+      <width>126</width>
+      <height>72</height>
      </rect>
     </property>
     <property name="title">
      <string>帮助(&amp;H)</string>
     </property>
+    <addaction name="actionHelp"/>
    </widget>
    <widget class="QMenu" name="menu_4">
     <property name="title">
      <string>窗口(&amp;W)</string>
     </property>
+    <addaction name="actionInspector"/>
+    <addaction name="actionConsole"/>
+    <addaction name="actionModel"/>
+    <addaction name="actionRestore"/>
    </widget>
    <widget class="QMenu" name="menu_5">
+    <property name="geometry">
+     <rect>
+      <x>251</x>
+      <y>154</y>
+      <width>120</width>
+      <height>72</height>
+     </rect>
+    </property>
     <property name="title">
      <string>设置(&amp;S)</string>
     </property>
+    <widget class="QMenu" name="menu_I">
+     <property name="title">
+      <string>主题(&amp;I)</string>
+     </property>
+     <addaction name="actionGray"/>
+     <addaction name="actionBlue"/>
+     <addaction name="actionDark"/>
+    </widget>
+    <addaction name="menu_I"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_5"/>
@@ -165,17 +195,6 @@
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
   <widget class="QDockWidget" name="dockWidgetInfos">
    <property name="minimumSize">
     <size>
@@ -268,7 +287,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_10">
+   <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="Inspector" name="inspector" native="true"/>
@@ -276,11 +295,20 @@
     </layout>
    </widget>
   </widget>
-  <action name="save">
-   <property name="text">
-    <string>baocun1</string>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
    </property>
-  </action>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
+  </widget>
   <action name="createScene">
    <property name="text">
     <string>新建(&amp;N)...</string>
@@ -337,9 +365,84 @@
     <string>退出(&amp;Q)...</string>
    </property>
   </action>
-  <action name="actionloadRecent">
+  <action name="actionGray">
    <property name="text">
-    <string>loadRecent</string>
+    <string>浅色(&amp;L)</string>
+   </property>
+  </action>
+  <action name="actionBlue">
+   <property name="text">
+    <string>蓝色(&amp;B)</string>
+   </property>
+  </action>
+  <action name="actionDark">
+   <property name="text">
+    <string>深色(&amp;D)</string>
+   </property>
+  </action>
+  <action name="actionInspector">
+   <property name="text">
+    <string>检查器(&amp;I)</string>
+   </property>
+  </action>
+  <action name="actionConsole">
+   <property name="text">
+    <string>控制台(&amp;C)</string>
+   </property>
+  </action>
+  <action name="actionModel">
+   <property name="text">
+    <string>模型(&amp;M)</string>
+   </property>
+  </action>
+  <action name="actionRestore">
+   <property name="text">
+    <string>还原布局(&amp;R)</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>查看帮助(&amp;H)</string>
+   </property>
+   <property name="shortcut">
+    <string>?</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::WindowShortcut</enum>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string/>
+   </property>
+   <property name="toolTip">
+    <string>新建场景</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string/>
+   </property>
+   <property name="toolTip">
+    <string>打开场景</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string/>
+   </property>
+   <property name="toolTip">
+    <string>保存</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>.</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>清空菜单(&amp;M)</string>
    </property>
   </action>
  </widget>

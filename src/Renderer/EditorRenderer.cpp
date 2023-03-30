@@ -93,7 +93,6 @@ void EditorRenderer::renderModels()
 void EditorRenderer::initSkybox()
 {
 	shaderProgram["skybox"]->bind();
-	initSkyboxTexture();
 	shaderProgram["skybox"]->setUniformValue("skybox", 0);
 	QOpenGLVertexArrayObject::Binder binder(&skyboxVAO);
 	skyboxVBO.bind();

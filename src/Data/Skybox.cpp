@@ -15,13 +15,6 @@ void Skybox::destory(Skybox* skybox)
 	delete skybox;
 }
 
-void Skybox::setPath(const QString& location, const QString& path)
-{
-    if (pathes.contains(location)) {
-        pathes[location] = path;
-    }
-}
-
 QJsonObject Skybox::toJson()
 {
     QJsonObject skybox;
@@ -37,10 +30,15 @@ void Skybox::prase(const QJsonObject& skybox)
     for (int i = 0; i < keys.size(); i++) {
         auto& key = keys.at(i);
         auto newPath = skybox[key].toString();
-        if (newPath != pathes[key]) {
-            pathes[key] = newPath;
-        }
+        pathes[key] = newPath;
     }
+    emit sendUpdateSkybox(false);
+}
+
+void Skybox::reset()
+{
+    pathes = backUpPathes;
+    emit sendUpdateSkybox(false);
 }
 
 Skybox::Skybox()
@@ -53,6 +51,8 @@ Skybox::Skybox()
         {"+z", ":/skybox/pz.png"},
         {"-z", ":/skybox/nz.png"},
     };
+
+    backUpPathes = pathes;
 
 	vertices = {
         // back face

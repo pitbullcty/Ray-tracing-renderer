@@ -9,5 +9,8 @@
         <file>downArrow.png</file>
         <file>leftArrow.png</file>
         <file>background.png</file>
+        <file>new.ico</file>
+        <file>open.ico</file>
+        <file>save.ico</file>
     </qresource>
 </RCC>

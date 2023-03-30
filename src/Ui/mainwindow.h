@@ -23,7 +23,8 @@ signals:
 private:
     Ui::MainWindow* ui;
     MainWindowManager* mainWindowManager;
-
+    QByteArray layoutData;
+    QByteArray geometryData;
     void bindSignals();
 };
 

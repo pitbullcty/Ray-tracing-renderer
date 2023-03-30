@@ -17,7 +17,9 @@ MainWindow::MainWindow(QWidget* parent) :
     mainWindowManager = new MainWindowManager(ui);
     mainWindowManager->bindSignals(); //绑定窗口相关信号
     this->bindSignals(); //绑定其他信号
-
+    
+    layoutData = saveState();
+    geometryData = saveGeometry();
 }
 
 MainWindow::~MainWindow()//析构函数，关掉ＵＩ界面
@@ -58,14 +60,16 @@ void MainWindow::dropEvent(QDropEvent* event)
     const QMimeData* mimeData = event->mimeData();
     if (mimeData->hasUrls()) {
         auto urlList = mimeData->urls();
-        QString filename = urlList.at(0).toLocalFile(); 
-        if (filename.contains(".obj") || filename.contains(".fbx") || filename.contains(".gltf")) {
-            mainWindowManager->loadModel(filename);
+        for (auto& url : urlList) {
+            QString filename = url.toLocalFile();
+            if (filename.contains(".obj") || filename.contains(".fbx") || filename.contains(".gltf")) {
+                mainWindowManager->loadModel(filename);
+            }
+            else if (filename.contains(".json")) {
+                mainWindowManager->loadScene(filename);
+            }
+            else;
         }
-        else if (filename.contains(".json")) {
-            mainWindowManager->loadScene(filename);
-        }
-        else;
     }
 }
 
@@ -82,6 +86,13 @@ void MainWindow::bindSignals()
 {
     connect(ui->closeWindow, &QAction::triggered, this, &MainWindow::close);
     connect(this, &MainWindow::sendChangeWindow, mainWindowManager, &MainWindowManager::changeRenderWindow);
+    connect(ui->actionRestore, &QAction::triggered, [=]() {
+        if (ui->dockWidgetConsole->isHidden()) ui->dockWidgetConsole->show();
+        if (ui->dockWidgetInfos->isHidden()) ui->dockWidgetInfos->show();
+        if (ui->dockWidgetDetails->isHidden()) ui->dockWidgetDetails->show();
+        restoreState(layoutData);
+        restoreGeometry(geometryData);
+    });
 }
 
 void QAbstractSpinBox::wheelEvent(QWheelEvent* e) {
@@ -91,3 +102,7 @@ void QAbstractSpinBox::wheelEvent(QWheelEvent* e) {
 void QAbstractSlider::wheelEvent(QWheelEvent* e) {
     e->ignore();
 } //屏蔽滚轮事件
+
+void QDockWidget::closeEvent(QCloseEvent* e) {
+    this->hide();
+} //关闭事件修改为隐藏

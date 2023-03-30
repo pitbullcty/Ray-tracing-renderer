@@ -352,6 +352,11 @@ QSharedPointer<Camera> SceneManager::getCamera()
 	return camera;
 }
 
+QSharedPointer<Skybox> SceneManager::getSkybox()
+{
+	return skybox;
+}
+
 QMap<QString, Model>* SceneManager::getModels()
 {
 	return &models;

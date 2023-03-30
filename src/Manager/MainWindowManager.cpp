@@ -7,11 +7,17 @@ MainWindowManager::MainWindowManager(Ui::MainWindow* ui) :
 	transformInspector(new TransformInspector),
 	materialInspector(new MaterialInspector),
 	renderOptionInspector(new RenderOptionInspector),
+	skyboxInspector(new SkyboxInspector),
 	currentIndex(0)
 {
 	copyLightsModel(); 
-	setStyle();
+	setStyle(0);
 	readSettings();
+	setUi();
+}
+
+void MainWindowManager::setUi()
+{
 
 	QThreadPool* global = QThreadPool::globalInstance();
 	global->setMaxThreadCount(1); //设置线程池最多执行单线程
@@ -22,16 +28,31 @@ MainWindowManager::MainWindowManager(Ui::MainWindow* ui) :
 	ui->renderButton->setFixedSize(20, 20); //设置按钮相关属性大小
 	ui->renderWidget->hide();
 
+	ui->actionNew->setIcon(QIcon(":/icons/new.ico"));
+	ui->actionSave->setIcon(QIcon(":/icons/save.ico"));
+	ui->actionOpen->setIcon(QIcon(":/icons/open.ico"));
+	ui->toolBar->setIconSize(QSize(30, 30));
+
 	ui->stackedWidget->setCurrentIndex(1);
-	ui->stackedWidget->setCurrentIndex(0);  
-	QFont font("宋体",15, QFont::Bold);
-	ui->fpslabel->setFont(font);
+	ui->stackedWidget->setCurrentIndex(0);
+
 	//相关设置
+	ui->inspector->addWidget("天空盒", skyboxInspector);
 	ui->inspector->addWidget("变换", transformInspector);
 	ui->inspector->addWidget("材质", materialInspector);
+
 	ui->inspector->addWidget("渲染设置", renderOptionInspector);
-	ui->inspector->hideWidget(2);
+	ui->inspector->hideWidget(3);
 	ui->inspector->setEnabled(false); //设置不可展开
+
+	for (auto& sceneFile : sceneList) {
+		QAction* action = new QAction(sceneFile, ui->menuClear);
+		connect(action, &QAction::triggered, [=]() {
+			loadScene(sceneFile);
+		});
+		actions.push_back(action);
+	}
+	ui->menuClear->insertActions(ui->actionClear, actions); //插入
 }
 
 MainWindowManager::~MainWindowManager()
@@ -39,6 +60,8 @@ MainWindowManager::~MainWindowManager()
 	ui = nullptr;
 	transformInspector = nullptr;
 	materialInspector = nullptr;
+	skyboxInspector = nullptr;
+	renderOptionInspector = nullptr;
 	saveSettings();
 }
 
@@ -50,6 +73,53 @@ void MainWindowManager::bindSignals()
 	connect(ui->saveAsSceneJson, &QAction::triggered, this, &MainWindowManager::saveSceneAS);
 	connect(ui->createScene, &QAction::triggered, this, &MainWindowManager::crateScene);
 	connect(ui->closeScene, &QAction::triggered, this, &MainWindowManager::closeScene);
+
+	connect(ui->actionNew, &QAction::triggered, this, &MainWindowManager::crateScene);
+	connect(ui->actionOpen, &QAction::triggered, this, &MainWindowManager::loadSceneFromAction);
+	connect(ui->actionSave, &QAction::triggered, this, &MainWindowManager::saveScene);
+
+	connect(ui->actionBlue, &QAction::triggered, [=]() {
+		setStyle(1); 	
+		ui->renderButton->setIconSize(QSize(30, 30));
+		ui->renderButton->setFixedSize(20, 20); //设置按钮相关属性大小
+	});
+	connect(ui->actionGray, &QAction::triggered, [=]() {
+		setStyle(0);
+		ui->renderButton->setIconSize(QSize(30, 30));
+		ui->renderButton->setFixedSize(20, 20); //设置按钮相关属性大小
+	});
+	connect(ui->actionDark, &QAction::triggered, [=]() {
+		setStyle(2);
+		ui->renderButton->setIconSize(QSize(30, 30));
+		ui->renderButton->setFixedSize(20, 20); //设置按钮相关属性大小
+	});
+
+	connect(ui->actionConsole, &QAction::triggered, [=]() {
+		if (ui->dockWidgetConsole->isHidden()) ui->dockWidgetConsole->show();
+	});
+
+	connect(ui->actionModel, &QAction::triggered, [=]() {
+		if (ui->dockWidgetInfos->isHidden()) ui->dockWidgetInfos->show();
+	});
+
+	connect(ui->actionInspector, &QAction::triggered, [=]() {
+		if (ui->dockWidgetDetails->isHidden()) ui->dockWidgetDetails->show();
+	});
+
+	connect(ui->actionClear, &QAction::triggered, [=]() {
+		sceneList.clear();
+		for (auto& action : actions) {
+			ui->menuClear->removeAction(action);
+		}
+		actions.clear();
+	});
+
+	connect(ui->actionHelp, &QAction::triggered, [=]() {
+		auto helpDialog = new HelpDialog();
+		helpDialog->exec();
+		delete helpDialog;
+	});
+
 	auto& seceneManager = SceneManager::GetInstance();
 	connect(seceneManager.data(), &SceneManager::updateList, ui->listWidget, &ModelListWidget::updateList); //关联更新信号
 
@@ -97,10 +167,19 @@ void MainWindowManager::bindSignals()
 
 	connect(transformInspector, &TransformInspector::sendRevertModel, seceneManager.data(), &SceneManager::addInspectorRevertModel);
 	connect(materialInspector, &MaterialInspector::sendRevertModel, seceneManager.data(), &SceneManager::addInspectorRevertModel);
+	
 
 	auto rayTarcingRenderer = ui->rayTracing->getRayTracingRenderer();
 	connect(renderOptionInspector, &RenderOptionInspector::sendRenderOption, rayTarcingRenderer.data(), &RayTracingRenderer::setRenderOption);
 	connect(rayTarcingRenderer.data(), &RayTracingRenderer::Info, ui->console, &Console::Info);
+
+	auto editorRenderer = ui->editor->getEditorRenderer();
+	connect(skyboxInspector, &SkyboxInspector::sendUpdateSkybox, rayTarcingRenderer.data(), &RayTracingRenderer::initSkyboxTexture);
+	connect(skyboxInspector, &SkyboxInspector::sendUpdateSkybox, editorRenderer.data(), &EditorRenderer::initSkyboxTexture);
+
+	auto skybox = seceneManager->getSkybox();
+	connect(skybox.data(), &Skybox::sendUpdateSkybox, rayTarcingRenderer.data(), &RayTracingRenderer::initSkyboxTexture);
+	connect(skybox.data(), &Skybox::sendUpdateSkybox, editorRenderer.data(), &EditorRenderer::initSkyboxTexture);
 
 	connect(ui->renderButton, &QPushButton::clicked, this, &MainWindowManager::changeRenderWindow);
 
@@ -133,6 +212,7 @@ void MainWindowManager::loadModel(const QString& path)
 		sceneManager->createScene();
 		ui->inspector->setModelName("");
 		renderOptionInspector->reset();
+		sceneManager->getSkybox()->reset();
 	}
 	if (path.contains("/lights/rectlight.obj") || path.contains("/lights/spherelight.obj")) {
 		sceneManager->addModel(fileName, "", false, true); //路径为添加灯光
@@ -161,6 +241,7 @@ void MainWindowManager::crateScene()
 	sceneManager->createScene();
 	ui->inspector->setModelName("");
 	renderOptionInspector->reset();
+	sceneManager->getSkybox()->reset();
 	ui->editor->update(); //刷新界面显示
 	if (currentIndex) {
 		changeRenderWindow();
@@ -179,9 +260,16 @@ void MainWindowManager::loadScene(const QString& path)
 	else {
 		fileName = path;
 	}
+
 	if (fileName.isEmpty()) {
 		return;
 	}
+
+	if (sceneList.indexOf(fileName) == -1) {
+		if (sceneList.size() >= MAXSCENEFILESIZE) sceneList.pop(); //最多5个不重复
+		sceneList.push(fileName);
+	}
+
 	QFileInfo fileInfo(fileName);
 	lastScenePath = fileInfo.absolutePath();
 	auto sceneManager = ui->editor->getSceneManager();
@@ -265,22 +353,44 @@ void MainWindowManager::readSettings()
 		return;
 	} //不存在文件
 	QSettings settings("settings.ini", QSettings::IniFormat);
-	lastModelPath = settings.value("dir/model").toString();
-	lastScenePath = settings.value("dir/scene").toString();
+
+	lastModelPath = settings.value("dir/lastModelPath").toString();
+	lastScenePath = settings.value("dir/lastScenePath").toString();
+
+	int size = settings.beginReadArray("recentFiles");
+	for (int i = 0; i < size; ++i) {
+		settings.setArrayIndex(i);
+		QString path("scene%1");
+		sceneList.push(settings.value(path.arg(QString::number(i))).toString());
+	}
+	settings.endArray();
+
 }
 
 void MainWindowManager::saveSettings()
 {
-	QSettings settings("settings.ini", QSettings::IniFormat);
 	if (lastModelPath.isEmpty() && lastScenePath.isEmpty()) return;
-	settings.setValue("dir/model", lastModelPath);
-	settings.setValue("dir/scene", lastScenePath);
+
+	QSettings settings("settings.ini", QSettings::IniFormat);
+
+	settings.setValue("dir/lastModelPath", lastModelPath);
+	settings.setValue("dir/lastScenePath", lastScenePath);
+
+	settings.beginWriteArray("recentFiles");
+	int count = 0;
+	for (auto& sceneFile : sceneList) {
+		settings.setArrayIndex(count);
+		QString path("scene%1");
+		settings.setValue(path.arg(QString::number(count++)), sceneFile);
+	}
+	settings.endArray();
 }
 
 void MainWindowManager::showFPS(int fps)
 {
 	if (fps) {
-		ui->fpslabel->setText("FPS:" + QString::number(fps));
+		QString text("<font size=\"5\"><b>FPS:%1</b></font>");
+		ui->fpslabel->setText(text.arg(QString::number(fps)));
 	}
 }
 

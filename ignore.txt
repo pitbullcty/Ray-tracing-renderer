@@ -4,3 +4,5 @@
 ./src/Ui/UiMaterialInspector.h
 ./src/Ui/UiMainWindow.h
 ./src/Ui/UiRenderOptionInspector.h
+./src/Ui/UiHelpDialog.h
+./src/Ui/UiSkyboxInspector.h

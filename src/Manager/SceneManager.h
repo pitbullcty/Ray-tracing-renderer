@@ -51,6 +51,7 @@ public:
 	bool closeApp(); //关闭app
 	
 	QSharedPointer<Camera> getCamera();
+	QSharedPointer<Skybox> getSkybox();
 	QMap<QString, Model>* getModels(); //返回模型指针
 	STATE getState();
 	QString getSceneName();

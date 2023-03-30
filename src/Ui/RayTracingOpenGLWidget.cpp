@@ -152,7 +152,7 @@ void RayTracingOpenGLWidget::initRenderer()
     auto& dataBuilder = DataBuilder::GetInstance();
     connect(dataBuilder.data(), &DataBuilder::sendDataDone, rayTracingRenderer.data(), &RayTracingRenderer::sendDataToGPU);
 
-    rayTracingRenderer->initSkyboxTexture();
+    //rayTracingRenderer->initSkyboxTexture();
     rayTracingRenderer->initFBOs();
 
 }

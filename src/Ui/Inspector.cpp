@@ -53,20 +53,23 @@ void Inspector::expandAll()
 
 void Inspector::changeCurrentIndex(int index)
 {
-    auto transform = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(0)->widget());
-    auto material = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(1)->widget());
-    auto renderOption = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(2)->widget());
+    auto skybox = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(0)->widget());
+    auto transform = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(1)->widget());
+    auto material = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(2)->widget());
+    auto renderOption = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(3)->widget());
 
     if (index) {
         ui->modelName->show();
         material->show();
         transform->show();
+        skybox->show();
         renderOption->hide();
     }
     else {
         ui->modelName->hide();
         material->hide();
         transform->hide();
+        skybox->hide();
         renderOption->expand();
         renderOption->setEnabled(true);
         renderOption->show();
@@ -102,8 +105,12 @@ void Inspector::collapseAll(bool isClose)
 void Inspector::setModelName(const QString& name) {
 
     QString text("<font size = \"5\"><b>%1</b></font>");
+    auto skybox = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(0)->widget());
+
     if (name.isEmpty()) {
         collapseAll();
+        skybox->setEnabled(true);
+        skybox->expand();
         ui->modelName->setText(text.arg("未选中物体"));
     }
     else {
@@ -111,8 +118,8 @@ void Inspector::setModelName(const QString& name) {
         ui->modelName->setText(text.arg(name));
     }
 
-    auto renderOption = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(2)->widget());
+    auto renderOption = static_cast<InspectorPage*>(contentVBoxLayout->itemAt(3)->widget());
     if (!renderOption->isHidden()) return;
     ui->modelName->show();
-   
+
 }

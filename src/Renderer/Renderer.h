@@ -12,10 +12,13 @@ class Renderer:public QObject {
 
 public:
 	QSharedPointer<Camera> getCamera();
-	void initSkyboxTexture();
 	virtual void resize(int w, int h) = 0;
 	virtual void destoryData() = 0;
 	Renderer(QMap<QString, QOpenGLShaderProgram*> shaderProgram, QOpenGLExtraFunctions* functions, int width, int height);
+	unsigned int getEnvMap();
+
+public slots:
+	void initSkyboxTexture(bool isEmpty=false);
 
 protected:
 	QMap<QString, QOpenGLShaderProgram*> shaderProgram;

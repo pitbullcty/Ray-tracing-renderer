@@ -5,10 +5,15 @@
 #include "src/Ui/TransformInspector.h"
 #include "src/Ui/MaterialInspector.h"
 #include "src/ui/RenderOptionInspector.h"
+#include "src/ui/SkyboxInspector.h"
+#include "src/ui/HelpDialog.h"
+#include "src/Data/Skybox.h"
 #include <QtConcurrent>
 #include <QAction>
 #include <QFile>
 #include <QSettings>
+
+const int MAXSCENEFILESIZE = 5;
 
 class MainWindowManager:public QObject {
 	Q_OBJECT
@@ -36,13 +41,17 @@ signals:
 private:
 	Ui::MainWindow* ui;
 	QString lastModelPath;
-	QString lastScenePath; //上次打开位置
+	QString lastScenePath; 
+
+	QStack<QString> sceneList;
+	QVector<QAction*> actions;
 
 	int currentIndex;  //当前index
 
 	TransformInspector* transformInspector;
 	MaterialInspector* materialInspector;
 	RenderOptionInspector* renderOptionInspector;
+	SkyboxInspector* skyboxInspector;
 
 	void copyLightsModel();
 	void setButtonStyle(int index);
@@ -50,6 +59,7 @@ private:
 
 	void readSettings();
 	void saveSettings();
+	void setUi();
 
 	void showFPS(int fps);
 	void showSceneName(const QString& sceneName);

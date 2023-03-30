@@ -86,6 +86,7 @@ void EditorOpenGLWidget::initRenderer()
 
     auto& modelLoader = ModelLoader::GetInstance();
     modelLoader->setContext(QOpenGLContext::currentContext()->extraFunctions(), &modelShaderProgram);
+
     editorRenderer->initSkybox();
 
 }

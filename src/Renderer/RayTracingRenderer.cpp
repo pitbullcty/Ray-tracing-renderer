@@ -113,8 +113,7 @@ void RayTracingRenderer::bindVAO()
 
 void RayTracingRenderer::bindTexture()
 {
-	functions->glActiveTexture(GL_TEXTURE0);
-	functions->glBindTexture(GL_TEXTURE_2D, envCubemap);
+
 
 	functions->glActiveTexture(GL_TEXTURE1);
 	functions->glBindTexture(GL_TEXTURE_BUFFER, BVHTexture);
@@ -138,6 +137,8 @@ void RayTracingRenderer::bindTexture()
 	functions->glBindTexture(GL_TEXTURE_2D, backgroundTexture); //绑定纹理单元
 
 	functions->glActiveTexture(GL_TEXTURE0);
+	functions->glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap); //生成立方体截图
+
 }
 
 void RayTracingRenderer::destoryData()
