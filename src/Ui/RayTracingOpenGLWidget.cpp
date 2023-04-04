@@ -51,21 +51,21 @@ void RayTracingOpenGLWidget::paintGL()
           
             if (option.frameCounter % 10 == 0) {
                 QString info("渲染已完成%1\%,预计剩余时间%2s");
-                float remainTime = 1.0 / fps * (option.maxFrameCounter - option.frameCounter);
+                float remainTime = 1.0f / fps * (option.maxFrameCounter - option.frameCounter);
                 info = info.arg(QString::number((float)option.frameCounter / option.maxFrameCounter * 100, 'f', 2)).arg(QString::number(remainTime, 'f', 2));
                 emit Info(info, false);
             }
         }
 
         clacFPS();
-        emit sendFPS(fps);
+        emit sendFPS((int)fps);
     }
     update();
 }
 
 void RayTracingOpenGLWidget::keyPressEvent(QKeyEvent* event)
 {
-    if (rayTracingRenderer->getIsOffScreenRendering()) return;
+    if (rayTracingRenderer->getIsOffScreenRendering() || !rayTracingRenderer->getIsRealTimeRendering()) return;
     Qt::Key key = (Qt::Key)(event->key());
     if (processCameraKey(event)) {
         isLongPressing = true;
@@ -80,7 +80,7 @@ void RayTracingOpenGLWidget::keyPressEvent(QKeyEvent* event)
 
 void RayTracingOpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 {
-    if (rayTracingRenderer->getIsOffScreenRendering()) return;
+    if (rayTracingRenderer->getIsOffScreenRendering() || !rayTracingRenderer->getIsRealTimeRendering()) return;
     Qt::Key key = (Qt::Key)(event->key());
     processKeyRelease(event);
     if (key == Qt::Key_F10) return;
@@ -89,7 +89,7 @@ void RayTracingOpenGLWidget::keyReleaseEvent(QKeyEvent* event)
 
 void RayTracingOpenGLWidget::mousePressEvent(QMouseEvent* event)
 {
-    if (rayTracingRenderer->getIsOffScreenRendering()) return;
+    if (rayTracingRenderer->getIsOffScreenRendering() || !rayTracingRenderer->getIsRealTimeRendering()) return;
 
     if (isIgnore()) {
         event->ignore();
@@ -108,7 +108,7 @@ void RayTracingOpenGLWidget::mousePressEvent(QMouseEvent* event)
 
 void RayTracingOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (rayTracingRenderer->getIsOffScreenRendering()) return;
+    if (rayTracingRenderer->getIsOffScreenRendering() || !rayTracingRenderer->getIsRealTimeRendering()) return;
     if (isIgnore()) {
         event->ignore();
         return;
@@ -119,7 +119,7 @@ void RayTracingOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void RayTracingOpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
-    if (rayTracingRenderer->getIsOffScreenRendering()) return;
+    if (rayTracingRenderer->getIsOffScreenRendering() || !rayTracingRenderer->getIsRealTimeRendering()) return;
     processMouseMove(event);
     if (isRightClicked) {
         rayTracingRenderer->clearFrameCounter();
@@ -128,7 +128,7 @@ void RayTracingOpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 
 void RayTracingOpenGLWidget::wheelEvent(QWheelEvent* event)
 {
-    if (rayTracingRenderer->getIsOffScreenRendering()) return;
+    if (rayTracingRenderer->getIsOffScreenRendering() || !rayTracingRenderer->getIsRealTimeRendering()) return;
     processWheel(event);
     rayTracingRenderer->clearFrameCounter();
 }

@@ -14,28 +14,122 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="3">
-    <widget class="QCheckBox" name="checkBox">
-     <property name="text">
-      <string>开启</string>
+   <item row="6" column="3">
+    <widget class="QComboBox" name="comboBoxQuality">
+     <property name="editable">
+      <bool>false</bool>
+     </property>
+     <property name="currentText">
+      <string/>
+     </property>
+     <property name="currentIndex">
+      <number>-1</number>
      </property>
     </widget>
    </item>
-   <item row="1" column="2">
+   <item row="6" column="0">
+    <widget class="QLabel" name="label_11">
+     <property name="statusTip">
+      <string>渲染图片的保存质量</string>
+     </property>
+     <property name="text">
+      <string>图片质量</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="label_10">
+     <property name="statusTip">
+      <string>渲染结果的分辨率</string>
+     </property>
+     <property name="text">
+      <string>渲染分辨率</string>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QPushButton" name="pushButtonReset">
+     <property name="text">
+      <string>重置</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="3">
+    <widget class="QComboBox" name="comboBoxResolution">
+     <property name="editable">
+      <bool>false</bool>
+     </property>
+     <property name="currentText">
+      <string/>
+     </property>
+     <property name="currentIndex">
+      <number>-1</number>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
     <widget class="QLabel" name="labelDepth">
      <property name="text">
       <string>2</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="3">
-    <widget class="QToolButton" name="toolButton">
+   <item row="10" column="0" colspan="4">
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>离屏渲染</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;光线追踪深度，对每条光线反射追踪的次数（&lt;span style=&quot; font-weight:700;&quot;&gt;数值越大对性能要求越高&lt;/span&gt;）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
-      <string>选择文件</string>
+      <string>追踪深度</string>
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
+   <item row="1" column="3">
+    <widget class="QSlider" name="horizontalSliderMaxFrameCount">
+     <property name="minimum">
+      <number>100</number>
+     </property>
+     <property name="maximum">
+      <number>1000</number>
+     </property>
+     <property name="value">
+      <number>200</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="2">
+    <widget class="QLabel" name="labelOutputPath">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
     <widget class="QLabel" name="label_6">
      <property name="toolTip">
       <string>渲染结果的保存目录</string>
@@ -45,14 +139,41 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="2">
-    <widget class="QLabel" name="labelMaxFrameCount">
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;渲染过程中实时降噪（&lt;span style=&quot; font-weight:700;&quot;&gt;对性能要求较高&lt;/span&gt;）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
-      <string>200</string>
+      <string>实时降噪</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="4">
+   <item row="7" column="3">
+    <widget class="QToolButton" name="toolButton">
+     <property name="text">
+      <string>选择文件</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="toolTip">
+      <string>采样总次数，最大值为无限</string>
+     </property>
+     <property name="text">
+      <string>采样次数</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QCheckBox" name="checkBox">
+     <property name="text">
+      <string>开启</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="4">
     <widget class="QWidget" name="denoiserCount" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -94,30 +215,7 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="3">
-    <widget class="QComboBox" name="comboBoxResolution">
-     <property name="editable">
-      <bool>false</bool>
-     </property>
-     <property name="currentText">
-      <string/>
-     </property>
-     <property name="currentIndex">
-      <number>-1</number>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="label_10">
-     <property name="statusTip">
-      <string>渲染结果的分辨率</string>
-     </property>
-     <property name="text">
-      <string>渲染分辨率</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
+   <item row="2" column="3">
     <widget class="QSlider" name="horizontalSliderDepth">
      <property name="maximum">
       <number>20</number>
@@ -130,108 +228,30 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="0" colspan="4">
-    <widget class="QWidget" name="widget" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QPushButton" name="pushButton">
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>离屏渲染</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_3">
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;光线追踪深度，对每条光线反射追踪的次数（&lt;span style=&quot; font-weight:700;&quot;&gt;数值越大对性能要求越高&lt;/span&gt;）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
+   <item row="1" column="2">
+    <widget class="QLabel" name="labelMaxFrameCount">
      <property name="text">
-      <string>追踪深度</string>
+      <string>200</string>
      </property>
     </widget>
    </item>
    <item row="0" column="0">
-    <widget class="QLabel" name="label_2">
+    <widget class="QCheckBox" name="checkBoxPreView">
      <property name="toolTip">
-      <string>采样总次数，最大值为无限</string>
+      <string>可在场景中自由移动，对性能要求较高，可能导致ui界面卡顿</string>
      </property>
      <property name="text">
-      <string>采样次数</string>
+      <string>实时预览</string>
      </property>
-    </widget>
-   </item>
-   <item row="0" column="3">
-    <widget class="QSlider" name="horizontalSliderMaxFrameCount">
-     <property name="minimum">
-      <number>100</number>
-     </property>
-     <property name="maximum">
-      <number>1000</number>
-     </property>
-     <property name="value">
-      <number>200</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="label_11">
-     <property name="statusTip">
-      <string>渲染图片的保存质量</string>
-     </property>
-     <property name="text">
-      <string>图片质量</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="3">
-    <widget class="QComboBox" name="comboBoxQuality">
-     <property name="editable">
-      <bool>false</bool>
-     </property>
-     <property name="currentText">
-      <string/>
-     </property>
-     <property name="currentIndex">
-      <number>-1</number>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_4">
-     <property name="toolTip">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;渲染过程中实时降噪（&lt;span style=&quot; font-weight:700;&quot;&gt;对性能要求较高&lt;/span&gt;）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>实时降噪</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="2">
-    <widget class="QLabel" name="labelOutputPath">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="openExternalLinks">
+     <property name="checked">
       <bool>true</bool>
      </property>
     </widget>
    </item>
-   <item row="8" column="0">
-    <widget class="QPushButton" name="pushButtonReset">
+   <item row="0" column="3">
+    <widget class="QLabel" name="labelPreview">
      <property name="text">
-      <string>重置</string>
+      <string/>
      </property>
     </widget>
    </item>

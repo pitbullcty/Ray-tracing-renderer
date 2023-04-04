@@ -49,7 +49,7 @@ void BaseOpenGLWidget::clacFPS()
 
     if (abs(deltaTime - 0.0f) < 1e-6) return;
     fps = 1.0f / deltaTime;
-    if (fps > 144) {
+    if (fps > 144.0f) {
         return;
     }
 

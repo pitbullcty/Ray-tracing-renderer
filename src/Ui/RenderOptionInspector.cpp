@@ -31,6 +31,9 @@ void RenderOptionInspector::reset()
 	ui->labelOutputPath->setText(getOutputText(option.outputPath));
 	ui->labelOutputPath->setToolTip(option.outputPath);
 	ui->denoiserCount->hide();
+	ui->labelPreview->setText("");
+	ui->checkBoxPreView->setChecked(true);
+	emit sendRenderState(true);
 }
 
 void RenderOptionInspector::applyData()
@@ -71,6 +74,15 @@ void RenderOptionInspector::applyData()
 		else {
 			option.isRealTimeDenoising = false;
 			ui->denoiserCount->hide();
+		}
+	});
+
+	connect(ui->checkBoxPreView, &QCheckBox::clicked, [=]() {
+		if (ui->checkBoxPreView->isChecked()) {
+			emit sendRenderState(true);
+		}
+		else {
+			emit sendRenderState(false);
 		}
 	});
 

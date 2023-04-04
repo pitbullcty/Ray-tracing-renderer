@@ -171,6 +171,7 @@ void MainWindowManager::bindSignals()
 
 	auto rayTarcingRenderer = ui->rayTracing->getRayTracingRenderer();
 	connect(renderOptionInspector, &RenderOptionInspector::sendRenderOption, rayTarcingRenderer.data(), &RayTracingRenderer::setRenderOption);
+	connect(renderOptionInspector, &RenderOptionInspector::sendRenderState, rayTarcingRenderer.data(), &RayTracingRenderer::setRealTimeRendering);
 	connect(rayTarcingRenderer.data(), &RayTracingRenderer::Info, ui->console, &Console::Info);
 
 	auto editorRenderer = ui->editor->getEditorRenderer();

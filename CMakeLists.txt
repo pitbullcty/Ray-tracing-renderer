@@ -42,6 +42,7 @@ qt_add_resources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/shader/shader.qrc
 )
 
 add_executable(${PROJECT_NAME} 
+        WIN32
         ${inc_files} 
         ${src_files} 
         ${gizmo_inc_files} 

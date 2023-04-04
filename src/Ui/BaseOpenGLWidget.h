@@ -54,7 +54,7 @@ protected:
 
     float deltaTime; //渲染每帧间隔时间
     float lastFrameTime; //上一帧时间
-    int fps; //帧数
+    float fps; //帧数
  
     QSharedPointer<SceneManager> sceneManager; //场景管理器
 

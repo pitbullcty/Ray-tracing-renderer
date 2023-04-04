@@ -13,6 +13,8 @@ class RayTracingRenderer :public Renderer {
 public:
 	void render();
 
+	void renderAccum();
+
 	void saveRenderResult(const QString& path, int quality);
 	void setSnapshotParam(const QString& savePath, int quality=50);
 
@@ -28,6 +30,9 @@ public:
 	RenderOption& getOption();
 
 	void stopRender();
+
+	void setRealTimeRendering(bool state);
+	bool getIsRealTimeRendering();
 
 	bool getIsOffScreenRendering();
 
@@ -48,6 +53,9 @@ private:
 	bool hasData; //是否有数据传输
 
 	bool isOffScreenRendering; //开启离屏渲染
+	bool isRealTimeRendering; //实时渲染
+	int delayStep; //延迟步数
+
 	RenderOption option;
 
 	QOpenGLBuffer pathTraceVBO;

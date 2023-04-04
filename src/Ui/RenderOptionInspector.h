@@ -16,6 +16,7 @@ public:
 
 signals:
 	void sendRenderOption(const RenderOption& option);
+	void sendRenderState(bool state);
 
 public slots:
 	void reset();

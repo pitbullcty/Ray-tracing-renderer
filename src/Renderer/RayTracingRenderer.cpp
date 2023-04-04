@@ -32,6 +32,8 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	isResized(false),
 	isSavingSnapshot(false),
 	isOffScreenRendering(false),
+	isRealTimeRendering(true),
+	delayStep(0),
 	hasData(false)
 {
 	outputVBO.create();
@@ -212,7 +214,19 @@ void RayTracingRenderer::stopRender()
 {
 	option.reset();
 	isOffScreenRendering = false;
+	delayStep = option.frameCounter;
 	isResized = true;
+}
+
+void RayTracingRenderer::setRealTimeRendering(bool state)
+{
+	isRealTimeRendering = state;
+	delayStep = option.frameCounter;
+}
+
+bool RayTracingRenderer::getIsRealTimeRendering()
+{
+	return isRealTimeRendering;
 }
 
 bool RayTracingRenderer::getIsOffScreenRendering()
@@ -341,49 +355,19 @@ void RayTracingRenderer::render()
 	
 	resizeFBO(); //判断是否需要变换FBO大小
 	bindTexture();
-
 	functions->glViewport(0, 0, width, height);
 
 	projection = QMatrix4x4();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 
-	pathTracingVAO.bind();
-	shaderProgram["pathTracing"]->bind();
-	shaderProgram["pathTracing"]->setUniformValue("hasData", hasData);
-	shaderProgram["pathTracing"]->setUniformValue("cubemap", 0);
-	shaderProgram["pathTracing"]->setUniformValue("BVHnodes", 1);
-	shaderProgram["pathTracing"]->setUniformValue("triangles", 2);
-	shaderProgram["pathTracing"]->setUniformValue("materials", 3);
-	shaderProgram["pathTracing"]->setUniformValue("textureMapsArrayTex", 5);
-	shaderProgram["pathTracing"]->setUniformValue("lastFrame", 7);
-	shaderProgram["pathTracing"]->setUniformValue("width", width);
-	shaderProgram["pathTracing"]->setUniformValue("height", height);
-	shaderProgram["pathTracing"]->setUniformValue("depth", option.depth);
-	shaderProgram["pathTracing"]->setUniformValue("projection", projection.inverted());
-	shaderProgram["pathTracing"]->setUniformValue("eye", camera->getPos());
-	shaderProgram["pathTracing"]->setUniformValue("cameraRotate", camera->getView().inverted());
-	auto location = shaderProgram["pathTracing"]->programId();
-	functions->glUniform1ui(functions->glGetUniformLocation(location,"frameCounter"), option.frameCounter++);
-
-	functions->glBindFramebuffer(GL_FRAMEBUFFER, pathTracingFBO);
-	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	shaderProgram["pathTracing"]->release();
-	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	pathTracingVAO.release();
-
-	accumVAO.bind();
-	shaderProgram["accum"]->bind();
-	shaderProgram["accum"]->setUniformValue("lastFrame", 6);
-
-	functions->glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
-	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	shaderProgram["accum"]->release();
-	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	accumVAO.release();
+	if (isRealTimeRendering || isOffScreenRendering) {
+		renderAccum();
+	}
+	else if (!isRealTimeRendering && (option.frameCounter - delayStep) <= 3)
+	{
+		renderAccum();
+	}
+	else ;
 
 	if (isOffScreenRendering) {
 
@@ -404,15 +388,13 @@ void RayTracingRenderer::render()
 	shaderProgram["output"]->release();
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	outputVAO.release();
-
+	
 
 	if (isOffScreenRendering && option.frameCounter == option.maxFrameCounter) {
 		saveRenderResult(option.outputPath, option.quality);
 		QString info("渲染已完成, 结果保存至%1, <a href=\"file:///%2\">单击链接查看</a>");
 		info = info.arg(option.outputPath).arg(option.outputPath);
-		option.reset();
-		isResized = true;
-		isOffScreenRendering = false;
+		stopRender();
 		emit Info(info, false);
 	}
 	
@@ -440,6 +422,47 @@ void RayTracingRenderer::render()
 		isSavingSnapshot = false;
 	}
 
+}
+
+void RayTracingRenderer::renderAccum()
+{
+	pathTracingVAO.bind();
+	shaderProgram["pathTracing"]->bind();
+	shaderProgram["pathTracing"]->setUniformValue("hasData", hasData);
+	shaderProgram["pathTracing"]->setUniformValue("cubemap", 0);
+	shaderProgram["pathTracing"]->setUniformValue("BVHnodes", 1);
+	shaderProgram["pathTracing"]->setUniformValue("triangles", 2);
+	shaderProgram["pathTracing"]->setUniformValue("materials", 3);
+	shaderProgram["pathTracing"]->setUniformValue("textureMapsArrayTex", 5);
+	shaderProgram["pathTracing"]->setUniformValue("lastFrame", 7);
+	shaderProgram["pathTracing"]->setUniformValue("width", width);
+	shaderProgram["pathTracing"]->setUniformValue("height", height);
+	shaderProgram["pathTracing"]->setUniformValue("depth", option.depth);
+	shaderProgram["pathTracing"]->setUniformValue("projection", projection.inverted());
+	shaderProgram["pathTracing"]->setUniformValue("eye", camera->getPos());
+	shaderProgram["pathTracing"]->setUniformValue("cameraRotate", camera->getView().inverted());
+	auto location = shaderProgram["pathTracing"]->programId();
+	functions->glUniform1ui(functions->glGetUniformLocation(location, "frameCounter"), option.frameCounter++);
+
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, pathTracingFBO);
+	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	shaderProgram["pathTracing"]->release();
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	pathTracingVAO.release();
+
+	accumVAO.bind();
+	shaderProgram["accum"]->bind();
+	shaderProgram["accum"]->setUniformValue("lastFrame", 6);
+
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
+	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	shaderProgram["accum"]->release();
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	accumVAO.release();
 }
 
 template<typename T>
