@@ -5,6 +5,7 @@ HelpDialog::HelpDialog(QDialog* parent):
 	ui(new Ui::HelpDialog)
 {
 	ui->setupUi(this);
+	setWindowTitle("帮助");
 	setWindowIcon(QIcon(":/icons/title.ico"));
 	QFile markdown(":/doc/help.md");
 	markdown.open(QIODevice::ReadOnly);

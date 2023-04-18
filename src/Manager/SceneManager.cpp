@@ -125,7 +125,6 @@ void SceneManager::revertAction()
 			revertActions.pop();
 			revertActions.pop();
 			revertActions.pop();
-			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true);
 		}
 		else {
 			QString name = action.second;
@@ -288,6 +287,7 @@ void SceneManager::rename(const QString& oldname, const QString& newname)
 	models.insert(newname, model);
 	modelLoader->addPath(model.getPath());
 	addRevertModel(RENAME, model, oldname + "$@$" + newname);
+	QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, true);
 	emit sendEditModel(nullptr);
 	emit sendInspectorModel(nullptr);
 	emit sendInspectorName("");

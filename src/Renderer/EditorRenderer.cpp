@@ -162,6 +162,9 @@ void EditorRenderer::resize(int w, int h)
 	width = w;
 	height = h;
 	gizmo->setSize(w, h);
+	GLint major, minor;
+	functions->glGetIntegerv(GL_MAJOR_VERSION, &major); //gl大版本（整型）
+	functions->glGetIntegerv(GL_MINOR_VERSION, &minor); //gl小版本（整型）5
 }
 
 QSharedPointer<Gizmo> EditorRenderer::getGizmo()
