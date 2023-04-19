@@ -39,6 +39,9 @@
      <property name="keyboardTracking">
       <bool>false</bool>
      </property>
+     <property name="decimals">
+      <number>4</number>
+     </property>
      <property name="minimum">
       <double>-1000000000.000000000000000</double>
      </property>
@@ -130,6 +133,9 @@
      <property name="suffix">
       <string>°</string>
      </property>
+     <property name="decimals">
+      <number>4</number>
+     </property>
      <property name="minimum">
       <double>-1000000000.000000000000000</double>
      </property>
@@ -162,6 +168,9 @@
      <property name="suffix">
       <string>°</string>
      </property>
+     <property name="decimals">
+      <number>4</number>
+     </property>
      <property name="maximum">
       <double>1000000000.000000000000000</double>
      </property>
@@ -191,6 +200,9 @@
      <property name="keyboardTracking">
       <bool>false</bool>
      </property>
+     <property name="decimals">
+      <number>4</number>
+     </property>
      <property name="minimum">
       <double>0.000000000000000</double>
      </property>
@@ -216,6 +228,9 @@
     <widget class="QDoubleSpinBox" name="doubleSpinBoxScaleY">
      <property name="keyboardTracking">
       <bool>false</bool>
+     </property>
+     <property name="decimals">
+      <number>4</number>
      </property>
      <property name="minimum">
       <double>0.000000000000000</double>
@@ -246,6 +261,9 @@
      <property name="keyboardTracking">
       <bool>false</bool>
      </property>
+     <property name="decimals">
+      <number>4</number>
+     </property>
      <property name="minimum">
       <double>-1000000000.000000000000000</double>
      </property>
@@ -264,6 +282,9 @@
      </property>
      <property name="suffix">
       <string>°</string>
+     </property>
+     <property name="decimals">
+      <number>4</number>
      </property>
      <property name="minimum">
       <double>-1000000000.000000000000000</double>
@@ -290,6 +311,9 @@
     <widget class="QDoubleSpinBox" name="doubleSpinBoxPosX">
      <property name="keyboardTracking">
       <bool>false</bool>
+     </property>
+     <property name="decimals">
+      <number>4</number>
      </property>
      <property name="minimum">
       <double>-1000000000.000000000000000</double>
@@ -336,6 +360,9 @@
     <widget class="QDoubleSpinBox" name="doubleSpinBoxScaleX">
      <property name="keyboardTracking">
       <bool>false</bool>
+     </property>
+     <property name="decimals">
+      <number>4</number>
      </property>
      <property name="minimum">
       <double>0.000000000000000</double>
@@ -451,7 +478,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup2"/>
  </buttongroups>
 </ui>

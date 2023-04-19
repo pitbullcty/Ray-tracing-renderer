@@ -307,7 +307,7 @@ void MainWindowManager::saveSceneAS()
 		QMessageBox::warning(ui->editor, "警告", "尚未打开场景！", QMessageBox::Yes);
 		return;
 	}
-	QString fileName = QFileDialog::getSaveFileName(ui->editor, "选择保存路径", QDir::currentPath(), "场景文件(*.json)");
+	QString fileName = QFileDialog::getSaveFileName(ui->editor, "选择保存路径", lastScenePath, "场景文件(*.json)");
 	if (fileName.isEmpty()) {
 		return;
 	}

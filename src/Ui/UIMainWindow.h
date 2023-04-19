@@ -219,12 +219,12 @@ public:
         menuClear->setObjectName(QString::fromUtf8("menuClear"));
         menu_2 = new QMenu(menubar);
         menu_2->setObjectName(QString::fromUtf8("menu_2"));
-        menu_2->setGeometry(QRect(396, 154, 126, 72));
+        menu_2->setGeometry(QRect(396, 154, 128, 78));
         menu_4 = new QMenu(menubar);
         menu_4->setObjectName(QString::fromUtf8("menu_4"));
         menu_5 = new QMenu(menubar);
         menu_5->setObjectName(QString::fromUtf8("menu_5"));
-        menu_5->setGeometry(QRect(251, 154, 120, 72));
+        menu_5->setGeometry(QRect(251, 154, 122, 78));
         menu_I = new QMenu(menu_5);
         menu_I->setObjectName(QString::fromUtf8("menu_I"));
         MainWindow->setMenuBar(menubar);
@@ -271,7 +271,7 @@ public:
         MainWindow->addDockWidget(Qt::BottomDockWidgetArea, dockWidgetConsole);
         dockWidgetDetails = new QDockWidget(MainWindow);
         dockWidgetDetails->setObjectName(QString::fromUtf8("dockWidgetDetails"));
-        dockWidgetDetails->setMinimumSize(QSize(300, 170));
+        dockWidgetDetails->setMinimumSize(QSize(320, 170));
         dockWidgetDetails->setMaximumSize(QSize(500, 524287));
         dockWidgetDetails->setAllowedAreas(Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea);
         dockWidgetContents = new QWidget();

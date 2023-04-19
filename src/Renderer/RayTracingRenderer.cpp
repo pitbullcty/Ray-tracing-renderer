@@ -12,6 +12,7 @@ void RayTracingRenderer::setRenderOption(const RenderOption& option)
 {
 	this->option = option;
 	isOffScreenRendering = true;
+	timer.restart();
 	isResized = true;
 }
 
@@ -267,7 +268,7 @@ void RayTracingRenderer::sendDataToGPU(bool needSend)
 	if (needSend) {
 		QThreadPool* global = QThreadPool::globalInstance();
 		if (global->activeThreadCount() != 0) {
-			global->clear() ;
+			global->clear();
 			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, true, false);
 			return;
 		} //如果线程池还有耗时任务,则取消重新构建
@@ -360,6 +361,7 @@ void RayTracingRenderer::render()
 	projection = QMatrix4x4();
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 
+
 	if (isRealTimeRendering || isOffScreenRendering) {
 		renderAccum();
 	}
@@ -392,8 +394,8 @@ void RayTracingRenderer::render()
 
 	if (isOffScreenRendering && option.frameCounter == option.maxFrameCounter) {
 		saveRenderResult(option.outputPath, option.quality);
-		QString info("渲染已完成, 结果保存至%1, <a href=\"file:///%2\">单击链接查看</a>");
-		info = info.arg(option.outputPath).arg(option.outputPath);
+		QString info("渲染已完成,总耗时%1s。结果保存至%2, <a href=\"file:///%3\">单击链接查看</a>");
+		info = info.arg(QString::number(timer.elapsed()/1000.0f, 'f', 2)).arg(option.outputPath).arg(option.outputPath);
 		stopRender();
 		emit Info(info, false);
 	}
@@ -421,6 +423,7 @@ void RayTracingRenderer::render()
 		saveRenderResult(snapShotSavingPath, snapShotquality);
 		isSavingSnapshot = false;
 	}
+
 
 }
 

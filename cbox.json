@@ -1,307 +1,308 @@
 ﻿{
-    "camera": {
-        "pitch": 14.499969482421875,
-        "x": 0.2570987939834595,
-        "y": -0.007379541173577309,
-        "yaw": 3.7997961044311523e-07,
-        "z": -1.0264368057250977
-    },
-    "lights": [
-        {
-            "material": {
-                "baseColor": {
-                    "b": 1,
-                    "g": 1,
-                    "r": 1
-                },
-                "emissive": {
-                    "x": 20,
-                    "y": 20,
-                    "z": 20
-                }
-            },
-            "modelPath": "F:/Ray-tracing-renderer/out/build/x64-debug/lights/rectlight.obj",
-            "name": "rectlight",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 0.016102634370326996,
-                "scaleY": 0.009999999776482582,
-                "scaleZ": 0.022154977545142174,
-                "translationX": 0.28338807821273804,
-                "translationY": 0.5477999448776245,
-                "translationZ": 0.22700010240077972
-            }
+  "camera": {
+    "fov": 42,
+    "pitch": 0.6999672651290894,
+    "x": 0.28294721245765686,
+    "y": 0.24878376722335815,
+    "yaw": 1.1000005006790161,
+    "z": -0.8457783460617065
+  },
+  "lights": [
+    {
+      "material": {
+        "baseColor": {
+          "b": 1,
+          "g": 1,
+          "r": 1
+        },
+        "emissive": {
+          "x": 20,
+          "y": 20,
+          "z": 20
         }
-    ],
-    "models": [
-        {
-            "material": {
-                "anisotropic": 0,
-                "baseColor": {
-                    "b": 0.6800000071525574,
-                    "g": 0.7099999785423279,
-                    "r": 0.7250000238418579
-                },
-                "clearcoat": 0,
-                "clearcoatGloss": 0,
-                "emissive": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "metallic": 0,
-                "roughness": 0.5,
-                "sheen": 0,
-                "sheenTint": 0,
-                "specular": 0,
-                "specularTint": 0,
-                "subsurface": 0
-            },
-            "modelPath": "F:/Ray-tracing-renderer/resources/model/cornell_box/cbox_back.obj",
-            "name": "cbox_back",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 0.009999999776482582,
-                "scaleY": 0.009999999776482582,
-                "scaleZ": 0.009999999776482582,
-                "translationX": 0.2767006456851959,
-                "translationY": 0.274399995803833,
-                "translationZ": 0.5591999888420105
-            }
-        },
-        {
-            "material": {
-                "anisotropic": 0,
-                "baseColor": {
-                    "b": 0.6800000071525574,
-                    "g": 0.7099999785423279,
-                    "r": 0.7250000238418579
-                },
-                "clearcoat": 0,
-                "clearcoatGloss": 0,
-                "emissive": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "metallic": 0,
-                "roughness": 0.5,
-                "sheen": 0,
-                "sheenTint": 0,
-                "specular": 0,
-                "specularTint": 0,
-                "subsurface": 0
-            },
-            "modelPath": "F:/Ray-tracing-renderer/resources/model/cornell_box/cbox_ceiling.obj",
-            "name": "cbox_ceiling",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 0.009999999776482582,
-                "scaleY": 0.009999999776482582,
-                "scaleZ": 0.009999999776482582,
-                "translationX": 0.27799999713897705,
-                "translationY": 0.548799991607666,
-                "translationZ": 0.2795499861240387
-            }
-        },
-        {
-            "material": {
-                "anisotropic": 0,
-                "baseColor": {
-                    "b": 0.6800000071525574,
-                    "g": 0.7099999785423279,
-                    "r": 0.7250000238418579
-                },
-                "clearcoat": 0,
-                "clearcoatGloss": 0,
-                "emissive": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "metallic": 0,
-                "roughness": 0.5,
-                "sheen": 0,
-                "sheenTint": 0,
-                "specular": 0,
-                "specularTint": 0,
-                "subsurface": 0
-            },
-            "modelPath": "F:/Ray-tracing-renderer/resources/model/cornell_box/cbox_floor.obj",
-            "name": "cbox_floor",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 0.009999999776482582,
-                "scaleY": 0.009999999776482582,
-                "scaleZ": 0.009999999776482582,
-                "translationX": 0.27559998631477356,
-                "translationY": 0,
-                "translationZ": 0.27959999442100525
-            }
-        },
-        {
-            "material": {
-                "anisotropic": 0,
-                "baseColor": {
-                    "b": 0.09099999815225601,
-                    "g": 0.44999998807907104,
-                    "r": 0.14000000059604645
-                },
-                "clearcoat": 0,
-                "clearcoatGloss": 0,
-                "emissive": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "metallic": 0,
-                "roughness": 0.5,
-                "sheen": 0,
-                "sheenTint": 0,
-                "specular": 0,
-                "specularTint": 0,
-                "subsurface": 0
-            },
-            "modelPath": "F:/Ray-tracing-renderer/resources/model/cornell_box/cbox_greenwall.obj",
-            "name": "cbox_greenwall",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 0.009999999776482582,
-                "scaleY": 0.009999999776482582,
-                "scaleZ": 0.009999999776482582,
-                "translationX": 0,
-                "translationY": 0.274399995803833,
-                "translationZ": 0.27959999442100525
-            }
-        },
-        {
-            "material": {
-                "anisotropic": 0,
-                "baseColor": {
-                    "b": 0.6800000071525574,
-                    "g": 0.7099999785423279,
-                    "r": 0.7250000238418579
-                },
-                "clearcoat": 0,
-                "clearcoatGloss": 0,
-                "emissive": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "metallic": 0,
-                "roughness": 0.5,
-                "sheen": 0,
-                "sheenTint": 0,
-                "specular": 0,
-                "specularTint": 0,
-                "subsurface": 0
-            },
-            "modelPath": "F:/Ray-tracing-renderer//resources/model/cornell_box/cbox_largebox.obj",
-            "name": "cbox_largebox",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 0.009999999776482582,
-                "scaleY": 0.009999999776482582,
-                "scaleZ": 0.009999999776482582,
-                "translationX": 0.3684999942779541,
-                "translationY": 0.16599999368190765,
-                "translationZ": 0.3512499928474426
-            }
-        },
-        {
-            "material": {
-                "anisotropic": 0,
-                "baseColor": {
-                    "b": 0.05000000074505806,
-                    "g": 0.06499999761581421,
-                    "r": 0.6299999952316284
-                },
-                "clearcoat": 0,
-                "clearcoatGloss": 0,
-                "emissive": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "metallic": 0,
-                "roughness": 0.5,
-                "sheen": 0,
-                "sheenTint": 0,
-                "specular": 0,
-                "specularTint": 0,
-                "subsurface": 0
-            },
-            "modelPath": "F:/Ray-tracing-renderer//resources/model/cornell_box/cbox_redwall.obj",
-            "name": "cbox_redwall",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 0.009999999776482582,
-                "scaleY": 0.009999999776482582,
-                "scaleZ": 0.009999999776482582,
-                "translationX": 0.5508414506912231,
-                "translationY": 0.274399995803833,
-                "translationZ": 0.27554601430892944
-            }
-        },
-        {
-            "material": {
-                "anisotropic": 0,
-                "baseColor": {
-                    "b": 0.6800000071525574,
-                    "g": 0.7099999785423279,
-                    "r": 0.7250000238418579
-                },
-                "clearcoat": 0,
-                "clearcoatGloss": 0,
-                "emissive": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "metallic": 0,
-                "roughness": 0.5,
-                "sheen": 0,
-                "sheenTint": 0,
-                "specular": 0,
-                "specularTint": 0,
-                "subsurface": 0
-            },
-            "modelPath": "F:/Ray-tracing-renderer//resources/model/cornell_box/cbox_smallbox.obj",
-            "name": "cbox_smallbox",
-            "transform": {
-                "rotationX": 0,
-                "rotationY": 0,
-                "rotationZ": 0,
-                "scaleX": 0.009999999776482582,
-                "scaleY": 0.009999999776482582,
-                "scaleZ": 0.009999999776482582,
-                "translationX": 0.18549999594688416,
-                "translationY": 0.08349999785423279,
-                "translationZ": 0.16899999976158142
-            }
-        }
-    ],
-    "skybox": {
-        "+x": ":/skybox/px.png",
-        "+y": ":/skybox/py.png",
-        "+z": ":/skybox/pz.png",
-        "-x": ":/skybox/nx.png",
-        "-y": ":/skybox/ny.png",
-        "-z": ":/skybox/nz.png"
+      },
+      "modelPath": "F:/Ray-tracing-renderer/out/build/x64-debug/lights/rectlight.obj",
+      "name": "rectlight",
+      "transform": {
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "scaleX": 0.016102634370326996,
+        "scaleY": 0.009999999776482582,
+        "scaleZ": 0.022154977545142174,
+        "translationX": 0.28338807821273804,
+        "translationY": 0.5477999448776245,
+        "translationZ": 0.22700010240077972
+      }
     }
+  ],
+  "models": [
+    {
+      "material": {
+        "anisotropic": 0,
+        "baseColor": {
+          "b": 0.6800000071525574,
+          "g": 0.7099999785423279,
+          "r": 0.7250000238418579
+        },
+        "clearcoat": 0,
+        "clearcoatGloss": 0,
+        "emissive": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "metallic": 0,
+        "roughness": 0.5,
+        "sheen": 0,
+        "sheenTint": 0,
+        "specular": 0,
+        "specularTint": 0,
+        "subsurface": 0
+      },
+      "modelPath": "F:/Ray-tracing-renderer/resources/model/cornell_box/cbox_back.obj",
+      "name": "cbox_back",
+      "transform": {
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "scaleX": 0.009999999776482582,
+        "scaleY": 0.009999999776482582,
+        "scaleZ": 0.009999999776482582,
+        "translationX": 0.2767006456851959,
+        "translationY": 0.274399995803833,
+        "translationZ": 0.5591999888420105
+      }
+    },
+    {
+      "material": {
+        "anisotropic": 0,
+        "baseColor": {
+          "b": 0.6800000071525574,
+          "g": 0.7099999785423279,
+          "r": 0.7250000238418579
+        },
+        "clearcoat": 0,
+        "clearcoatGloss": 0,
+        "emissive": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "metallic": 0,
+        "roughness": 0.5,
+        "sheen": 0,
+        "sheenTint": 0,
+        "specular": 0,
+        "specularTint": 0,
+        "subsurface": 0
+      },
+      "modelPath": "F:/Ray-tracing-renderer/resources/model/cornell_box/cbox_ceiling.obj",
+      "name": "cbox_ceiling",
+      "transform": {
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "scaleX": 0.009999999776482582,
+        "scaleY": 0.009999999776482582,
+        "scaleZ": 0.009999999776482582,
+        "translationX": 0.27799999713897705,
+        "translationY": 0.548799991607666,
+        "translationZ": 0.2795499861240387
+      }
+    },
+    {
+      "material": {
+        "anisotropic": 0,
+        "baseColor": {
+          "b": 0.6800000071525574,
+          "g": 0.7099999785423279,
+          "r": 0.7250000238418579
+        },
+        "clearcoat": 0,
+        "clearcoatGloss": 0,
+        "emissive": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "metallic": 0,
+        "roughness": 0.5,
+        "sheen": 0,
+        "sheenTint": 0,
+        "specular": 0,
+        "specularTint": 0,
+        "subsurface": 0
+      },
+      "modelPath": "F:/Ray-tracing-renderer/resources/model/cornell_box/cbox_floor.obj",
+      "name": "cbox_floor",
+      "transform": {
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "scaleX": 0.009999999776482582,
+        "scaleY": 0.009999999776482582,
+        "scaleZ": 0.009999999776482582,
+        "translationX": 0.27559998631477356,
+        "translationY": 0,
+        "translationZ": 0.27959999442100525
+      }
+    },
+    {
+      "material": {
+        "anisotropic": 0,
+        "baseColor": {
+          "b": 0.09099999815225601,
+          "g": 0.44999998807907104,
+          "r": 0.14000000059604645
+        },
+        "clearcoat": 0,
+        "clearcoatGloss": 0,
+        "emissive": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "metallic": 0,
+        "roughness": 0.5,
+        "sheen": 0,
+        "sheenTint": 0,
+        "specular": 0,
+        "specularTint": 0,
+        "subsurface": 0
+      },
+      "modelPath": "F:/Ray-tracing-renderer/resources/model/cornell_box/cbox_greenwall.obj",
+      "name": "cbox_greenwall",
+      "transform": {
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "scaleX": 0.009999999776482582,
+        "scaleY": 0.009999999776482582,
+        "scaleZ": 0.009999999776482582,
+        "translationX": 0,
+        "translationY": 0.274399995803833,
+        "translationZ": 0.27959999442100525
+      }
+    },
+    {
+      "material": {
+        "anisotropic": 0,
+        "baseColor": {
+          "b": 0.6800000071525574,
+          "g": 0.7099999785423279,
+          "r": 0.7250000238418579
+        },
+        "clearcoat": 0,
+        "clearcoatGloss": 0,
+        "emissive": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "metallic": 0,
+        "roughness": 0.5,
+        "sheen": 0,
+        "sheenTint": 0,
+        "specular": 0,
+        "specularTint": 0,
+        "subsurface": 0
+      },
+      "modelPath": "F:/Ray-tracing-renderer//resources/model/cornell_box/cbox_largebox.obj",
+      "name": "cbox_largebox",
+      "transform": {
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "scaleX": 0.009999999776482582,
+        "scaleY": 0.009999999776482582,
+        "scaleZ": 0.009999999776482582,
+        "translationX": 0.3684999942779541,
+        "translationY": 0.16599999368190765,
+        "translationZ": 0.3512499928474426
+      }
+    },
+    {
+      "material": {
+        "anisotropic": 0,
+        "baseColor": {
+          "b": 0.05000000074505806,
+          "g": 0.06499999761581421,
+          "r": 0.6299999952316284
+        },
+        "clearcoat": 0,
+        "clearcoatGloss": 0,
+        "emissive": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "metallic": 0,
+        "roughness": 0.5,
+        "sheen": 0,
+        "sheenTint": 0,
+        "specular": 0,
+        "specularTint": 0,
+        "subsurface": 0
+      },
+      "modelPath": "F:/Ray-tracing-renderer//resources/model/cornell_box/cbox_redwall.obj",
+      "name": "cbox_redwall",
+      "transform": {
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "scaleX": 0.009999999776482582,
+        "scaleY": 0.009999999776482582,
+        "scaleZ": 0.009999999776482582,
+        "translationX": 0.5508414506912231,
+        "translationY": 0.274399995803833,
+        "translationZ": 0.27554601430892944
+      }
+    },
+    {
+      "material": {
+        "anisotropic": 0,
+        "baseColor": {
+          "b": 0.6800000071525574,
+          "g": 0.7099999785423279,
+          "r": 0.7250000238418579
+        },
+        "clearcoat": 0,
+        "clearcoatGloss": 0,
+        "emissive": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "metallic": 0,
+        "roughness": 0.5,
+        "sheen": 0,
+        "sheenTint": 0,
+        "specular": 0,
+        "specularTint": 0,
+        "subsurface": 0
+      },
+      "modelPath": "F:/Ray-tracing-renderer//resources/model/cornell_box/cbox_smallbox.obj",
+      "name": "cbox_smallbox",
+      "transform": {
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "scaleX": 0.009999999776482582,
+        "scaleY": 0.009999999776482582,
+        "scaleZ": 0.009999999776482582,
+        "translationX": 0.18549999594688416,
+        "translationY": 0.08349999785423279,
+        "translationZ": 0.16899999976158142
+      }
+    }
+  ],
+  "skybox": {
+    "+x": ":/skybox/px.png",
+    "+y": ":/skybox/py.png",
+    "+z": ":/skybox/pz.png",
+    "-x": ":/skybox/nx.png",
+    "-y": ":/skybox/ny.png",
+    "-z": ":/skybox/nz.png"
+  }
 }

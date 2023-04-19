@@ -1,0 +1,11 @@
+Model Information:
+* title:	Dragon
+* source:	https://sketchfab.com/3d-models/dragon-f4b218fb3b0d49e9b3a27367850517b8
+* author:	uptown (https://sketchfab.com/uptown)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Dragon" (https://sketchfab.com/3d-models/dragon-f4b218fb3b0d49e9b3a27367850517b8) by uptown (https://sketchfab.com/uptown) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

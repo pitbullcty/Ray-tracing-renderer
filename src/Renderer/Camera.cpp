@@ -128,10 +128,10 @@ void Camera::processMouseMovement(float xoffset, float yoffset)
 */
 void Camera::processMouseScroll(float yoffset)
 {
-    if (zoom >= 1.0f && zoom <= 45.0f)
+    if (zoom >= 1.0f && zoom <= 60.0f)
         zoom -= yoffset;
-    if (zoom > 45.0f)
-        zoom = 45.0f;
+    if (zoom > 60.0f)
+        zoom = 60.0f;
     if (zoom < 1.0f)
         zoom = 1.0f;
 }
@@ -173,6 +173,7 @@ QJsonObject Camera::toJson()
     camera.insert("z", pos.z());
     camera.insert("yaw", yaw);
     camera.insert("pitch", pitch);
+    camera.insert("fov", zoom);
     return camera;
 }
 
@@ -183,6 +184,7 @@ void Camera::prase(const QJsonObject& camera)
     float z = camera["z"].toVariant().toFloat();
     pitch = camera["pitch"].toVariant().toFloat();
     yaw = camera["yaw"].toVariant().toFloat();
+    zoom = camera["fov"].toVariant().toFloat();
     setPos({ x,y,z });
     updateState();
 }

@@ -56,6 +56,8 @@ private:
 	bool isRealTimeRendering; //实时渲染
 	int delayStep; //延迟步数
 
+	QElapsedTimer timer; //计数器
+
 	RenderOption option;
 
 	QOpenGLBuffer pathTraceVBO;

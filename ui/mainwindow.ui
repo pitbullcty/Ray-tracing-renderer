@@ -149,8 +149,8 @@
      <rect>
       <x>396</x>
       <y>154</y>
-      <width>126</width>
-      <height>72</height>
+      <width>128</width>
+      <height>78</height>
      </rect>
     </property>
     <property name="title">
@@ -172,8 +172,8 @@
      <rect>
       <x>251</x>
       <y>154</y>
-      <width>120</width>
-      <height>72</height>
+      <width>122</width>
+      <height>78</height>
      </rect>
     </property>
     <property name="title">
@@ -268,7 +268,7 @@
   <widget class="QDockWidget" name="dockWidgetDetails">
    <property name="minimumSize">
     <size>
-     <width>300</width>
+     <width>320</width>
      <height>170</height>
     </size>
    </property>

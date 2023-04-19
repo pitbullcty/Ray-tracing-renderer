@@ -1,6 +1,6 @@
 ﻿#include "RayTracingOpenGLWidget.h"
 
-RayTracingOpenGLWidget::RayTracingOpenGLWidget(QWidget* parent):
+RayTracingOpenGLWidget::RayTracingOpenGLWidget(QWidget* parent) :
     BaseOpenGLWidget(parent),
     isLongPressing(false)
 {
@@ -48,8 +48,7 @@ void RayTracingOpenGLWidget::paintGL()
 
         if (rayTracingRenderer->getIsOffScreenRendering()) {
             auto& option = rayTracingRenderer->getOption();
-          
-            if (option.frameCounter % 10 == 0) {
+            if (option.frameCounter!=0 && option.frameCounter % 10 == 0) {
                 QString info("渲染已完成%1\%,预计剩余时间%2s");
                 float remainTime = 1.0f / fps * (option.maxFrameCounter - option.frameCounter);
                 info = info.arg(QString::number((float)option.frameCounter / option.maxFrameCounter * 100, 'f', 2)).arg(QString::number(remainTime, 'f', 2));

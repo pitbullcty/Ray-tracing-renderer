@@ -41,6 +41,15 @@ qt_add_resources(SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/shader/shader.qrc
     ${CMAKE_CURRENT_SOURCE_DIR}/resources/skybox/cubemap/Standard-Cube-Map1/skybox.qrc
 )
 
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+add_executable(${PROJECT_NAME} 
+        ${inc_files} 
+        ${src_files} 
+        ${gizmo_inc_files} 
+        ${gizmo_src_files} 
+        ${SOURCES}
+)
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Release")
 add_executable(${PROJECT_NAME} 
         WIN32
         ${inc_files} 
@@ -49,7 +58,7 @@ add_executable(${PROJECT_NAME}
         ${gizmo_src_files} 
         ${SOURCES}
 )
-
+endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt::Core
     Qt::Gui
