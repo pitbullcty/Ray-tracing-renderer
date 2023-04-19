@@ -10,10 +10,11 @@ QVector3D QColor2QVector3D(const QColor& v) {
 
 QColor Emissive2Color(const QVector3D& emissive) {
 	float factor = std::max(std::max(emissive.x(), emissive.y()), emissive.z());
-	if (factor != 0) {
+	if ((factor-0.0f)>1e-6) {
 		QVector3D newEmissive = emissive / factor * 255;
 		return QVector3D2QColor(newEmissive);
 	}
+	return QVector3D2QColor({ 0,0,0 });
 }
 
 QVector3D Color2Emissive(const QColor& color, int factor) {
@@ -364,5 +365,5 @@ void MaterialInspector::setData()
 	emissiveColorText = emissiveColorText.arg(emissiveColor.name());
 	ui->labelEmissive->setToolTip(QString("R:%1 G:%2 B:%3").arg(emissiveColor.red()).arg(emissiveColor.green()).arg(emissiveColor.blue()));
 	ui->labelEmissive->setStyleSheet(emissiveColorText);
-
+	
 }
