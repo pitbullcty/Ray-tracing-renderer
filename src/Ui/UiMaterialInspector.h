@@ -310,7 +310,7 @@ public:
 
         horizontalSliderFactor = new QSlider(emissiveWidget);
         horizontalSliderFactor->setObjectName(QString::fromUtf8("horizontalSliderFactor"));
-        horizontalSliderFactor->setMinimum(10);
+        horizontalSliderFactor->setMinimum(1);
         horizontalSliderFactor->setMaximum(255);
         horizontalSliderFactor->setValue(20);
         horizontalSliderFactor->setOrientation(Qt::Horizontal);
@@ -406,7 +406,7 @@ public:
         label_13->setText(QCoreApplication::translate("MaterialInspector", "\345\205\211\347\205\247\345\274\272\345\272\246", nullptr));
         labelFactor->setText(QCoreApplication::translate("MaterialInspector", "20", nullptr));
 #if QT_CONFIG(tooltip)
-        label->setToolTip(QCoreApplication::translate("MaterialInspector", "\344\275\234\344\270\272\345\205\211\346\272\220\346\227\266\347\232\204\345\217\221\345\205\211\351\242\234\350\211\262", nullptr));
+        label->setToolTip(QCoreApplication::translate("MaterialInspector", "\344\275\234\344\270\272\345\205\211\346\272\220\346\227\266\347\232\204\345\217\221\345\205\211\351\242\234\350\211\262\357\274\214\351\273\221\350\211\262\344\273\243\350\241\250\344\270\215\345\217\221\345\205\211", nullptr));
 #endif // QT_CONFIG(tooltip)
         label->setText(QCoreApplication::translate("MaterialInspector", "\345\217\221\345\205\211\351\242\234\350\211\262", nullptr));
         toolButtonEmissive->setText(QCoreApplication::translate("MaterialInspector", "\347\274\226\350\276\221", nullptr));

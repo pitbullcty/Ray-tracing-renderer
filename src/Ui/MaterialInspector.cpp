@@ -51,6 +51,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderAnisotropic, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderAnisotropic->value() / 100.0f;
 		if (model != nullptr) {
+			model->modelMaterial.anisotropic = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->anisotropic->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -66,6 +68,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderClearcoat, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderClearcoat->value() / 100.0f;
 		if (model != nullptr) {
+			model->modelMaterial.clearcoat = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->clearcoat->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -81,6 +85,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderClearcoatGloss, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderClearcoatGloss->value() / 100.0f;
 		if (model != nullptr && abs(model->modelMaterial.clearcoatGloss - value) > 1e-6) {
+			model->modelMaterial.clearcoatGloss = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->clearcoatGloss->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -96,6 +102,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderMetallic, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderMetallic->value() / 100.0f;
 		if (model != nullptr) {
+			model->modelMaterial.metallic = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->metallic->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -111,6 +119,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderRoughness, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderRoughness->value() / 100.0f;
 		if (model != nullptr) {
+			model->modelMaterial.roughness = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->roughness->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -126,6 +136,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderSheen, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderSheen->value() / 100.0f;
 		if (model != nullptr) {
+			model->modelMaterial.sheen = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->sheen->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -141,6 +153,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderSheenTint, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderSheenTint->value() / 100.0f;
 		if (model != nullptr) {
+			model->modelMaterial.sheenTint = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->sheenTint->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -156,6 +170,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderSpecular, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderSpecular->value() / 100.0f;
 		if (model != nullptr) {
+			model->modelMaterial.specular = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->specular->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -171,6 +187,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderSpecularTint, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderSpecularTint->value() / 100.0f;
 		if (model != nullptr) {
+			model->modelMaterial.specularTint = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->specularTint->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -186,6 +204,8 @@ void MaterialInspector::applyData()
 	connect(ui->horizontalSliderSubsurface, &QSlider::valueChanged, [=]() {
 		auto value = ui->horizontalSliderSubsurface->value() / 100.0f;
 		if (model != nullptr) {
+			model->modelMaterial.subsurface = value;
+			QtConcurrent::run(&DataBuilder::buildData, DataBuilder::GetInstance().data(), false, false, false);
 			ui->subsurface->setText(QString::number(value, 'f', 2));
 		}
 	});
@@ -362,8 +382,8 @@ void MaterialInspector::setData()
 
 	QString emissiveColorText("background-color:%1");
 	auto emissiveColor = Emissive2Color(emissive);
+	ui->horizontalSliderFactor->setValue(std::max(std::max(emissive.x(), emissive.y()), emissive.z()));
 	emissiveColorText = emissiveColorText.arg(emissiveColor.name());
 	ui->labelEmissive->setToolTip(QString("R:%1 G:%2 B:%3").arg(emissiveColor.red()).arg(emissiveColor.green()).arg(emissiveColor.blue()));
 	ui->labelEmissive->setStyleSheet(emissiveColorText);
-	
 }

@@ -383,7 +383,7 @@
       <item row="2" column="2">
        <widget class="QSlider" name="horizontalSliderFactor">
         <property name="minimum">
-         <number>10</number>
+         <number>1</number>
         </property>
         <property name="maximum">
          <number>255</number>
@@ -399,7 +399,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="label">
         <property name="toolTip">
-         <string>作为光源时的发光颜色</string>
+         <string>作为光源时的发光颜色，黑色代表不发光</string>
         </property>
         <property name="text">
          <string>发光颜色</string>

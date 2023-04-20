@@ -14,6 +14,7 @@ bool isBusy = false; //静态外部变量，程序是否忙碌
 Console::Console(QWidget* parent):QTextBrowser(parent)
 {
 	setOpenExternalLinks(true);
+	document()->setMaximumBlockCount(100); //最多100条记录
 }
 
 void Console::Warning(const QString& text)

@@ -1,0 +1,608 @@
+{
+    "camera": {
+        "fov": 30,
+        "pitch": -18.499998092651367,
+        "x": -25.977542877197266,
+        "y": 9.959922790527344,
+        "yaw": -89.50003814697266,
+        "z": -0.6129509806632996
+    },
+    "lights": [
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 10,
+                    "y": 10,
+                    "z": 10
+                }
+            },
+            "modelPath": "F:/Ray-tracing-renderer/out/build/x64-release/lights/rectlight.obj",
+            "name": "rectlight",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 0.20000000298023224,
+                "translationX": -2.0399999618530273,
+                "translationY": 5,
+                "translationZ": -7.5
+            }
+        },
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 5,
+                    "y": 5,
+                    "z": 5
+                }
+            },
+            "modelPath": "F:/Ray-tracing-renderer/out/build/x64-release/lights/rectlight.obj",
+            "name": "rectlight01",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 0.20000000298023224,
+                "translationX": -2.0399999618530273,
+                "translationY": 5,
+                "translationZ": -5.5
+            }
+        },
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 5,
+                    "y": 5,
+                    "z": 5
+                }
+            },
+            "modelPath": "F:/Ray-tracing-renderer/out/build/x64-release/lights/rectlight.obj",
+            "name": "rectlight02",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 0.20000000298023224,
+                "translationX": -2.0399999618530273,
+                "translationY": 5,
+                "translationZ": -3.5
+            }
+        },
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 5,
+                    "y": 5,
+                    "z": 5
+                }
+            },
+            "modelPath": "F:/Ray-tracing-renderer/out/build/x64-release/lights/rectlight.obj",
+            "name": "rectlight03",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 0.20000000298023224,
+                "translationX": -2.0399999618530273,
+                "translationY": 5,
+                "translationZ": -1.5
+            }
+        },
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 5,
+                    "y": 5,
+                    "z": 5
+                }
+            },
+            "modelPath": "F:/Ray-tracing-renderer/out/build/x64-release/lights/rectlight.obj",
+            "name": "rectlight04",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 0.20000000298023224,
+                "translationX": -2.0399999618530273,
+                "translationY": 5,
+                "translationZ": 0.5
+            }
+        },
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 5,
+                    "y": 5,
+                    "z": 5
+                }
+            },
+            "modelPath": "F:/Ray-tracing-renderer/out/build/x64-release/lights/rectlight.obj",
+            "name": "rectlight05",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 0.20000000298023224,
+                "translationX": -2.0399999618530273,
+                "translationY": 5,
+                "translationZ": 2.5
+            }
+        },
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 5,
+                    "y": 5,
+                    "z": 5
+                }
+            },
+            "modelPath": "F:/Ray-tracing-renderer/out/build/x64-release/lights/rectlight.obj",
+            "name": "rectlight06",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 0.20000000298023224,
+                "translationX": -2.0399999618530273,
+                "translationY": 5,
+                "translationZ": 4.5
+            }
+        },
+        {
+            "material": {
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "emissive": {
+                    "x": 5,
+                    "y": 5,
+                    "z": 5
+                }
+            },
+            "modelPath": "F:/Ray-tracing-renderer/out/build/x64-release/lights/rectlight.obj",
+            "name": "rectlight07",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 0.20000000298023224,
+                "translationX": -2.0399999618530273,
+                "translationY": 5,
+                "translationZ": 6.5
+            }
+        }
+    ],
+    "models": [
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.9019607901573181,
+                    "g": 0.9019607901573181,
+                    "r": 0.9019607901573181
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 1,
+                "roughness": 0.009999999776482582,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/chrome.obj",
+            "name": "chrome",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": 0.4000000059604645,
+                "translationY": 1.8600000143051147,
+                "translationZ": -6.590000152587891
+            }
+        },
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0.20000000298023224,
+                "roughness": 0.5,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/floor.obj",
+            "name": "floor",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": 0,
+                "translationY": 0,
+                "translationZ": 0
+            }
+        },
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.07450980693101883,
+                    "g": 0.14509804546833038,
+                    "r": 0.0235294122248888
+                },
+                "clearcoat": 1,
+                "clearcoatGloss": 1,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0.009999999776482582,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/marb1.obj",
+            "name": "marb1",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": -3.7799999713897705,
+                "translationY": 0.8799999952316284,
+                "translationZ": -0.8399999737739563
+            }
+        },
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.13333334028720856,
+                    "g": 0.239215686917305,
+                    "r": 0.09803921729326248
+                },
+                "clearcoat": 1,
+                "clearcoatGloss": 1,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0.009999999776482582,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/marb2.obj",
+            "name": "marb2",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": -3.746000051498413,
+                "translationY": 0.9693999886512756,
+                "translationZ": 0.9739999771118164
+            }
+        },
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0,
+                    "g": 0.6666666865348816,
+                    "r": 1
+                },
+                "clearcoat": 1,
+                "clearcoatGloss": 1,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 0.009999999776482582,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/orange.obj",
+            "name": "orange",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": 1.6460000276565552,
+                "translationY": 1.6799999475479126,
+                "translationZ": 3.559999942779541
+            }
+        },
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0.8509804010391235,
+                    "g": 0.886274516582489,
+                    "r": 0.929411768913269
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0,
+                "roughness": 1,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 1
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/pingpong.obj",
+            "name": "pingpong",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": -3.140000104904175,
+                "translationY": 1.5099999904632568,
+                "translationZ": -4.119999885559082
+            }
+        },
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 0,
+                    "g": 0,
+                    "r": 1
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 0.20000000298023224,
+                "roughness": 0.5,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/plate.obj",
+            "name": "plate",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": 0,
+                "translationY": 0.36000001430511475,
+                "translationZ": 0
+            }
+        },
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 1,
+                "roughness": 0.009999999776482582,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/ring1.obj",
+            "name": "ring1",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": -0.30000001192092896,
+                "translationY": 0.800000011920929,
+                "translationZ": -1.4199999570846558
+            }
+        },
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 1,
+                "roughness": 0.009999999776482582,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/ring2.obj",
+            "name": "ring2",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": -0.6700000166893005,
+                "translationY": 0.800000011920929,
+                "translationZ": 0.6266999840736389
+            }
+        },
+        {
+            "material": {
+                "anisotropic": 0,
+                "baseColor": {
+                    "b": 1,
+                    "g": 1,
+                    "r": 1
+                },
+                "clearcoat": 0,
+                "clearcoatGloss": 0,
+                "emissive": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "metallic": 1,
+                "roughness": 0.009999999776482582,
+                "sheen": 0,
+                "sheenTint": 0,
+                "specular": 0,
+                "specularTint": 0,
+                "subsurface": 0
+            },
+            "modelPath": "F:/Ray-tracing-renderer/resources/model/hyperion/ring3.obj",
+            "name": "ring3",
+            "transform": {
+                "rotationX": 0,
+                "rotationY": 0,
+                "rotationZ": 0,
+                "scaleX": 1,
+                "scaleY": 1,
+                "scaleZ": 1,
+                "translationX": -1.440000057220459,
+                "translationY": 0.800000011920929,
+                "translationZ": 1.7200000286102295
+            }
+        }
+    ],
+    "skybox": {
+        "+x": ":/skybox/px.png",
+        "+y": ":/skybox/py.png",
+        "+z": ":/skybox/pz.png",
+        "-x": ":/skybox/nx.png",
+        "-y": ":/skybox/ny.png",
+        "-z": ":/skybox/nz.png"
+    }
+}

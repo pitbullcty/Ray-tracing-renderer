@@ -1,0 +1,13 @@
+﻿uic ./ui/mainwindow.ui -o ./src/Ui/UiMainWindow.h
+uic ./ui/Inspector.ui -o ./src/Ui/UiInspector.h
+uic ./ui/InspectorPage.ui -o ./src/Ui/UiInspectorPage.h
+uic ./ui/RenderOptionInspector.ui -o ./src/Ui/UiRenderOptionInspector.h
+uic ./ui/TransformInspector.ui -o ./src/Ui/UiTransformInspector.h
+uic ./ui/MaterialInspector.ui -o ./src/Ui/UiMaterialInspector.h
+uic ./ui/HelpDialog.ui -o ./src/Ui/UiHelpDialog.h
+uic ./ui/SkyboxInspector.ui -o ./src/Ui/UiSkyboxInspector.h
+
+cloc src --exclude-list-file=ignore.txt
+
+
+
