@@ -359,3 +359,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# 程序运行时生成的文件
+lights/
+outputs/
+settings.ini
