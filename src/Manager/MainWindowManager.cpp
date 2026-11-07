@@ -184,6 +184,7 @@ void MainWindowManager::bindSignals()
 	auto rayTarcingRenderer = ui->rayTracing->getRayTracingRenderer();
 	connect(renderOptionInspector, &RenderOptionInspector::sendRenderOption, ui->rayTracing, &RayTracingOpenGLWidget::startOfflineRender); //离屏渲染交给后台线程
 	connect(renderOptionInspector, &RenderOptionInspector::sendRenderState, rayTarcingRenderer.data(), &RayTracingRenderer::setRealTimeRendering);
+	connect(renderOptionInspector, &RenderOptionInspector::sendRealTimeDenoise, rayTarcingRenderer.data(), &RayTracingRenderer::setRealTimeDenoise); //实时预览降噪开关
 	connect(rayTarcingRenderer.data(), &RayTracingRenderer::Info, ui->console, &Console::Info);
 
 	auto editorRenderer = ui->editor->getEditorRenderer();

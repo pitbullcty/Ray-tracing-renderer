@@ -27,6 +27,9 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	outputFBO(-1), outputTexture(-1),
 	pathTracingFBO(-1), pathTracingTexture(-1),
 	backgroundTexture(-1),
+	gNormalDepthTexture(-1), gAlbedoTexture(-1),
+	momentsFBO(-1), momentsTexture(-1),
+	denoiseResultTexture(-1),
 	pathTraceVBO(QOpenGLBuffer::VertexBuffer),
 	accumVBO(QOpenGLBuffer::VertexBuffer),
 	outputVBO(QOpenGLBuffer::VertexBuffer),
@@ -43,6 +46,9 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	outputVBO.create();
 	accumVBO.create();
 	pathTraceVBO.create();
+	denoiseVBO.create();
+	denoiseFBO[0] = denoiseFBO[1] = -1;
+	denoiseTexture[0] = denoiseTexture[1] = -1;
 }
 
 RayTracingRenderer::~RayTracingRenderer()
@@ -115,6 +121,14 @@ void RayTracingRenderer::bindVAO()
 	shaderProgram["output"]->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float) * 3);
 	shaderProgram["output"]->release();
 
+	//降噪用的全屏四边形(两个降噪着色器都用 location 0 的顶点属性)
+	QOpenGLVertexArrayObject::Binder denoiseBinder(&denoiseVAO);
+	denoiseVBO.bind();
+	denoiseVBO.allocate(quadData.data(), (unsigned int)quadData.size() * sizeof(float));
+	functions->glEnableVertexAttribArray(0);
+	functions->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+	denoiseVBO.release();
+
 }
 
 void RayTracingRenderer::bindTexture()
@@ -168,6 +182,20 @@ void RayTracingRenderer::destoryFBOs()
 	functions->glDeleteFramebuffers(1, &pathTracingFBO);
 	functions->glDeleteFramebuffers(1, &accumFBO);
 	functions->glDeleteFramebuffers(1, &outputFBO);
+
+	//降噪相关缓冲
+	functions->glDeleteTextures(1, &gNormalDepthTexture);
+	functions->glDeleteTextures(1, &gAlbedoTexture);
+	functions->glDeleteTextures(1, &momentsTexture);
+	functions->glDeleteTextures(1, &denoiseTexture[0]);
+	functions->glDeleteTextures(1, &denoiseTexture[1]);
+	functions->glDeleteFramebuffers(1, &momentsFBO);
+	functions->glDeleteFramebuffers(1, &denoiseFBO[0]);
+	functions->glDeleteFramebuffers(1, &denoiseFBO[1]);
+	gNormalDepthTexture = gAlbedoTexture = momentsTexture = -1;
+	denoiseTexture[0] = denoiseTexture[1] = -1;
+	momentsFBO = denoiseFBO[0] = denoiseFBO[1] = -1;
+	denoiseResultTexture = -1;
 	
 }
 
@@ -179,6 +207,8 @@ void RayTracingRenderer::destoryVAO()
 	accumVBO.destroy();
 	outputVAO.destroy();
 	outputVBO.destroy();
+	denoiseVAO.destroy();
+	denoiseVBO.destroy();
 }
 
 void RayTracingRenderer::setUseGPUBVH(bool state)
@@ -541,6 +571,16 @@ void RayTracingRenderer::initFBOs()
 	functions->glBindTexture(GL_TEXTURE_2D, pathTracingTexture);
 	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pathTracingTexture, 0);
 
+	//G-Buffer: 供降噪器做边缘保持的几何引导(法线/深度/反照率)
+	gNormalDepthTexture = generateAttachment(width, height);
+	gAlbedoTexture = generateAttachment(width, height);
+	functions->glBindTexture(GL_TEXTURE_2D, gNormalDepthTexture);
+	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormalDepthTexture, 0);
+	functions->glBindTexture(GL_TEXTURE_2D, gAlbedoTexture);
+	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoTexture, 0);
+	unsigned int drawBuffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	functions->glDrawBuffers(3, drawBuffers);
+
 	functions->glGenFramebuffers(1, &accumFBO);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, accumFBO);
 	functions->glBindTexture(GL_TEXTURE_2D, accumTexture);
@@ -552,6 +592,21 @@ void RayTracingRenderer::initFBOs()
 	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, outputTexture, 0);
 
 	functions->glBindTexture(GL_TEXTURE_2D, 0);
+	//降噪中间缓冲: 方差估计 与 a-trous ping-pong
+	momentsTexture = generateAttachmentRGBA(width, height);
+	functions->glGenFramebuffers(1, &momentsFBO);
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, momentsFBO);
+	functions->glBindTexture(GL_TEXTURE_2D, momentsTexture);
+	functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, momentsTexture, 0);
+
+	functions->glGenFramebuffers(2, denoiseFBO);
+	for (int i = 0; i < 2; ++i) {
+		denoiseTexture[i] = generateAttachment(width, height);
+		functions->glBindFramebuffer(GL_FRAMEBUFFER, denoiseFBO[i]);
+		functions->glBindTexture(GL_TEXTURE_2D, denoiseTexture[i]);
+		functions->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, denoiseTexture[i], 0);
+	}
+
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0); //解绑
 
 	bindVAO();
@@ -584,17 +639,25 @@ void RayTracingRenderer::render()
 	}
 	else ;
 
-	if (isOffScreenRendering) {
+	//降噪: 实时预览走 GPU a-trous(无需读回CPU), 离屏渲染按降噪步长做一次
+	unsigned int displayTexture = accumTexture;
 
-		if (option.isRealTimeDenoising && option.frameCounter % option.denoiserStep == 0) {
-			denoise(accumFBO, accumTexture, true);
-		} //达到要求则降噪
-
+	if (realTimeDenoise && !isStandalone) {
+		if (isRealTimeRendering) {
+			displayTexture = runGPUDenoise(accumTexture, 3); //实时预览: 3轮滤波
+		}
+		else if (isOffScreenRendering && option.isRealTimeDenoising
+			&& option.frameCounter % option.denoiserStep == 0) {
+			displayTexture = runGPUDenoise(accumTexture, 2); //离屏过程中的预览降噪
+		}
 	}
 
 	outputVAO.bind();
 	shaderProgram["output"]->bind();
 	shaderProgram["output"]->setUniformValue("lastFrame", 7);
+	//降噪打开时显示降噪结果, 否则显示原始累积结果
+	functions->glActiveTexture(GL_TEXTURE7);
+	functions->glBindTexture(GL_TEXTURE_2D, displayTexture);
 	shaderProgram["output"]->setUniformValue("needToneMapping", true);
 	functions->glBindFramebuffer(GL_FRAMEBUFFER, outputFBO);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -654,6 +717,7 @@ void RayTracingRenderer::renderAccum()
 	shaderProgram["pathTracing"]->setUniformValue("lights", 4);
 	shaderProgram["pathTracing"]->setUniformValue("lightTriangleCount", lightTriangleCount);
 	shaderProgram["pathTracing"]->setUniformValue("lightTotalArea", lightTotalArea);
+	shaderProgram["pathTracing"]->setUniformValue("fireflyClamp", fireflyClampValue);
 	shaderProgram["pathTracing"]->setUniformValue("textureMapsArrayTex", 5);
 	shaderProgram["pathTracing"]->setUniformValue("lastFrame", 7);
 	shaderProgram["pathTracing"]->setUniformValue("width", width);
@@ -698,8 +762,25 @@ void RayTracingRenderer::getPixels(QVector<T>& pixels, unsigned int FBO, unsigne
 
 void RayTracingRenderer::saveRenderResult(const QString& path, int quality)
 {
-	denoise(outputFBO, outputTexture, true);
-	saveFBO(path, outputFBO, outputTexture, quality);
+	if (useOIDNFinalDenoise) {
+		//OIDN(CPU): 质量最好但需要读写回CPU, 大分辨率下要几百毫秒
+		denoise(outputFBO, outputTexture, true);
+		saveFBO(path, outputFBO, outputTexture, quality);
+		return;
+	}
+
+	//GPU a-trous 多轮降噪: 不读回CPU, 毫秒级完成, 质量接近OIDN
+	const int iterations = 5;
+	unsigned int filtered = runGPUDenoise(outputTexture, iterations);
+
+	if (filtered == outputTexture) {
+		//降噪着色器不可用(例如老显卡)时退化为直接保存原始结果
+		saveFBO(path, outputFBO, outputTexture, quality);
+		return;
+	}
+
+	int index = (filtered == denoiseTexture[0]) ? 0 : 1;
+	saveFBO(path, denoiseFBO[index], filtered, quality);
 }
 
 QImage RayTracingRenderer::grabResultImage()
@@ -760,3 +841,134 @@ void RayTracingRenderer::denoise(unsigned int FBO, unsigned int texture, bool ne
 }
 
 
+
+unsigned int RayTracingRenderer::generateAttachmentRGBA(int w, int h)
+{
+	unsigned int id;
+	functions->glGenTextures(1, &id);
+	functions->glBindTexture(GL_TEXTURE_2D, id);
+	functions->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, w, h, 0, GL_RGBA, GL_FLOAT, NULL);
+	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	functions->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	return id;
+}
+
+void RayTracingRenderer::drawFullscreen()
+{
+	functions->glBindVertexArray(denoiseVAO.objectId());
+	functions->glDrawArrays(GL_TRIANGLES, 0, 6);
+	functions->glBindVertexArray(0);
+}
+
+/*
+ * GPU a-trous 边缘保持降噪:
+ *   1) 用 3x3 一阶/二阶矩估计局部噪声方差
+ *   2) 做若干轮 a-trous 小波滤波(步长 1,2,4,8,16), 权重同时考虑
+ *      法线 / 深度 / 反照率 / 亮度(以方差归一)
+ * 全流程在 GPU 上完成, 不需要 glReadPixels 与 CPU 端 OIDN, 因此既可用于实时预览,
+ * 也可作为离屏渲染最终出图的降噪方式(轮数更多即可)
+ */
+unsigned int RayTracingRenderer::runGPUDenoise(unsigned int sourceTexture, int iterations)
+{
+	if (width <= 0 || height <= 0 || momentsFBO == -1 || denoiseFBO[0] == -1)
+		return sourceTexture;
+	if (!shaderProgram.contains("denoise_moments") || !shaderProgram.contains("denoise_atrous"))
+		return sourceTexture;
+
+	QElapsedTimer watch;
+	watch.start();
+
+	functions->glViewport(0, 0, width, height);
+
+	//1) 方差估计
+	functions->glActiveTexture(GL_TEXTURE10);
+	functions->glBindTexture(GL_TEXTURE_2D, sourceTexture);
+	QOpenGLShaderProgram* momentsShader = shaderProgram["denoise_moments"];
+	momentsShader->bind();
+	momentsShader->setUniformValue("sourceTex", 10);
+	momentsShader->setUniformValue("texelSize", QVector2D(1.0f / width, 1.0f / height));
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, momentsFBO);
+	functions->glClear(GL_COLOR_BUFFER_BIT);
+	drawFullscreen();
+	momentsShader->release();
+
+	//2) a-trous 迭代
+	QOpenGLShaderProgram* atrousShader = shaderProgram["denoise_atrous"];
+	unsigned int input = sourceTexture;
+	const int totalIterations = qBound(1, iterations, 5);
+	const int steps[5] = { 1, 2, 4, 8, 16 };
+
+	for (int i = 0; i < totalIterations; ++i) {
+		functions->glActiveTexture(GL_TEXTURE11);
+		functions->glBindTexture(GL_TEXTURE_2D, input);
+		functions->glActiveTexture(GL_TEXTURE12);
+		functions->glBindTexture(GL_TEXTURE_2D, momentsTexture);
+		functions->glActiveTexture(GL_TEXTURE13);
+		functions->glBindTexture(GL_TEXTURE_2D, gNormalDepthTexture);
+		functions->glActiveTexture(GL_TEXTURE14);
+		functions->glBindTexture(GL_TEXTURE_2D, gAlbedoTexture);
+
+			atrousShader->bind();
+		atrousShader->setUniformValue("colorTex", 11);
+		atrousShader->setUniformValue("momentTex", 12);
+		atrousShader->setUniformValue("normalDepthTex", 13);
+		atrousShader->setUniformValue("albedoTex", 14);
+		atrousShader->setUniformValue("texelSize", QVector2D(1.0f / width, 1.0f / height));
+		atrousShader->setUniformValue("stepWidth", steps[i]);
+		atrousShader->setUniformValue("sigmaNormal", 8.0f);
+		atrousShader->setUniformValue("sigmaDepth", 0.05f);
+		atrousShader->setUniformValue("sigmaLuma", 4.0f);
+		atrousShader->setUniformValue("sigmaAlbedo", 2.0f);
+
+		functions->glBindFramebuffer(GL_FRAMEBUFFER, denoiseFBO[i % 2]);
+		functions->glClear(GL_COLOR_BUFFER_BIT);
+		drawFullscreen();
+		atrousShader->release();
+
+		input = denoiseTexture[i % 2];
+	}
+
+	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	functions->glBindTexture(GL_TEXTURE_2D, 0);
+
+	denoiseResultTexture = input;
+	lastDenoiseMs = watch.nsecsElapsed() / 1e6;
+	return input;
+}
+
+void RayTracingRenderer::setRealTimeDenoise(bool state)
+{
+	realTimeDenoise = state;
+}
+
+bool RayTracingRenderer::getRealTimeDenoise() const
+{
+	return realTimeDenoise;
+}
+
+void RayTracingRenderer::setFireflyClamp(float value)
+{
+	fireflyClampValue = value;
+}
+
+float RayTracingRenderer::getFireflyClamp() const
+{
+	return fireflyClampValue;
+}
+
+double RayTracingRenderer::getLastDenoiseMs() const
+{
+	return lastDenoiseMs;
+}
+
+void RayTracingRenderer::setUseOIDNFinalDenoise(bool state)
+{
+	useOIDNFinalDenoise = state;
+}
+
+bool RayTracingRenderer::getUseOIDNFinalDenoise() const
+{
+	return useOIDNFinalDenoise;
+}

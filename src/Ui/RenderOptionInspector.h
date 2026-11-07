@@ -17,6 +17,7 @@ public:
 signals:
 	void sendRenderOption(const RenderOption& option);
 	void sendRenderState(bool state);
+	void sendRealTimeDenoise(bool state); //实时预览降噪开关
 
 public slots:
 	void reset();

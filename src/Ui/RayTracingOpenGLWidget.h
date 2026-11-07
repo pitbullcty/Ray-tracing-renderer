@@ -44,6 +44,8 @@ private:
     QOpenGLShaderProgram pathTracingProgram;
     QOpenGLShaderProgram accumProgram;
     QOpenGLShaderProgram outputProgram;
+    QOpenGLShaderProgram denoiseMomentsProgram;  //方差估计
+    QOpenGLShaderProgram denoiseAtrousProgram;  //a-trous 边缘保持滤波
 
     bool isLongPressing;
 

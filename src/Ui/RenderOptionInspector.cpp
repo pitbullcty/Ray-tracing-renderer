@@ -70,10 +70,12 @@ void RenderOptionInspector::applyData()
 		if (ui->checkBox->isChecked()) {
 			ui->denoiserCount->show();
 			option.isRealTimeDenoising = true;
+			emit sendRealTimeDenoise(true);
 		}
 		else {
 			option.isRealTimeDenoising = false;
 			ui->denoiserCount->hide();
+			emit sendRealTimeDenoise(false);
 		}
 	});
 

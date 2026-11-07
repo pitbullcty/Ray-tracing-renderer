@@ -2,7 +2,10 @@
 #version 330 core
 
 in vec3 vertex;
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
+//G-Buffer: 供边缘保持型降噪器使用的几何引导(法线/命中距离/反照率)
+layout(location = 1) out vec4 gNormalDepth;
+layout(location = 2) out vec4 gAlbedoRough;
 
 uniform uint frameCounter;
 
@@ -20,6 +23,9 @@ uniform samplerBuffer materials;
 uniform samplerBuffer lights;
 uniform int lightTriangleCount;
 uniform float lightTotalArea;
+
+//萤火虫抑制上限:单次采样贡献的亮度上限(<=0 表示关闭)
+uniform float fireflyClamp;
 
 uniform sampler2DArray textureMapsArrayTex;
 
@@ -606,6 +612,23 @@ vec3 sampleDirectLight(HitResult hit, vec3 V, out float pdfLight, out vec3 light
     return f_r * Le * cosSurface * cosLight * lightTotalArea / dist2;
 }
 
+//亮度
+float luminance(vec3 c) {
+    return dot(c, vec3(0.2126, 0.7152, 0.0722));
+}
+
+/*
+ * 萤火虫(极亮离群采样)抑制
+ * 镜面/小概率路径偶尔会采样到极端亮度的贡献, 累积后会在画面上留下洗不掉的白色噪点,
+ * 这里按亮度给单次采样的贡献设上限(保持色相不变), 是路径追踪的标准做法之一
+ */
+vec3 clampRadiance(vec3 c) {
+    if (fireflyClamp <= 0.0) return c;
+    float l = luminance(c);
+    if (l > fireflyClamp) c *= fireflyClamp / l;
+    return c;
+}
+
 // 路径追踪
 vec3 pathTracing(HitResult hit, int maxBounce) {
     vec3 Lo = vec3(0);      // 最终的颜色
@@ -622,7 +645,7 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
         if (pdfLight > 0.0) {
             float pdfBSDF = max(0.0, dot(N, lightDir)) / PI; //出射方向若由BSDF采样的概率密度
             float weight = pdfLight / (pdfLight + pdfBSDF);  //平衡启发式,避免重复计算同一路径
-            Lo += history * direct * weight;
+            Lo += clampRadiance(history * direct * weight);
         }
 
         // 2.间接光照:按余弦加权(重要性采样)采样出射方向
@@ -642,7 +665,7 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
         // 未命中
         if(!newHit.isHit) {
             vec3 skyColor = sampleCube(randomRay.direction);
-            Lo += history * weightBSDF * skyColor;
+            Lo += clampRadiance(history * weightBSDF * skyColor);
             break;
         }
 
@@ -656,12 +679,17 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
                     pdfLightAtHit = newHit.distance * newHit.distance / (cosLight * lightTotalArea);
             }
             float weight = (pdfLightAtHit > 0.0) ? (pdf / (pdf + pdfLightAtHit)) : 1.0;
-            Lo += history * weightBSDF * Le * weight;
+            Lo += clampRadiance(history * weightBSDF * Le * weight);
         }
 
         // 递归(步进)
         hit = newHit;
         history *= weightBSDF;  // 累积颜色
+        //限制路径吞吐量,避免镜面/高光路径出现极端倍增
+        if (fireflyClamp > 0.0) {
+            float throughput = max(max(history.r, history.g), history.b);
+            if (throughput > 32.0) history *= 32.0 / throughput;
+        }
     }
 
     return Lo;
@@ -685,10 +713,14 @@ void main() {
         if(!firstHit.isHit) {
             color = vec3(0);
             color = sampleCube(ray.direction);
+            gNormalDepth = vec4(0.0, 0.0, 0.0, 1e6); //天空: 距离拉满, 降噪时视作远处
+            gAlbedoRough = vec4(0.0);
         } else {
             vec3 Le = firstHit.material.emissive;
             vec3 Li = pathTracing(firstHit, depth);
             color = Le + Li;
+            gNormalDepth = vec4(normalize(firstHit.normal), firstHit.distance);
+            gAlbedoRough = vec4(firstHit.material.baseColor, firstHit.material.roughness);
         }  
     
         // 和上一帧混合
@@ -698,6 +730,8 @@ void main() {
     }
     else{
         color = sampleCube(ray.direction);
+        gNormalDepth = vec4(0.0, 0.0, 0.0, 1e6);
+        gAlbedoRough = vec4(0.0);
     }
     // 输出
     fragColor = vec4(color, 1.0);

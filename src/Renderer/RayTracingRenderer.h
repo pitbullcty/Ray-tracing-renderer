@@ -58,6 +58,15 @@ public:
 	//取outputFBO中的当前画面(降噪后),用于回传预览
 	QImage grabResultImage();
 
+	//实时降噪(GPU a-trous边缘保持滤波,无需读回CPU)
+	void setRealTimeDenoise(bool state);
+	bool getRealTimeDenoise() const;
+	void setFireflyClamp(float value); //萤火虫抑制上限,<=0 关闭
+	float getFireflyClamp() const;
+	double getLastDenoiseMs() const;   //上一次GPU降噪耗时(ms)
+	void setUseOIDNFinalDenoise(bool state); //最终出图是否使用OIDN(默认用GPU滤波)
+	bool getUseOIDNFinalDenoise() const;
+
 	//GPU动态构建BVH: 需要在GL线程中调用(需要当前GL上下文)
 	void setUseGPUBVH(bool state);
 	bool getUseGPUBVH() const;
@@ -109,6 +118,21 @@ private:
 	unsigned int pathTracingFBO, accumFBO, outputFBO;
 	unsigned int pathTracingTexture, accumTexture, outputTexture; //用到的FBO以及颜色附件
 
+	//降噪用的G-Buffer与中间缓冲
+	unsigned int gNormalDepthTexture;  //xyz=世界法线, w=命中距离
+	unsigned int gAlbedoTexture;       //rgb=反照率
+	unsigned int momentsFBO, momentsTexture; //rgb=局部均值, a=亮度方差
+	unsigned int denoiseFBO[2];
+	unsigned int denoiseTexture[2];
+	unsigned int denoiseResultTexture;
+	QOpenGLBuffer denoiseVBO;
+	QOpenGLVertexArrayObject denoiseVAO;
+
+	bool realTimeDenoise = false;     //实时预览是否降噪
+	float fireflyClampValue = 8.0f;   //萤火虫抑制上限
+	double lastDenoiseMs = 0.0;       //GPU降噪耗时
+	bool useOIDNFinalDenoise = false; //最终出图使用OIDN还是GPU滤波
+
 	unsigned int BVHbuffer;
 	unsigned int BVHTexture; 
 
@@ -148,6 +172,11 @@ private:
 	unsigned int generateAttachment(const QImage& image);
 
 	void denoise(unsigned int FBO, unsigned int texture, bool needWriteBack=false); //降噪
+
+	//GPU a-trous 降噪: 返回降噪结果纹理(源数据不满足条件时原样返回)
+	unsigned int runGPUDenoise(unsigned int sourceTexture, int iterations);
+	void drawFullscreen(); //用降噪用的全屏四边形绘制
+	unsigned int generateAttachmentRGBA(int w, int h); //带 alpha 通道的附件(方差)
 
 	template<typename T>
 	void getPixels(QVector<T>& pixels, unsigned int FBO, unsigned int texture, GLenum format, GLenum type);

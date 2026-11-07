@@ -15,5 +15,7 @@
         <file>bvh_sort.comp</file>
         <file>bvh_leaf.comp</file>
         <file>bvh_reduce.comp</file>
+        <file>denoise_moments.frag</file>
+        <file>denoise_atrous.frag</file>
     </qresource>
 </RCC>
