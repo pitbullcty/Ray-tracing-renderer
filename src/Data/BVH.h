@@ -145,13 +145,4 @@ struct BVHNode
 	BVHNode() :parent(-2), lChild(-1), rChild(-1), isLeaf(false), n(0), index(-1) {};
 };
 
-struct LightEncoded
-{
-	QVector3D position;
-	QVector3D emission;
-	QVector3D u;
-	QVector3D v;
-	QVector3D param; //编码半径，类型（radius, type）
-};
-
 #endif

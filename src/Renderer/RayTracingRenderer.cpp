@@ -21,6 +21,7 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	BVHbuffer(-1), BVHTexture(-1),
 	triangleBuffer(-1), triangleTexture(-1),
 	materialBuffer(-1), materialTexture(-1),
+	lightBuffer(-1), lightTexture(-1),
 	textureMapsArrayTex(-1),
 	accumFBO(-1), accumTexture(-1),
 	outputFBO(-1), outputTexture(-1),
@@ -129,6 +130,9 @@ void RayTracingRenderer::bindTexture()
 	functions->glActiveTexture(GL_TEXTURE3);
 	functions->glBindTexture(GL_TEXTURE_BUFFER, materialTexture);
 
+	functions->glActiveTexture(GL_TEXTURE4);
+	functions->glBindTexture(GL_TEXTURE_BUFFER, lightTexture);
+
 	functions->glActiveTexture(GL_TEXTURE5);
 	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, textureMapsArrayTex);
 
@@ -187,6 +191,9 @@ void RayTracingRenderer::destoryTexture()
 
 	functions->glDeleteTextures(1, &materialTexture);
 	functions->glDeleteBuffers(1, &materialBuffer);
+
+	functions->glDeleteTextures(1, &lightTexture);
+	functions->glDeleteBuffers(1, &lightBuffer);
 
 	functions->glDeleteTextures(1, &backgroundTexture);
 
@@ -309,6 +316,20 @@ void RayTracingRenderer::uploadRenderData(const RenderData& data, const QImage& 
 	functions->glBindTexture(GL_TEXTURE_BUFFER, materialTexture);
 	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, materialBuffer); 
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);//发送材质数据
+	
+	lightTriangleCount = data.encodedLight.size();
+	lightTotalArea = lightTriangleCount > 0 ? data.encodedLight.last().x() : 0.0f;
+	QVector<QVector4D> lightData = data.encodedLight;
+	if (lightData.isEmpty())
+		lightData.emplace_back(QVector4D(0.0f, 0.0f, 0.0f, 0.0f)); //没有灯光时放一个占位数据,避免空缓冲区
+
+	functions->glGenBuffers(1, &lightBuffer);
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, lightBuffer);
+	functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(QVector4D) * (unsigned int)lightData.size(), lightData.data(), GL_STATIC_DRAW);
+	functions->glGenTextures(1, &lightTexture);
+	functions->glBindTexture(GL_TEXTURE_BUFFER, lightTexture);
+	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, lightBuffer); //发送灯光三角形CDF数据
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
 	
  	functions->glGenTextures(1, &textureMapsArrayTex);
 	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, textureMapsArrayTex);
@@ -484,6 +505,9 @@ void RayTracingRenderer::renderAccum()
 	shaderProgram["pathTracing"]->setUniformValue("BVHnodes", 1);
 	shaderProgram["pathTracing"]->setUniformValue("triangles", 2);
 	shaderProgram["pathTracing"]->setUniformValue("materials", 3);
+	shaderProgram["pathTracing"]->setUniformValue("lights", 4);
+	shaderProgram["pathTracing"]->setUniformValue("lightTriangleCount", lightTriangleCount);
+	shaderProgram["pathTracing"]->setUniformValue("lightTotalArea", lightTotalArea);
 	shaderProgram["pathTracing"]->setUniformValue("textureMapsArrayTex", 5);
 	shaderProgram["pathTracing"]->setUniformValue("lastFrame", 7);
 	shaderProgram["pathTracing"]->setUniformValue("width", width);
