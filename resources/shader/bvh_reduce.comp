@@ -1,4 +1,4 @@
-﻿#version 430
+#version 430
 
 //自底向上合并一层内部节点:节点采用堆布局,根为1,子节点为2*id与2*id+1
 layout(local_size_x = 256) in;

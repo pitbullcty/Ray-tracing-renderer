@@ -1,4 +1,4 @@
-﻿
+
 #version 330 core
 
 in vec3 vertex;
@@ -358,10 +358,13 @@ HitResult hitBVH(Ray ray) {
     // 栈
     int stack[256];
     int sp = 0;
+    int guard = 0; //遍历保护: 防御异常BVH数据导致死循环/栈溢出
 
     stack[sp++] = 1;
     while(sp>0) {
         int top = stack[--sp];
+        if(++guard > 65536) break;              //单条光线最多访问节点数
+        if(top <= 0 || top > (1<<22)) continue; //非法节点下标
         BVHNode node = getBVHNode(top);
         
         // 是叶子节点，遍历三角形，求最近交点

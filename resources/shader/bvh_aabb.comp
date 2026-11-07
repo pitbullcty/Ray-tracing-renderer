@@ -1,4 +1,4 @@
-﻿#version 430
+#version 430
 
 //计算所有三角形的整体包围盒,用于后续Morton编码的归一化
 layout(local_size_x = 64) in;

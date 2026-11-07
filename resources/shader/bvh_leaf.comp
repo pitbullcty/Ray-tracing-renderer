@@ -1,4 +1,4 @@
-﻿#version 430
+#version 430
 
 //按排序结果写入叶子节点(每个叶子一个三角形),并把节点数据写成遍历着色器期望的12个float布局
 //布局: [left, right, 0, n, index, 0, AA.xyz, BB.xyz]

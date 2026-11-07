@@ -1,4 +1,4 @@
-﻿#version 430
+#version 430
 
 //双调排序(bitonic sort)的一步:由CPU按k、j两层循环多次派发
 layout(local_size_x = 256) in;
