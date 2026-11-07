@@ -1,4 +1,6 @@
 ﻿#include "ModelLoader.h"
+#include <QFileInfo>
+#include <QDir>
 
 QSharedPointer<ModelLoader> ModelLoader::instance = nullptr;
 
@@ -8,6 +10,45 @@ static QVector3D assimp2QVector(const aiVector3D& vector) {
 
 static aiVector3D QVector2assimp(const QVector3D& vector) {
     return aiVector3D(vector.x(), vector.y(), vector.z());
+}
+
+//兼容旧工程写死的绝对路径(如 F:/Ray-tracing-renderer/resources/model/x.obj):
+//把 "Ray-tracing-renderer/" 之后、或 "resources/"/"lights/" 开始的后缀, 依次拼接当前工作目录及上级目录尝试
+static QString resolveModelPath(const QString& path)
+{
+	if (path.isEmpty() || QFileInfo::exists(path)) {
+		return path;
+	}
+
+	QStringList tails;
+	static const QString projectAnchor = QStringLiteral("Ray-tracing-renderer/");
+	int anchorIndex = path.indexOf(projectAnchor, 0, Qt::CaseInsensitive);
+	if (anchorIndex >= 0) {
+		tails << path.mid(anchorIndex + projectAnchor.size());
+	}
+	int resourcesIndex = path.indexOf(QStringLiteral("resources/"), 0, Qt::CaseInsensitive);
+	if (resourcesIndex >= 0) {
+		tails << path.mid(resourcesIndex);
+	}
+	int lightsIndex = path.indexOf(QStringLiteral("lights/"), 0, Qt::CaseInsensitive);
+	if (lightsIndex >= 0) {
+		tails << path.mid(lightsIndex);
+	}
+	tails.removeDuplicates();
+
+	for (const QString& tail : tails) {
+		QDir dir = QDir::current();
+		for (int depth = 0; depth < 5; ++depth) {
+			const QString candidate = dir.absoluteFilePath(tail);
+			if (QFileInfo::exists(candidate)) {
+				return candidate;
+			}
+			if (!dir.cdUp()) {
+				break;
+			}
+		}
+	}
+	return path;
 }
 
 QSharedPointer<ModelLoader>& ModelLoader::GetInstance()
@@ -67,18 +108,22 @@ static QSharedPointer<QOpenGLTexture> textureFromFile(const QString& path)
 
 
 LOADRESULT ModelLoader::loadModel(const QString& path, Model &model, bool isLight) {
-    
-    this->path = path;
+
+    const QString resolvedPath = resolveModelPath(path);
+    if (resolvedPath != path) {
+        emit Info("模型路径已按当前工作目录重映射: " + path + " -> " + resolvedPath, false);
+    }
+    this->path = resolvedPath;
     meshes.clear();
     textures_loaded.clear();
     nodeCenters.clear();
     center = QVector3D(); //加载前清空
-    if (pathLoaded.contains(path)) {
+    if (pathLoaded.contains(resolvedPath)) {
         return RELOADED;
     } //若模型已经加载过则直接复制
-    pathLoaded.push_back(path);
+    pathLoaded.push_back(resolvedPath);
     Assimp::Importer import;
-    const aiScene* scene = import.ReadFile(path.toStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals); //读入场景,基于y轴翻转纹理坐标,换所有的模型的原始几何形状为三角形
+    const aiScene* scene = import.ReadFile(resolvedPath.toStdString(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals); //读入场景,基于y轴翻转纹理坐标,换所有的模型的原始几何形状为三角形
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)//检查场景和其根节点不为null，并且检查了标记(Flag)，查看返回的数据完整性。
     {
         auto error = import.GetErrorString();
@@ -86,7 +131,7 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model, bool isLigh
         return FAILED;
     }
     if(!isLight)
-        emit Info(QString("模型%1 网格数量：").arg(path) + QString::number(scene->mNumMeshes) + " 模型材质数量：" + QString::number(scene->mNumMaterials) + " 模型纹理数量：" + QString::number(scene->mNumTextures), true);
+        emit Info(QString("模型%1 网格数量：").arg(resolvedPath) + QString::number(scene->mNumMeshes) + " 模型材质数量：" + QString::number(scene->mNumMaterials) + " 模型纹理数量：" + QString::number(scene->mNumTextures), true);
     processNode(scene->mRootNode, scene);
     for (auto& nodeCenter : nodeCenters) {
         center += nodeCenter;
@@ -94,7 +139,7 @@ LOADRESULT ModelLoader::loadModel(const QString& path, Model &model, bool isLigh
     for (auto& mesh : meshes) {
         model.getBound().Union(mesh->bound);
     }
-    model.setData(meshes, path, center/nodeCenters.size());
+    model.setData(meshes, resolvedPath, center/nodeCenters.size());
     return SUCCESS;
 }
 

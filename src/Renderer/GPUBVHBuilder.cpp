@@ -283,12 +283,15 @@ bool GPUBVHBuilder::readbackNodes(QVector<float>& nodes)
 
 	nodes.resize(lastNodeCount * 12);
 	f->glBindBuffer(GL_SHADER_STORAGE_BUFFER, nodeBufferId);
-	void* mapped = f->glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, nodeBytes, GL_MAP_READ_BIT);
+	//nodeBytes由历史最大容量决定(lastNodeCount可能更小), 只能读取本次实际需要的字节数
+	const qint64 requiredBytes = qint64(lastNodeCount) * 12 * qint64(sizeof(float));
+	const qint64 mapBytes = qMin(nodeBytes, requiredBytes);
+	void* mapped = f->glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, mapBytes, GL_MAP_READ_BIT);
 	if (mapped == nullptr) {
 		f->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 		return false;
 	}
-	std::memcpy(nodes.data(), mapped, size_t(nodeBytes));
+	std::memcpy(nodes.data(), mapped, size_t(mapBytes));
 	f->glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	f->glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	return true;
