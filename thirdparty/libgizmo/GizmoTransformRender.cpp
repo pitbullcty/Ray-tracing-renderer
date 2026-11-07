@@ -148,18 +148,18 @@ void CGizmoTransformRender::DrawQuad(const tvector3& orig, float size, bool bSel
 	pts[3] = orig + (axisV * size);
 	tvector4 color;
 	if (!bSelected)
-		color = { 1,1,0,0.5f };
+		color = { 1,1,0,0.16f };
 	else
-		color = { 1,1,1,0.6f };
+		color = { 1,1,1,0.42f };
 	for (int i = 0; i < 4; i++) {
 		addVector3(data, pts[i]);
 		addColor(data, color);
 	}
 	Draw(data, GL_QUADS, 4, true);
 	if (!bSelected)
-		color = { 1, 1, 0.2f, 1 };
+		color = { 1, 1, 0.35f, 0.85f };
 	else
-		color = { 1, 1, 1, 0.6f };
+		color = { 1, 1, 1, 0.42f };
 	data.clear();
 	for (int i = 0; i < 4; i++) {
 		addVector3(data, pts[i]);
@@ -182,9 +182,9 @@ void CGizmoTransformRender::DrawTri(const tvector3& orig, float size, bool bSele
 	tvector4 color;
 	QVector<float> data;
 	if (!bSelected)
-		color = { 1, 1, 0, 0.5f };
+		color = { 1, 1, 0, 0.16f };
 	else
-		color = { 1, 1, 1, 0.6f };
+		color = { 1, 1, 1, 0.42f };
 	for (int i = 0; i < 3; i++) {
 		addVector3(data, pts[i]);
 		addColor(data, color);
@@ -192,9 +192,9 @@ void CGizmoTransformRender::DrawTri(const tvector3& orig, float size, bool bSele
 	Draw(data, GL_TRIANGLES, 3, true);
 	data.clear();
 	if (!bSelected)
-		color = { 1, 1, 0.2f, 1 };
+		color = { 1, 1, 0.35f, 0.85f };
 	else
-		color = { 1, 1, 1, 0.6f };
+		color = { 1, 1, 1, 0.42f };
 	for (int i = 0; i < 3; i++) {
 		addVector3(data, pts[i]);
 		addColor(data, color);
@@ -219,7 +219,17 @@ void CGizmoTransformRender::Draw(const QVector<float>& data, GLenum mode, int co
 	program->setAttributeBuffer(0, GL_FLOAT, 0, 3, sizeof(float) * 7);
 	program->enableAttributeArray(1);
 	program->setAttributeBuffer(1, GL_FLOAT, sizeof(float) * 3, 4, sizeof(float) * 7);
+	//线框加粗: 1px的轴在亮背景上几乎不可见, 抓取也不直观
+	const bool isLinePrimitive = (mode == GL_LINES || mode == GL_LINE_LOOP || mode == GL_LINE_STRIP);
+	if (isLinePrimitive) {
+		functions->glEnable(GL_LINE_SMOOTH);
+		functions->glLineWidth(2.0f);
+	}
 	functions->glDrawArrays(mode, 0, count);
+	if (isLinePrimitive) {
+		functions->glLineWidth(1.0f);
+		functions->glDisable(GL_LINE_SMOOTH);
+	}
 	functions->glEnable(GL_DEPTH_TEST);
 	functions->glEnable(GL_LIGHTING);
 	if (isBlend) {

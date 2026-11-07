@@ -39,7 +39,8 @@ EditorRenderer::EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgr
 	selected(nullptr),models(nullptr)
 {
 	gizmo = QSharedPointer<Gizmo>(new Gizmo(functions, shaderProgram["gizmo"]));
-	gizmo->setScale(5.0f);
+	//gizmo屏幕尺寸系数: 轴长约占地平线方向视野高度的1.5*0.15=22%(原来5.0时高达75%,会糊住整个画面)
+	gizmo->setScale(1.5f);
 	gizmo->setType(MOVE);
 	gizmo->setEditModel(nullptr);
 	skyboxVBO.create();

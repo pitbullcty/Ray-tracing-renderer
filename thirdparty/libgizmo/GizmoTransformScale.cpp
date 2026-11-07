@@ -93,28 +93,28 @@ bool CGizmoTransformScale::GetOpType(SCALETYPE &type, unsigned int x, unsigned i
 	df2 = RayTrace2(rayOrigin, rayDir, GetTransformedVector(1), mt, trss);
 
 
-	if ( (df2.x<0.2f) && (df2.z<0.2f) && (df2.x>0) && (df2.z>0)) { type = SCALE_XYZ; return true; }
+	if ( (df2.x<0.08f) && (df2.z<0.08f) && (df2.x>0) && (df2.z>0)) { type = SCALE_XYZ; return true; }
 	else if ( ( df2.x >= 0 ) && (df2.x <= 1) && ( fabs(df2.z) < 0.1f ) ) { type = SCALE_X; return true;	}
 	else if ( ( df2.z >= 0 ) && (df2.z <= 1) && ( fabs(df2.x) < 0.1f ) ) { type = SCALE_Z; return true;	}
-	else if ( (df2.x<0.5f) && (df2.z<0.5f) && (df2.x>0) && (df2.z>0)) {	type = SCALE_XZ; return true; }
+	else if ( (df2.x<0.22f) && (df2.z<0.22f) && (df2.x>0) && (df2.z>0)) {	type = SCALE_XZ; return true; }
 	else
 	{
 		//plan 2 : X/Y
 		df2 = RayTrace2(rayOrigin, rayDir, GetTransformedVector(2), mt, trss);
 
-		if ( (df2.x<0.2f) && (df2.y<0.2f) && (df2.x>0) && (df2.y>0)) { type = SCALE_XYZ; return true; }
+		if ( (df2.x<0.08f) && (df2.y<0.08f) && (df2.x>0) && (df2.y>0)) { type = SCALE_XYZ; return true; }
 		else if ( ( df2.x >= 0 ) && (df2.x <= 1) && ( fabs(df2.y) < 0.1f ) ) { type = SCALE_X; return true;	}
 		else if ( ( df2.y >= 0 ) && (df2.y <= 1) && ( fabs(df2.x) < 0.1f ) ) { type = SCALE_Y; return true; }
-		else if ( (df2.x<0.5f) && (df2.y<0.5f) && (df2.x>0) && (df2.y>0)) { type = SCALE_XY; return true; }
+		else if ( (df2.x<0.22f) && (df2.y<0.22f) && (df2.x>0) && (df2.y>0)) { type = SCALE_XY; return true; }
 		else
 		{
 			//plan 3: Y/Z
 			df2 = RayTrace2(rayOrigin, rayDir, GetTransformedVector(0), mt, trss);
 
-			if ( (df2.y<0.2f) && (df2.z<0.2f) && (df2.y>0) && (df2.z>0)) { type = SCALE_XYZ; return true; }
+			if ( (df2.y<0.08f) && (df2.z<0.08f) && (df2.y>0) && (df2.z>0)) { type = SCALE_XYZ; return true; }
 			else if ( ( df2.y >= 0 ) && (df2.y <= 1) && ( fabs(df2.z) < 0.1f ) ) { type = SCALE_Y; return true;	}
 			else if ( ( df2.z >= 0 ) && (df2.z <= 1) && ( fabs(df2.y) < 0.1f ) ) { type = SCALE_Z; return true;	}
-			else if ( (df2.y<0.5f) && (df2.z<0.5f) && (df2.y>0) && (df2.z>0)) { type = SCALE_YZ; return true; }
+			else if ( (df2.y<0.22f) && (df2.z<0.22f) && (df2.y>0) && (df2.z>0)) { type = SCALE_YZ; return true; }
 		}
 	}
 
@@ -252,9 +252,9 @@ void CGizmoTransformScale::Draw()
 			axeZ.Normalize();
 		}
 
-		DrawTri(orig, 0.5f * GetScreenFactor(), ((m_ScaleTypePredict == SCALE_XZ) || (m_ScaleTypePredict == SCALE_XYZ)), axeX, axeZ);
-		DrawTri(orig, 0.5f * GetScreenFactor(), ((m_ScaleTypePredict == SCALE_XY) || (m_ScaleTypePredict == SCALE_XYZ)), axeX, axeY);
-		DrawTri(orig, 0.5f * GetScreenFactor(), ((m_ScaleTypePredict == SCALE_YZ) || (m_ScaleTypePredict == SCALE_XYZ)), axeY, axeZ);
+		DrawTri(orig, 0.22f * GetScreenFactor(), ((m_ScaleTypePredict == SCALE_XZ) || (m_ScaleTypePredict == SCALE_XYZ)), axeX, axeZ);
+		DrawTri(orig, 0.22f * GetScreenFactor(), ((m_ScaleTypePredict == SCALE_XY) || (m_ScaleTypePredict == SCALE_XYZ)), axeX, axeY);
+		DrawTri(orig, 0.22f * GetScreenFactor(), ((m_ScaleTypePredict == SCALE_YZ) || (m_ScaleTypePredict == SCALE_XYZ)), axeY, axeZ);
 
 		axeX *= GetScreenFactor();
 		axeY *= GetScreenFactor();
@@ -265,19 +265,19 @@ void CGizmoTransformScale::Draw()
 		if (m_ScaleTypePredict != SCALE_X)
 			DrawAxis(orig, axeX, axeY, axeZ, 0.05f, 0.83f, vector4(1, 0, 0, 1));
 		else
-			DrawAxis(orig, axeX, axeY, axeZ, 0.05f, 0.83f, vector4(1, 1, 1, 1));
+			DrawAxis(orig, axeX, axeY, axeZ, 0.05f, 0.83f, vector4(1.0f, 0.92f, 0.25f, 1));
 
 		//plan2
 		if (m_ScaleTypePredict != SCALE_Y)
 			DrawAxis(orig, axeY, axeX, axeZ, 0.05f, 0.83f, vector4(0, 1, 0, 1));
 		else
-			DrawAxis(orig, axeY, axeX, axeZ, 0.05f, 0.83f, vector4(1, 1, 1, 1));
+			DrawAxis(orig, axeY, axeX, axeZ, 0.05f, 0.83f, vector4(1.0f, 0.92f, 0.25f, 1));
 
 		//plan3
 		if (m_ScaleTypePredict != SCALE_Z)
 			DrawAxis(orig, axeZ, axeX, axeY, 0.05f, 0.83f, vector4(0, 0, 1, 1));
 		else
-			DrawAxis(orig, axeZ, axeX, axeY, 0.05f, 0.83f, vector4(1, 1, 1, 1));
+			DrawAxis(orig, axeZ, axeX, axeY, 0.05f, 0.83f, vector4(1.0f, 0.92f, 0.25f, 1));
 
 	}
 

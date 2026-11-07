@@ -92,7 +92,7 @@ bool CGizmoTransformMove::GetOpType(MOVETYPE &type, unsigned int x, unsigned int
 
 	if ( ( df.x >= 0 ) && (df.x <= 1) && ( fabs(df.z) < 0.1f ) ) { type = MOVE_X; return true; }
 	else if ( ( df.z >= 0 ) && (df.z <= 1) && ( fabs(df.x) < 0.1f ) ){ type = MOVE_Z; return true; }
-	else if ( (df.x<0.5f) && (df.z<0.5f) && (df.x>0) && (df.z>0)) { type = MOVE_XZ; return true; }
+	else if ( (df.x<0.22f) && (df.z<0.22f) && (df.x>0) && (df.z>0)) { type = MOVE_XZ; return true; }
 	else {
 
 		//plan 2 : X/Y
@@ -100,7 +100,7 @@ bool CGizmoTransformMove::GetOpType(MOVETYPE &type, unsigned int x, unsigned int
 
 		if ( ( df.x >= 0 ) && (df.x <= 1) && ( fabs(df.y) < 0.1f ) ) { type = MOVE_X; return true; }
 		if ( ( df.y >= 0 ) && (df.y <= 1) && ( fabs(df.x) < 0.1f ) ) { type = MOVE_Y; return true; }
-		else if ( (df.x<0.5f) && (df.y<0.5f) && (df.x>0) && (df.y>0)) { type = MOVE_XY; return true; }
+		else if ( (df.x<0.22f) && (df.y<0.22f) && (df.x>0) && (df.y>0)) { type = MOVE_XY; return true; }
 		else
 		{
 			//plan 3: Y/Z
@@ -108,7 +108,7 @@ bool CGizmoTransformMove::GetOpType(MOVETYPE &type, unsigned int x, unsigned int
 
 			if ( ( df.y >= 0 ) && (df.y <= 1) && ( fabs(df.z) < 0.1f ) ) { type = MOVE_Y; return true; }
 			else if ( ( df.z >= 0 ) && (df.z <= 1) && ( fabs(df.y) < 0.1f ) ) { type = MOVE_Z; return true; }
-			else if ( (df.y<0.5f) && (df.z<0.5f) && (df.y>0) && (df.z>0)) { type = MOVE_YZ; return true; }
+			else if ( (df.y<0.22f) && (df.z<0.22f) && (df.y>0) && (df.z>0)) { type = MOVE_YZ; return true; }
 
 		}
 	}
@@ -223,9 +223,9 @@ void CGizmoTransformMove::Draw()
 		}
 
 
-		DrawQuad(orig, 0.5f * GetScreenFactor(), (m_MoveTypePredict == MOVE_XZ), axeX, axeZ);
-		DrawQuad(orig, 0.5f * GetScreenFactor(), (m_MoveTypePredict == MOVE_XY), axeX, axeY);
-		DrawQuad(orig, 0.5f * GetScreenFactor(), (m_MoveTypePredict == MOVE_YZ), axeY, axeZ);
+		DrawQuad(orig, 0.22f * GetScreenFactor(), (m_MoveTypePredict == MOVE_XZ), axeX, axeZ);
+		DrawQuad(orig, 0.22f * GetScreenFactor(), (m_MoveTypePredict == MOVE_XY), axeX, axeY);
+		DrawQuad(orig, 0.22f * GetScreenFactor(), (m_MoveTypePredict == MOVE_YZ), axeY, axeZ);
 
 		axeX *= GetScreenFactor();
 		axeY *= GetScreenFactor();
@@ -233,15 +233,15 @@ void CGizmoTransformMove::Draw()
 
 		// plan1
 		if (m_MoveTypePredict != MOVE_X) DrawAxis(orig, axeX, axeY, axeZ, 0.05f, 0.83f, vector4(1, 0, 0, 1));
-		else DrawAxis(orig, axeX, axeY, axeZ, 0.05f, 0.83f, vector4(1, 1, 1, 1));
+		else DrawAxis(orig, axeX, axeY, axeZ, 0.05f, 0.83f, vector4(1.0f, 0.92f, 0.25f, 1));
 
 		//plan2
 		if (m_MoveTypePredict != MOVE_Y) DrawAxis(orig, axeY, axeX, axeZ, 0.05f, 0.83f, vector4(0, 1, 0, 1));
-		else DrawAxis(orig, axeY, axeX, axeZ, 0.05f, 0.83f, vector4(1, 1, 1, 1));
+		else DrawAxis(orig, axeY, axeX, axeZ, 0.05f, 0.83f, vector4(1.0f, 0.92f, 0.25f, 1));
 
 		//plan3
 		if (m_MoveTypePredict != MOVE_Z) DrawAxis(orig, axeZ, axeX, axeY, 0.05f, 0.83f, vector4(0, 0, 1, 1));
-		else DrawAxis(orig, axeZ, axeX, axeY, 0.05f, 0.83f, vector4(1, 1, 1, 1));
+		else DrawAxis(orig, axeZ, axeX, axeY, 0.05f, 0.83f, vector4(1.0f, 0.92f, 0.25f, 1));
 	}
 }
 
