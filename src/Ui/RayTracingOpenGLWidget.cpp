@@ -1,5 +1,6 @@
 ﻿#include "RayTracingOpenGLWidget.h"
 #include <QThreadPool>
+#include <QSettings>
 
 RayTracingOpenGLWidget::RayTracingOpenGLWidget(QWidget* parent) :
     BaseOpenGLWidget(parent),
@@ -204,6 +205,12 @@ void RayTracingOpenGLWidget::initRenderer()
 
     rayTracingRenderer = RayTracingRenderer::GetInstance(rayTracingMap,
         QOpenGLContext::currentContext()->extraFunctions(), width(), height());
+
+    //读取上次保存的"GPU动态构建BVH"设置
+    QSettings settings("settings.ini", QSettings::IniFormat);
+    rayTracingRenderer->setUseGPUBVH(settings.value("bvh/useGPU", false).toBool());
+    rayTracingRenderer->setAutoRebuildBVH(settings.value("bvh/autoRebuild", true).toBool());
+
     auto& dataBuilder = DataBuilder::GetInstance();
     connect(dataBuilder.data(), &DataBuilder::sendDataDone, rayTracingRenderer.data(), &RayTracingRenderer::sendDataToGPU);
 

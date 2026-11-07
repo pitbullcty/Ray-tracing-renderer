@@ -1,0 +1,31 @@
+﻿#version 430
+
+//双调排序(bitonic sort)的一步:由CPU按k、j两层循环多次派发
+layout(local_size_x = 256) in;
+
+layout(std430, binding = 2) buffer Keys {
+    uvec2 keys[];
+};
+
+//注意: uniform 一律用 int 声明(Qt 的 GLuint 重载在本机驱动上会触发 GL_INVALID_OPERATION,导致参数传不进去)
+uniform int kStep; //当前合并段的长度
+uniform int jStep; //当前比较间隔
+uniform int count; //参与排序的元素个数(2的幂)
+
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    if (i >= uint(count)) return;
+
+    uint partner = i ^ uint(jStep);
+    if (partner <= i) return; //每一对只由一个线程处理
+
+    bool ascending = ((i & uint(kStep)) == 0u);
+    uvec2 a = keys[i];
+    uvec2 b = keys[partner];
+
+    bool needSwap = ascending ? (a.x > b.x) : (a.x < b.x);
+    if (needSwap) {
+        keys[i] = b;
+        keys[partner] = a;
+    }
+}
