@@ -255,15 +255,6 @@ bool RayTracingRenderer::buildGPUBVHTexture()
 	lastGPUBVHMs = result.gpuMs;
 	gpuBVHTriangleCount = result.triangleCount;
 
-	//GPU构建的LBVH树在三角形数量较大时节点访问量增长明显, 单帧耗时可能超过显卡TDR阈值(约2秒),
-	//为避免驱动复位, 超过该上限时只保留GPU构建耗时数据, 遍历仍使用CPU构建的BVH
-	const int triangleLimit = 32768;
-	if (result.triangleCount > triangleLimit && !qEnvironmentVariableIsSet("RTR_BVH_FORCE")) {
-		emit Info(QString("GPU构建BVH完成: %1个三角形, GPU耗时%2ms (CPU耗时%3ms); 三角形数量超过%4, 遍历回退CPU BVH")
-			.arg(result.triangleCount).arg(result.gpuMs, 0, 'f', 2).arg(getLastCPUBVHMs(), 0, 'f', 2).arg(triangleLimit), true);
-		return false;
-	}
-
 	//把GPU建好的节点数据读回CPU, 再用与CPU BVH完全相同的上传方式(纹理缓冲)提供给遍历着色器
 	QVector<float> nodes;
 	if (!gpuBVHBuilder.readbackNodes(nodes)) {

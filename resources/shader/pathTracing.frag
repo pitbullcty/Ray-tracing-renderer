@@ -388,23 +388,64 @@ HitResult hitBVH(Ray ray) {
             d2 = hitAABB(ray, rightNode.AA, rightNode.BB);
         }
 
-        // 在最近的盒子中搜索
+        // 在最近的盒子中搜索(同时用当前最近距离剪枝)
         if(d1>0 && d2>0) {
             if(d1<d2) { // d1<d2, 左边先
-                stack[sp++] = node.right;
-                stack[sp++] = node.left;
+                if(d2 < res.distance) stack[sp++] = node.right;
+                if(d1 < res.distance) stack[sp++] = node.left;
             } else {    // d2<d1, 右边先
-                stack[sp++] = node.left;
-                stack[sp++] = node.right;
+                if(d1 < res.distance) stack[sp++] = node.left;
+                if(d2 < res.distance) stack[sp++] = node.right;
             }
         } else if(d1>0) {   // 仅命中左边
-            stack[sp++] = node.left;
+            if(d1 < res.distance) stack[sp++] = node.left;
         } else if(d2>0) {   // 仅命中右边
-            stack[sp++] = node.right;
+            if(d2 < res.distance) stack[sp++] = node.right;
         }
     }
 
     return res;
+}
+
+/* 
+ * 遮挡测试:只判断 [0, maxDist) 内是否有交点, 命中即返回(阴影光线专用)
+ * 相比 hitBVH 的最近交点搜索, 提前退出能显著减少节点访问
+ */
+bool occluded(Ray ray, float maxDist) {
+    int stack[128];
+    int sp = 0;
+    int guard = 0;
+
+    stack[sp++] = 1;
+    while(sp>0) {
+        int top = stack[--sp];
+        if(++guard > 65536) break;
+        if(top <= 0 || top > (1<<22)) continue;
+        BVHNode node = getBVHNode(top);
+
+        if(node.n>0) {
+            int L = node.index;
+            int R = node.index + node.n - 1;
+            for(int i=L; i<=R; i++) {
+                HitResult r = hitTriangle(getTriangle(i), ray);
+                if(r.isHit && r.distance < maxDist) return true;
+            }
+            continue;
+        }
+
+        if(node.left>0) {
+            BVHNode ln = getBVHNode(node.left);
+            float d = hitAABB(ray, ln.AA, ln.BB);
+            if(d>0 && d<maxDist) stack[sp++] = node.left;
+        }
+        if(node.right>0) {
+            BVHNode rn = getBVHNode(node.right);
+            float d = hitAABB(ray, rn.AA, rn.BB);
+            if(d>0 && d<maxDist) stack[sp++] = node.right;
+        }
+    }
+
+    return false;
 }
 
 float sqr(float x) { 
@@ -549,12 +590,11 @@ vec3 sampleDirectLight(HitResult hit, vec3 V, out float pdfLight, out vec3 light
     float cosLight = -dot(lightNormal, L);
     if (cosSurface <= 0.0 || cosLight <= 0.0) return vec3(0);
 
-    //可见性:向光源打阴影光线
+    //可见性:向光源打阴影光线(遮挡测试,命中即退出)
     Ray shadowRay;
     shadowRay.startPoint = hit.hitPoint;
     shadowRay.direction = L;
-    HitResult shadowHit = hitBVH(shadowRay);
-    if (shadowHit.isHit && shadowHit.distance < dist - 0.001) return vec3(0); //被遮挡
+    if (occluded(shadowRay, dist - 0.001)) return vec3(0); //被遮挡
 
     //三角形面积均匀采样的密度 1/lightTotalArea,转换成该方向的立体角密度
     pdfLight = dist2 / (cosLight * lightTotalArea);
