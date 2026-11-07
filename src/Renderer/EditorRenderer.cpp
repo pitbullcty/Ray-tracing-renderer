@@ -67,6 +67,7 @@ void EditorRenderer::renderModels()
 	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
 	shaderProgram["model"]->setUniformValue("projection", projection);
 	shaderProgram["model"]->setUniformValue("view", getCamera()->getView());
+	shaderProgram["model"]->setUniformValue("cameraPos", getCamera()->getPos()); //简单光照需要相机位置
 	for (auto it = models->begin(); it != models->end(); it++) {
 		auto& model = it.value();
 		shaderProgram["model"]->bind();

@@ -16,6 +16,11 @@ uniform samplerBuffer triangles;
 uniform samplerBuffer BVHnodes;
 uniform samplerBuffer materials;
 
+//灯光三角形列表: x=累积面积(CDF), y=三角形索引, z=三角形面积
+uniform samplerBuffer lights;
+uniform int lightTriangleCount;
+uniform float lightTotalArea;
+
 uniform sampler2DArray textureMapsArrayTex;
 
 uniform sampler2D lastFrame;
@@ -125,11 +130,15 @@ void getTangent(vec3 N, inout vec3 tangent, inout vec3 bitangent) {
 } //计算法线空间
 
 
-// 半球均匀采样
-vec3 SampleHemisphere() {
-    float z = rand();
-    float r = max(0, sqrt(1.0 - z*z));
+/*
+ * 余弦加权半球采样(重要性采样)
+ * 令 pdf(wi) = cos(theta) / PI,则对漫反射 BRDF 而言 f_r * cos / pdf 几乎为常数,
+ * 相比半球均匀采样可以显著降低方差。采样方式为 Malley 方法:先在单位圆盘均匀取点再投影到半球。
+ */
+vec3 SampleCosineHemisphere() {
+    float r = sqrt(rand());
     float phi = 2.0 * PI * rand();
+    float z = sqrt(max(0.0, 1.0 - r*r));
     return vec3(r * cos(phi), r * sin(phi), z);
 }
 
@@ -486,6 +495,74 @@ vec3 BRDF_Evaluate(vec3 V, vec3 N, vec3 L, vec3 X, vec3 Y, in Material material)
     return diffuse * (1.0 - material.metallic) + specular + clearcoat;
 }
 
+/*
+ * 按面积累积概率(CDF)从灯光三角形列表中抽一个三角形
+ * 用小面积的亮光源时,靠 BSDF 采样"碰巧"打中光源的概率极低,噪声很大;
+ * 直接按概率抽取光源三角形就能显著降低方差
+ */
+int pickLightTriangle() {
+    if (lightTriangleCount <= 0) return -1;
+
+    float u = rand() * lightTotalArea;
+    int lo = 0;
+    int hi = lightTriangleCount - 1;
+    while (lo < hi) {
+        int mid = (lo + hi) / 2;
+        if (texelFetch(lights, mid).x >= u) hi = mid;
+        else lo = mid + 1;
+    }
+    return int(texelFetch(lights, lo).y);
+}
+
+// 取第 i 个三角形的自发光颜色(材质数组与三角形一一对应)
+vec3 lightEmissive(int i) {
+    return texelFetch(materials, i * SIZE_MATERIAL + 0).xyz;
+}
+
+/*
+ * 下一事件估计(NEE):直接对灯光做重要性采样
+ * 返回该方向的直接光照贡献, pdfLight 为该方向的立体角概率密度(供多重重要性采样使用)
+ */
+vec3 sampleDirectLight(HitResult hit, vec3 V, out float pdfLight, out vec3 lightDir) {
+    pdfLight = 0.0;
+    lightDir = vec3(0);
+
+    int triIndex = pickLightTriangle();
+    if (triIndex < 0) return vec3(0);
+
+    Triangle lt = getTriangle(triIndex);
+    float r1 = sqrt(rand());
+    float r2 = rand();
+    vec3 lightPoint = (1.0 - r1) * lt.p1 + r1 * (1.0 - r2) * lt.p2 + r1 * r2 * lt.p3; //三角形上均匀取点
+
+    vec3 L = lightPoint - hit.hitPoint;
+    float dist2 = dot(L, L);
+    float dist = sqrt(dist2);
+    if (dist < EPSILON) return vec3(0);
+    L /= dist;
+
+    vec3 lightNormal = normalize(cross(lt.p2 - lt.p1, lt.p3 - lt.p1));
+    float cosSurface = dot(hit.normal, L);
+    float cosLight = -dot(lightNormal, L);
+    if (cosSurface <= 0.0 || cosLight <= 0.0) return vec3(0);
+
+    //可见性:向光源打阴影光线
+    Ray shadowRay;
+    shadowRay.startPoint = hit.hitPoint;
+    shadowRay.direction = L;
+    HitResult shadowHit = hitBVH(shadowRay);
+    if (shadowHit.isHit && shadowHit.distance < dist - 0.001) return vec3(0); //被遮挡
+
+    //三角形面积均匀采样的密度 1/lightTotalArea,转换成该方向的立体角密度
+    pdfLight = dist2 / (cosLight * lightTotalArea);
+    lightDir = L;
+
+    vec3 f_r = BRDF_Evaluate(V, hit.normal, L, hit.tangent, hit.bitangent, hit.material);
+    vec3 Le = lightEmissive(triIndex);
+    // f_r * Le * (cosSurface*cosLight/dist2) / (1/lightTotalArea)
+    return f_r * Le * cosSurface * cosLight * lightTotalArea / dist2;
+}
+
 // 路径追踪
 vec3 pathTracing(HitResult hit, int maxBounce) {
     vec3 Lo = vec3(0);      // 最终的颜色
@@ -494,12 +571,25 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
     for(int bounce=0; bounce<maxBounce; bounce++) {
         vec3 V = -hit.viewDir;
         vec3 N = hit.normal;
-        vec3 L = toNormalHemisphere(SampleHemisphere(), hit.normal);    // 随机出射方向 wi
-        float pdf = 1.0 / (2.0 * PI);                                   // 半球均匀采样概率密度
-        float cosine_o = max(0, dot(V, N));                             // 入射光和法线夹角余弦
-        float cosine_i = max(0, dot(L, N));                             // 出射光和法线夹角余弦
+
+        // 1.直接光照:对灯光做重要性采样(下一事件估计)
+        float pdfLight = 0.0;
+        vec3 lightDir = vec3(0);
+        vec3 direct = sampleDirectLight(hit, V, pdfLight, lightDir);
+        if (pdfLight > 0.0) {
+            float pdfBSDF = max(0.0, dot(N, lightDir)) / PI; //出射方向若由BSDF采样的概率密度
+            float weight = pdfLight / (pdfLight + pdfBSDF);  //平衡启发式,避免重复计算同一路径
+            Lo += history * direct * weight;
+        }
+
+        // 2.间接光照:按余弦加权(重要性采样)采样出射方向
+        vec3 L = toNormalHemisphere(SampleCosineHemisphere(), hit.normal);
+        float cosine_i = max(0.0, dot(L, N));
+        float pdf = cosine_i / PI;
+        if (pdf <= 0.0) break;
 
         vec3 f_r = BRDF_Evaluate(V, N, L, hit.tangent, hit.bitangent, hit.material);
+        vec3 weightBSDF = f_r * cosine_i / pdf;
 
         Ray randomRay;
         randomRay.startPoint = hit.hitPoint;
@@ -509,19 +599,28 @@ vec3 pathTracing(HitResult hit, int maxBounce) {
         // 未命中
         if(!newHit.isHit) {
             vec3 skyColor = sampleCube(randomRay.direction);
-            Lo += history * skyColor * f_r * cosine_i / pdf;
+            Lo += history * weightBSDF * skyColor;
             break;
         }
-        
-        // 命中光源积累颜色
+
+        // 命中灯光三角形:用与下一事件估计一致的权重,防止同一份光被重复计算
         vec3 Le = newHit.material.emissive;
-        Lo += history * Le * f_r * cosine_i / pdf;
-        
+        if (dot(Le, Le) > 0.0) {
+            float pdfLightAtHit = 0.0;
+            if (lightTriangleCount > 0) {
+                float cosLight = max(0.0, dot(newHit.normal, -L));
+                if (cosLight > 0.0)
+                    pdfLightAtHit = newHit.distance * newHit.distance / (cosLight * lightTotalArea);
+            }
+            float weight = (pdfLightAtHit > 0.0) ? (pdf / (pdf + pdfLightAtHit)) : 1.0;
+            Lo += history * weightBSDF * Le * weight;
+        }
+
         // 递归(步进)
         hit = newHit;
-        history *= f_r * cosine_i / pdf;  // 累积颜色
+        history *= weightBSDF;  // 累积颜色
     }
-    
+
     return Lo;
 }
 

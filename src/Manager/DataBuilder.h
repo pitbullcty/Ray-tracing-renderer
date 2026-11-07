@@ -2,6 +2,7 @@
 #define __DATA_BUILDER__
 
 #include <QSharedPointer>
+#include <QVector4D>
 #include "src/Data/Model.h"
 #include "src/Ui/Console.h"
 #include "src/Data/Triangle.h"
@@ -18,7 +19,7 @@ enum STRATEGY {
 struct RenderData {
 	QVector<TriangleEncoded> encodedTriangles; //编码后顶点数据
 	QVector<BVHNodeEncoded> encodedBVH; //编码后BVH
-	QVector<LightEncoded> encodedLight; //编码后灯光数据
+	QVector<QVector4D> encodedLight; //编码后灯光三角形, x=累积面积(CDF), y=三角形索引, z=三角形面积
 	QVector<MaterialEncoded> encodedMaterials; //编码后材质
 	QVector<QImage> encodedTexture; //编码后的贴图数组
 	void clear() {

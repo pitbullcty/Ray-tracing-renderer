@@ -251,6 +251,22 @@ void DataBuilder::encodeData(bool needRebuild)
 
 	}  //编码材质，三角形
 
+	//构建灯光三角形列表:按面积累积成CDF,供着色器做光源重要性采样(下一事件估计)
+	data.encodedLight.clear();
+	float totalLightArea = 0.0f;
+	for (int i = 0; i < triangles.size(); i++) {
+		const auto& material = modelMaterialsFlatten.at(triangles.at(i).modelIndex);
+		if (material.emissive.x() <= 0.0f && material.emissive.y() <= 0.0f && material.emissive.z() <= 0.0f)
+			continue; //非发光三角形
+
+		const Triangle& tri = triangles.at(i);
+		float area = 0.5f * QVector3D::crossProduct(tri.b.pos - tri.a.pos, tri.c.pos - tri.a.pos).length();
+		if (area <= 1e-8f) continue; //退化三角形
+
+		totalLightArea += area;
+		data.encodedLight.emplace_back(QVector4D(totalLightArea, float(i), area, 0.0f));
+	} //按面积累积概率
+
 	if (!needRebuild) return; //不需要重建则直接返回
 
 	for (auto& node:bvh) {

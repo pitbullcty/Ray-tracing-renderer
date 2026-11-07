@@ -103,6 +103,11 @@ private:
 	unsigned int materialBuffer; 
 	unsigned int materialTexture; //材质
 
+	unsigned int lightBuffer;
+	unsigned int lightTexture; //灯光三角形CDF(重要性采样用)
+	int lightTriangleCount = 0;
+	float lightTotalArea = 0.0f;
+
 	unsigned int backgroundTexture; //背景材质；
 
 	unsigned int textureMapsArrayTex; //贴图
