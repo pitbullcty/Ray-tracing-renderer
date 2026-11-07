@@ -9,14 +9,10 @@ QSharedPointer<Camera> Renderer::getCamera()
 
 void Renderer::initSkyboxTexture(bool isEmpty)
 {
-	functions->glDeleteTextures(1, &envCubemap);
-	functions->glGenTextures(1, &envCubemap);
-
-	functions->glActiveTexture(GL_TEXTURE0);
-	functions->glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap); //生成立方体截图
+	QVector<QImage> faces;
+	faces.reserve(6);
 
 	QString keys[6] = { "+x","-x","+y","-y","+z","-z" };
-	int i = 0;
 	for (auto& key : keys)
 	{
 		QImage tex;
@@ -28,8 +24,29 @@ void Renderer::initSkyboxTexture(bool isEmpty)
 			tex =QImage(TEXTURESIZE, TEXTURESIZE, QImage::Format_RGB888);
 			tex.fill(Qt::black);
 		}
+		faces.append(tex);
+	}
+
+	initSkyboxTextureFromImages(faces);
+}
+
+void Renderer::initSkyboxTextureFromImages(const QVector<QImage>& faces)
+{
+	functions->glDeleteTextures(1, &envCubemap);
+	functions->glGenTextures(1, &envCubemap);
+
+	functions->glActiveTexture(GL_TEXTURE0);
+	functions->glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap); //生成立方体截图
+
+	for (int i = 0; i < 6; ++i)
+	{
+		QImage tex = faces.value(i);
+		if (tex.isNull()) {
+			tex = QImage(TEXTURESIZE, TEXTURESIZE, QImage::Format_RGB888);
+			tex.fill(Qt::black);
+		}
+		tex = tex.convertToFormat(QImage::Format_RGB888).scaled(TEXTURESIZE, TEXTURESIZE);
 		functions->glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, TEXTURESIZE, TEXTURESIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, tex.bits());
-		i++;
 	}
 
 	functions->glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

@@ -17,6 +17,10 @@ public:
 	Renderer(QMap<QString, QOpenGLShaderProgram*> shaderProgram, QOpenGLExtraFunctions* functions, int width, int height);
 	unsigned int getEnvMap();
 
+	//用给定的六张天空盒图片(+x,-x,+y,-y,+z,-z)生成立方体贴图,
+	//离屏渲染线程拿不到界面线程的Skybox单例,故直接用图片快照初始化
+	void initSkyboxTextureFromImages(const QVector<QImage>& faces);
+
 public slots:
 	void initSkyboxTexture(bool isEmpty=false);
 

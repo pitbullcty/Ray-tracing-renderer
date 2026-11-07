@@ -170,7 +170,7 @@ void MainWindowManager::bindSignals()
 	
 
 	auto rayTarcingRenderer = ui->rayTracing->getRayTracingRenderer();
-	connect(renderOptionInspector, &RenderOptionInspector::sendRenderOption, rayTarcingRenderer.data(), &RayTracingRenderer::setRenderOption);
+	connect(renderOptionInspector, &RenderOptionInspector::sendRenderOption, ui->rayTracing, &RayTracingOpenGLWidget::startOfflineRender); //离屏渲染交给后台线程
 	connect(renderOptionInspector, &RenderOptionInspector::sendRenderState, rayTarcingRenderer.data(), &RayTracingRenderer::setRealTimeRendering);
 	connect(rayTarcingRenderer.data(), &RayTracingRenderer::Info, ui->console, &Console::Info);
 
@@ -319,6 +319,7 @@ void MainWindowManager::closeScene()
 {
 	auto sceneManager = ui->editor->getSceneManager();
 	if (sceneManager->getState() == NONE) return;
+	ui->rayTracing->cancelOfflineRender(); //关闭场景时取消正在进行的后台离屏渲染
 	sceneManager->closeScene();
 	if (currentIndex) {
 		changeRenderWindow();

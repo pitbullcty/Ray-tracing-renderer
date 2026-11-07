@@ -35,7 +35,9 @@ RayTracingRenderer::RayTracingRenderer(QMap<QString, QOpenGLShaderProgram*> _sha
 	isOffScreenRendering(false),
 	isRealTimeRendering(true),
 	delayStep(0),
-	hasData(false)
+	hasData(false),
+	isStandalone(false),
+	useCameraSnapshot(false)
 {
 	outputVBO.create();
 	accumVBO.create();
@@ -157,9 +159,11 @@ void RayTracingRenderer::destoryFBOs()
 
 	functions->glDeleteTextures(1, &pathTracingTexture);
 	functions->glDeleteTextures(1, &accumTexture); //删除材质和FBO
+	functions->glDeleteTextures(1, &outputTexture);
 
 	functions->glDeleteFramebuffers(1, &pathTracingFBO);
 	functions->glDeleteFramebuffers(1, &accumFBO);
+	functions->glDeleteFramebuffers(1, &outputFBO);
 	
 }
 
@@ -235,6 +239,91 @@ bool RayTracingRenderer::getIsOffScreenRendering()
 	return isOffScreenRendering;
 }
 
+void RayTracingRenderer::setStandaloneMode(bool state)
+{
+	isStandalone = state;
+	if (state) {
+		isOffScreenRendering = true; //独立模式下按option中的分辨率渲染到FBO
+		isRealTimeRendering = false;
+	}
+}
+
+bool RayTracingRenderer::getIsStandalone()
+{
+	return isStandalone;
+}
+
+void RayTracingRenderer::setCameraSnapshot(const QVector3D& pos, const QMatrix4x4& view, float zoom)
+{
+	snapshotPos = pos;
+	snapshotView = view;
+	snapshotZoom = zoom;
+	useCameraSnapshot = true;
+}
+
+QVector3D RayTracingRenderer::renderCameraPos()
+{
+	return useCameraSnapshot ? snapshotPos : camera->getPos();
+}
+
+QMatrix4x4 RayTracingRenderer::renderCameraView()
+{
+	return useCameraSnapshot ? snapshotView : camera->getView();
+}
+
+float RayTracingRenderer::renderCameraZoom()
+{
+	return useCameraSnapshot ? snapshotZoom : camera->getZoom();
+}
+
+void RayTracingRenderer::uploadRenderData(const RenderData& data, const QImage& background)
+{
+	hasData = !data.encodedTriangles.isEmpty();
+
+	destoryTexture();
+	option.frameCounter = 0;
+
+	backgroundTexture = generateAttachment(background);
+
+	functions->glGenBuffers(1, &BVHbuffer);
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, BVHbuffer);
+	functions->glBufferData(GL_TEXTURE_BUFFER,sizeof(BVHNodeEncoded) * (unsigned int)data.encodedBVH.size(),data.encodedBVH.data(), GL_STATIC_DRAW);
+	functions->glGenTextures(1, &BVHTexture);
+	functions->glBindTexture(GL_TEXTURE_BUFFER, BVHTexture);
+	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, BVHbuffer); //发送BVH数据
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
+
+
+	functions->glGenBuffers(1, &triangleBuffer);
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, triangleBuffer);
+    functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(TriangleEncoded) * (unsigned int)data.encodedTriangles.size(), data.encodedTriangles.data(), GL_STATIC_DRAW);
+	functions->glGenTextures(1, &triangleTexture);
+	functions->glBindTexture(GL_TEXTURE_BUFFER, triangleTexture);
+	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, triangleBuffer); //发送三角形数据
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
+
+	functions->glGenBuffers(1, &materialBuffer);
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, materialBuffer);
+	functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(MaterialEncoded) * (unsigned int)data.encodedMaterials.size(), data.encodedMaterials.data(), GL_STATIC_DRAW);
+	functions->glGenTextures(1, &materialTexture);
+	functions->glBindTexture(GL_TEXTURE_BUFFER, materialTexture);
+	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, materialBuffer); 
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);//发送材质数据
+	
+ 	functions->glGenTextures(1, &textureMapsArrayTex);
+	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, textureMapsArrayTex);
+	functions->glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, Texturesize, Texturesize, data.encodedTexture.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	for (int i = 0; i < data.encodedTexture.size(); ++i)
+	{
+		functions->glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, Texturesize, Texturesize, 1, GL_RGBA, GL_UNSIGNED_BYTE, data.encodedTexture[i].bits());
+	}
+	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+}
+
 void RayTracingRenderer::resizeFBO()
 {
 	if (isResized) {
@@ -275,52 +364,9 @@ void RayTracingRenderer::sendDataToGPU(bool needSend)
 	}
 
 	auto& data = DataBuilder::GetInstance()->getData(); //获取渲染数据
-	hasData = !data.encodedTriangles.isEmpty();
-
-	destoryTexture();
-	option.frameCounter = 0;
-
-	backgroundTexture = generateAttachment(QImage(":/icons/background.png").convertToFormat(QImage::Format_RGB888).mirrored());
-
-	functions->glGenBuffers(1, &BVHbuffer);
-	functions->glBindBuffer(GL_TEXTURE_BUFFER, BVHbuffer);
-	functions->glBufferData(GL_TEXTURE_BUFFER,sizeof(BVHNodeEncoded) * (unsigned int)data.encodedBVH.size(),data.encodedBVH.data(), GL_STATIC_DRAW);
-	functions->glGenTextures(1, &BVHTexture);
-	functions->glBindTexture(GL_TEXTURE_BUFFER, BVHTexture);
-	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, BVHbuffer); //发送BVH数据
-	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
-
-
-	functions->glGenBuffers(1, &triangleBuffer);
-	functions->glBindBuffer(GL_TEXTURE_BUFFER, triangleBuffer);
-    functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(TriangleEncoded) * (unsigned int)data.encodedTriangles.size(), data.encodedTriangles.data(), GL_STATIC_DRAW);
-	functions->glGenTextures(1, &triangleTexture);
-	functions->glBindTexture(GL_TEXTURE_BUFFER, triangleTexture);
-	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, triangleBuffer); //发送三角形数据
-	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
-
-	functions->glGenBuffers(1, &materialBuffer);
-	functions->glBindBuffer(GL_TEXTURE_BUFFER, materialBuffer);
-	functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(MaterialEncoded) * (unsigned int)data.encodedMaterials.size(), data.encodedMaterials.data(), GL_STATIC_DRAW);
-	functions->glGenTextures(1, &materialTexture);
-	functions->glBindTexture(GL_TEXTURE_BUFFER, materialTexture);
-	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, materialBuffer); 
-	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);//发送材质数据
-	
- 	functions->glGenTextures(1, &textureMapsArrayTex);
-	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, textureMapsArrayTex);
-	functions->glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, Texturesize, Texturesize, data.encodedTexture.size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	functions->glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	for (int i = 0; i < data.encodedTexture.size(); ++i)
-	{
-		functions->glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, Texturesize, Texturesize, 1, GL_RGBA, GL_UNSIGNED_BYTE, data.encodedTexture[i].bits());
-	}
-	functions->glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-	
+	uploadRenderData(data, QImage(":/icons/background.png").convertToFormat(QImage::Format_RGB888).mirrored());
 }
+
 
 void RayTracingRenderer::initFBOs()
 {
@@ -359,7 +405,7 @@ void RayTracingRenderer::render()
 	functions->glViewport(0, 0, width, height);
 
 	projection = QMatrix4x4();
-	projection.perspective(getCamera()->getZoom(), width / (float)height, 0.1f, 500.0f);
+	projection.perspective(renderCameraZoom(), width / (float)height, 0.1f, 500.0f);
 
 
 	if (isRealTimeRendering || isOffScreenRendering) {
@@ -392,7 +438,7 @@ void RayTracingRenderer::render()
 	outputVAO.release();
 	
 
-	if (isOffScreenRendering && option.frameCounter == option.maxFrameCounter) {
+	if (!isStandalone && isOffScreenRendering && option.frameCounter == option.maxFrameCounter) {
 		saveRenderResult(option.outputPath, option.quality);
 		QString info("渲染已完成,总耗时%1s。结果保存至%2, <a href=\"file:///%3\">单击链接查看</a>");
 		info = info.arg(QString::number(timer.elapsed()/1000.0f, 'f', 2)).arg(option.outputPath).arg(option.outputPath);
@@ -400,23 +446,25 @@ void RayTracingRenderer::render()
 		emit Info(info, false);
 	}
 	
-	outputVAO.bind();
-	shaderProgram["output"]->bind();
-	if (!isOffScreenRendering) {
-		shaderProgram["output"]->setUniformValue("lastFrame", 7);
-		shaderProgram["output"]->setUniformValue("needToneMapping", true);
-	}
-	else {
-		functions->glViewport(0, 0, 1282, 604);
-		shaderProgram["output"]->setUniformValue("lastFrame", 8);
-		shaderProgram["output"]->setUniformValue("needToneMapping", false);
-	}
+	if (!isStandalone) {
+		outputVAO.bind();
+		shaderProgram["output"]->bind();
+		if (!isOffScreenRendering) {
+			shaderProgram["output"]->setUniformValue("lastFrame", 7);
+			shaderProgram["output"]->setUniformValue("needToneMapping", true);
+		}
+		else {
+			functions->glViewport(0, 0, 1282, 604);
+			shaderProgram["output"]->setUniformValue("lastFrame", 8);
+			shaderProgram["output"]->setUniformValue("needToneMapping", false);
+		}
 
-	functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	functions->glDrawArrays(GL_TRIANGLES, 0, 6); //显示到屏幕
-	shaderProgram["output"]->release();
-	outputVAO.release();
+		functions->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		functions->glDrawArrays(GL_TRIANGLES, 0, 6); //显示到屏幕
+		shaderProgram["output"]->release();
+		outputVAO.release();
+	}
 	//非离屏渲染不用输出到屏幕
 	
 	if (isSavingSnapshot && !isOffScreenRendering) {
@@ -442,8 +490,8 @@ void RayTracingRenderer::renderAccum()
 	shaderProgram["pathTracing"]->setUniformValue("height", height);
 	shaderProgram["pathTracing"]->setUniformValue("depth", option.depth);
 	shaderProgram["pathTracing"]->setUniformValue("projection", projection.inverted());
-	shaderProgram["pathTracing"]->setUniformValue("eye", camera->getPos());
-	shaderProgram["pathTracing"]->setUniformValue("cameraRotate", camera->getView().inverted());
+	shaderProgram["pathTracing"]->setUniformValue("eye", renderCameraPos());
+	shaderProgram["pathTracing"]->setUniformValue("cameraRotate", renderCameraView().inverted());
 	auto location = shaderProgram["pathTracing"]->programId();
 	functions->glUniform1ui(functions->glGetUniformLocation(location, "frameCounter"), option.frameCounter++);
 
@@ -482,6 +530,17 @@ void RayTracingRenderer::saveRenderResult(const QString& path, int quality)
 {
 	denoise(outputFBO, outputTexture, true);
 	saveFBO(path, outputFBO, outputTexture, quality);
+}
+
+QImage RayTracingRenderer::grabResultImage()
+{
+	if (width <= 0 || height <= 0)
+		return QImage();
+
+	QVector<unsigned char> pixels(width * height * 4);
+	getPixels<unsigned char>(pixels, outputFBO, outputTexture, GL_RGBA, GL_UNSIGNED_BYTE);
+	QImage image(pixels.data(), width, height, QImage::Format_RGBA8888);
+	return image.mirrored();
 }
 
 void RayTracingRenderer::setSnapshotParam(const QString& savePath, int quality)
