@@ -1,4 +1,4 @@
-﻿#ifndef __SCENE_MANAGER__
+#ifndef __SCENE_MANAGER__
 #define __SCENE_MANAGER__
 
 #include "src/Manager/ModelLoader.h"
@@ -42,6 +42,8 @@ public:
 
 	Model* getSelected(int posx, int posy);
 	void setSize(int width, int height);
+	//场景是否正在批量改动(加载/新建/清空): 期间禁止拾取与Gizmo交互,避免遍历到正在插入/删除的QMap
+	bool isSceneBusy() const { return sceneBusyDepth > 0; }
 
 	void loadScene(const QString& path); //读取场景
 	bool saveScene(); //保存场景
@@ -99,6 +101,8 @@ private:
 	int height; //窗口大小
 
 	Model* modelToCopy;
+
+	int sceneBusyDepth = 0; //批量改动嵌套计数(loadScene内部还会调clearModels等),>0即忙
 
 	static QSharedPointer<SceneManager> instance;
 	SceneManager();

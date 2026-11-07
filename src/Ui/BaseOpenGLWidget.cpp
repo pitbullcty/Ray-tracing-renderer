@@ -1,4 +1,4 @@
-﻿#include "BaseOpenGLWidget.h"
+#include "BaseOpenGLWidget.h"
 
 extern bool isBusy;
 
@@ -84,7 +84,11 @@ void BaseOpenGLWidget::leaveEvent(QEvent* event)
 
 bool BaseOpenGLWidget::isIgnore()
 {
-    return isBusy || sceneManager->getState() == NONE;
+	//除了Console提示的通用忙碌,还需让行两类真实并发:
+	//1)场景正在批量改动(isSceneBusy): models正被插入/删除
+	//2)数据构建线程正在遍历models(buildData): 后台线程读QMap时前台不能同时遍历或改
+	return isBusy || sceneManager->isSceneBusy() || DataBuilder::GetInstance().data()->isBuilding()
+		|| sceneManager->getState() == NONE;
 }
 
 void BaseOpenGLWidget::initGL()

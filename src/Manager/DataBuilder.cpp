@@ -1,4 +1,4 @@
-﻿#include "DataBuilder.h"
+#include "DataBuilder.h"
 
 bool cmpx(const Triangle& t1, const Triangle& t2) {
 	return t1.getCenter().x() < t2.getCenter().x();
@@ -26,6 +26,13 @@ void DataBuilder::destory(DataBuilder* builder)
 }
 
 void DataBuilder::buildData(bool needTips, bool needRebuild, bool needSend) {
+
+	//构建期间置忙: 后台线程会遍历models,此时GUI线程的选择/拾取必须让行,否则QMap会并发读写崩溃
+	struct BuildingGuard {
+		std::atomic<bool>& flag;
+		BuildingGuard(std::atomic<bool>& f) : flag(f) { flag.store(true, std::memory_order_release); }
+		~BuildingGuard() { flag.store(false, std::memory_order_release); }
+	} buildingGuard(building);
 
 	if (models->empty()) {
 		data.clear();

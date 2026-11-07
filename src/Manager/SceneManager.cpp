@@ -1,7 +1,16 @@
-﻿#include "SceneManager.h"
+#include "SceneManager.h"
 
 
 QSharedPointer<SceneManager> SceneManager::instance = nullptr;
+
+namespace {
+	//批量改动场景期间的忙标记(RGUI重入保护): 只要深度>0,拾取与Gizmo交互一律拒绝
+	struct SceneBusyGuard {
+		int& depth;
+		explicit SceneBusyGuard(int& d) : depth(d) { ++depth; }
+		~SceneBusyGuard() { --depth; }
+	};
+}
 
 QSharedPointer<SceneManager>& SceneManager::GetInstance()
 {
@@ -296,6 +305,7 @@ void SceneManager::rename(const QString& oldname, const QString& newname)
 
 void SceneManager::clearModels()
 {
+	SceneBusyGuard busy(sceneBusyDepth); //清空期间不允许拾取
 	if(!revertActions.empty()) revertActions.clear();
 	if (!models.empty()) {
 		for (auto it = models.begin(); it != models.end(); it++) {
@@ -308,6 +318,9 @@ void SceneManager::clearModels()
 
 Model* SceneManager::getSelected(int posx, int posy)
 {
+	//场景正在批量改动(加载/新建/清空)时拒绝拾取: 否则会在遍历models的同时被插入/删除,导致迭代器失效崩溃
+	if (isSceneBusy()) return nullptr;
+
 	float x = 2.0f * posx / width - 1.0f;
 	float y = 1.0f - (2.0f * posy / height);
 
@@ -377,6 +390,7 @@ void SceneManager::loadScene(const QString& path)
 
 	if (!dealDifference()) return;
 
+	SceneBusyGuard busy(sceneBusyDepth); //整个加载过程禁止拾取/编辑
 	emit Clear();
 	bool res = true;
 	clearModels();
@@ -514,6 +528,7 @@ void SceneManager::saveSceneAs(const QString& path)
 void SceneManager::createScene()
 {
 	if (!dealDifference()) return;
+	SceneBusyGuard busy(sceneBusyDepth);
 	emit Clear();
 	sceneFileName =""; 
 	sceneName = "新场景";
@@ -528,6 +543,7 @@ void SceneManager::createScene()
 void SceneManager::closeScene()
 {
 	if (!dealDifference()) return;
+	SceneBusyGuard busy(sceneBusyDepth);
 	emit Clear();
 	sceneFileName =""; 
 	sceneName ="";//清除保存文件名

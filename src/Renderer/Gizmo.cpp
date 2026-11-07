@@ -1,4 +1,4 @@
-﻿#include "Gizmo.h"
+#include "Gizmo.h"
 
 Gizmo::Gizmo(QOpenGLExtraFunctions* _functions, QOpenGLShaderProgram* _program) :
 	gizmo(nullptr),
@@ -96,6 +96,7 @@ void Gizmo::setCamera(const QMatrix4x4& view, const QMatrix4x4& proj)
 
 void Gizmo::setType(GIZMOTYPE type)
 {
+	this->type = type; //记录当前工具,供界面提示显示
 	if (type == MOVE) {
 		gizmo = gizmoMove;
 		sendCheckedTransformButton(-2);
@@ -146,6 +147,7 @@ void Gizmo::mouseUp(int x, int y)
 
 void Gizmo::setLocation(IGizmo::LOCATION location)
 {
+	this->location = location; //记录当前坐标系,供界面提示显示
 	if (location == IGizmo::LOCATION::LOCATE_WORLD) emit sendCheckedLocationButton(-2);
 	else emit sendCheckedLocationButton(-1);
 

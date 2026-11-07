@@ -1,4 +1,4 @@
-﻿#ifndef __GIZMO__
+#ifndef __GIZMO__
 #define __GIZMO__
 
 #include "thirdparty/libgizmo/IGizmo.h"
@@ -34,6 +34,9 @@ public:
 	bool isChange(const QMatrix4x4& modelMatrix);
 	void Draw();
 
+	GIZMOTYPE getType() const { return type; } //当前工具(移动/旋转/缩放)
+	IGizmo::LOCATION getLocation() const { return location; } //当前坐标系(世界/局部)
+
 signals:
 	void sendChanged();
 	void sendCheckedTransformButton(int id);
@@ -47,6 +50,8 @@ public slots:
 private:
 	Model* model; //挂载的模型
 	IGizmo* gizmo;
+	GIZMOTYPE type = MOVE; //当前工具,供提示栏显示
+	IGizmo::LOCATION location = IGizmo::LOCATION::LOCATE_WORLD; //当前坐标系
 	float  gizmoModel[16], gizmoView[16], gizmoProj[16]; //gizmo观察、投影矩阵
 	IGizmo* gizmoMove, * gizmoRotate, *gizmoScale; //相关gizmo组件
 	void applyToModel(); //将结果返回模型

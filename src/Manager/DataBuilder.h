@@ -1,4 +1,4 @@
-﻿#ifndef __DATA_BUILDER__
+#ifndef __DATA_BUILDER__
 #define __DATA_BUILDER__
 
 #include <QSharedPointer>
@@ -8,6 +8,7 @@
 #include "src/Data/Triangle.h"
 #include <QElapsedTimer>
 #include <QtConcurrent>
+#include <atomic>
 
 const int Texturesize = 1024;
 
@@ -43,6 +44,8 @@ public:
 
 	double getLastBVHBuildMs() const { return lastBVHBuildMs; } //上一次CPU构建BVH的耗时(毫秒)
 	int getTriangleCount() const { return triangles.size(); }
+	//构建线程是否正在遍历场景模型数据: 后台线程读models期间,交互层必须让行,否则会与GUI线程遍历/修改同一个QMap
+	bool isBuilding() const { return building.load(std::memory_order_acquire); }
 
 signals:
 	void Info(QString info, bool needProcess);
@@ -60,6 +63,7 @@ private:
 	RenderData data; //渲染数据
 
 	double lastBVHBuildMs = 0.0; //上一次CPU构建BVH的耗时(毫秒)
+	std::atomic<bool> building{ false }; //构建进行中标志(跨线程读写)
 
 	static QSharedPointer<DataBuilder> instance;
 	DataBuilder();

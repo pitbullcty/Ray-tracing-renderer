@@ -1,4 +1,6 @@
-﻿#include "EditorOpenGLWidget.h"
+#include "EditorOpenGLWidget.h"
+#include <QPainter>
+#include <QFontMetrics>
 
 GIZMOTYPE type[3] = { MOVE,ROTATE,SCALE };
 IGizmo::LOCATION locations[2] = { IGizmo::LOCATE_WORLD, IGizmo::LOCATE_LOCAL };
@@ -61,7 +63,74 @@ void EditorOpenGLWidget::paintGL()
         clacFPS();
         emit sendFPS(fps);
     }
+    drawGizmoHints(); //左下角操作提示(叠加在主画面上,不遮挡模型)
     update();
+}
+
+void EditorOpenGLWidget::drawGizmoHints()
+{
+    if (sceneManager->getState() == NONE) return; //空场景只有居中提示
+
+    auto gizmo = editorRenderer->getGizmo();
+    const bool building = DataBuilder::GetInstance().data()->isBuilding();
+    const bool isLocal = gizmo->getLocation() == IGizmo::LOCATE_LOCAL;
+    const GIZMOTYPE tool = gizmo->getType();
+
+    QString toolName = QString::fromUtf8("移动");
+    if (tool == ROTATE) toolName = QString::fromUtf8("旋转");
+    else if (tool == SCALE) toolName = QString::fromUtf8("缩放");
+
+    QStringList lines;
+    lines << QString::fromUtf8("当前工具: %1  (Q 切换)").arg(toolName);
+    lines << QString::fromUtf8("坐标系: %1  (E 切换)").arg(isLocal ? QString::fromUtf8("局部") : QString::fromUtf8("世界"));
+    lines << QString::fromUtf8("右键拖动视角 · WASD 移动 · 滚轮缩放 · Delete 删除");
+    if (building) lines << QString::fromUtf8("正在重建 BVH, 交互暂时锁定…");
+
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setRenderHint(QPainter::TextAntialiasing, true);
+    QFont font;
+    font.setFamily(QString::fromUtf8("微软雅黑"));
+    font.setPointSizeF(9.5);
+    painter.setFont(font);
+
+    QFontMetrics metrics(font);
+    int textWidth = 0;
+    const int lineHeight = metrics.height();
+    for (const auto& line : lines) textWidth = qMax(textWidth, metrics.horizontalAdvance(line));
+
+    const int padding = 10;
+    const int spacing = 3;
+    const int panelWidth = textWidth + padding * 2;
+    const int panelHeight = lines.size() * lineHeight + (lines.size() - 1) * spacing + padding * 2;
+    const int margin = 12;
+    //窗口缩放后 QOpenGLWidget 的尺寸可能大于被主窗口裁剪后真正可见的区域,
+    //这里把提示面板夹到「实际可见区域」的左下角,避免画到窗口外面而看不见。
+    int visibleWidth = width();
+    int visibleHeight = height();
+    if (QWidget* topWindow = window()) {
+        const QPoint origin = mapTo(topWindow, QPoint(0, 0)); //本控件原点在窗口坐标系中的位置
+        visibleWidth = qMin(visibleWidth, topWindow->width() - origin.x());
+        visibleHeight = qMin(visibleHeight, topWindow->height() - origin.y());
+    }
+    if (visibleWidth <= 0 || visibleHeight <= 0) {
+        visibleWidth = width();
+        visibleHeight = height();
+    }
+    QRectF panel(margin, visibleHeight - panelHeight - margin, panelWidth, panelHeight);
+
+    painter.setPen(QPen(QColor(255, 255, 255, 45), 1));
+    painter.setBrush(QColor(18, 18, 18, 150));
+    painter.drawRoundedRect(panel, 6, 6);
+
+    int textY = panel.top() + padding;
+    for (int i = 0; i < lines.size(); i++) {
+        const bool isBusyLine = building && (i == lines.size() - 1);
+        painter.setPen(isBusyLine ? QColor(255, 200, 80) : QColor(232, 232, 232));
+        painter.drawText(QRect(panel.left() + padding, textY, textWidth, lineHeight), Qt::AlignLeft | Qt::AlignVCenter, lines.at(i));
+        textY += lineHeight + spacing;
+    }
+    painter.end();
 }
 
 

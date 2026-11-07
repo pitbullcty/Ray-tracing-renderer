@@ -1,4 +1,4 @@
-﻿#ifndef __EDITOR_OPENGL_WIDGET__
+#ifndef __EDITOR_OPENGL_WIDGET__
 #define __EDITOR_OPENGL_WIDGET__
 
 #include "BaseOpenGLWidget.h"
@@ -36,6 +36,9 @@ protected:
     virtual void wheelEvent(QWheelEvent* event) override;
     
 private:
+
+    //在视口左下角绘制操作提示(当前工具/坐标系/快捷键/构建状态)
+    void drawGizmoHints();
 
     QOpenGLShaderProgram modelShaderProgram;
     QOpenGLShaderProgram skyboxShaderProgram;
