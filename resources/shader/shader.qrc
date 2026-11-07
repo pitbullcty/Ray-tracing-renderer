@@ -10,5 +10,10 @@
         <file>output.frag</file>
         <file>pathTracing.frag</file>
         <file>pathTracing.vert</file>
+        <file>bvh_aabb.comp</file>
+        <file>bvh_morton.comp</file>
+        <file>bvh_sort.comp</file>
+        <file>bvh_leaf.comp</file>
+        <file>bvh_reduce.comp</file>
     </qresource>
 </RCC>

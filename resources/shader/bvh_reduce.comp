@@ -1,0 +1,68 @@
+﻿#version 430
+
+//自底向上合并一层内部节点:节点采用堆布局,根为1,子节点为2*id与2*id+1
+layout(local_size_x = 256) in;
+
+layout(std430, binding = 3) buffer Nodes {
+    float node[];
+};
+
+uniform int levelBase; //本层第一个节点下标 =(1<<level)
+uniform int levelCount; //本层节点个数 =(1<<level)
+uniform int heapSize; //节点总数上限,用于越界保护
+
+const float HUGE = 1e30;
+
+void main() {
+    uint t = gl_GlobalInvocationID.x;
+    if (t >= uint(levelCount)) return;
+
+    uint id = uint(levelBase) + t;
+    uint c0 = id * 2u; //左子节点
+    uint c1 = id * 2u + 1u; //右子节点
+
+    uint b0 = c0 * 12u;
+    uint b1 = c1 * 12u;
+    uint base = id * 12u;
+    if (base + 11u >= uint(heapSize) * 12u) return;
+
+    vec3 lo0 = vec3(node[b0 + 6], node[b0 + 7], node[b0 + 8]);
+    vec3 hi0 = vec3(node[b0 + 9], node[b0 + 10], node[b0 + 11]);
+    vec3 lo1 = vec3(node[b1 + 6], node[b1 + 7], node[b1 + 8]);
+    vec3 hi1 = vec3(node[b1 + 9], node[b1 + 10], node[b1 + 11]);
+
+    bool empty0 = lo0.x > HUGE * 0.1;
+    bool empty1 = lo1.x > HUGE * 0.1;
+
+    vec3 lo;
+    vec3 hi;
+    if (empty0 && empty1) {
+        lo = vec3(HUGE);
+        hi = vec3(-HUGE);
+    }
+    else if (empty0) {
+        lo = lo1;
+        hi = hi1;
+    }
+    else if (empty1) {
+        lo = lo0;
+        hi = hi0;
+    }
+    else {
+        lo = min(lo0, lo1);
+        hi = max(hi0, hi1);
+    }
+
+    node[base + 0] = float(c0);
+    node[base + 1] = float(c1);
+    node[base + 2] = 0.0;
+    node[base + 3] = 0.0; //内部节点n=0
+    node[base + 4] = 0.0;
+    node[base + 5] = 0.0;
+    node[base + 6] = lo.x;
+    node[base + 7] = lo.y;
+    node[base + 8] = lo.z;
+    node[base + 9] = hi.x;
+    node[base + 10] = hi.y;
+    node[base + 11] = hi.z;
+}

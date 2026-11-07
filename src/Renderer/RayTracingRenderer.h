@@ -2,6 +2,7 @@
 #define _RAY_TRACING_RENDERER_
 
 #include "Renderer.h"
+#include "GPUBVHBuilder.h"
 #include "src/Manager/DataBuilder.h"
 #include <QFileInfo>
 #include "OpenImageDenoise/oidn.hpp"
@@ -56,6 +57,20 @@ public:
 
 	//取outputFBO中的当前画面(降噪后),用于回传预览
 	QImage grabResultImage();
+
+	//GPU动态构建BVH: 需要在GL线程中调用(需要当前GL上下文)
+	void setUseGPUBVH(bool state);
+	bool getUseGPUBVH() const;
+	bool initGPUBVH(); //初始化GPU构建器,返回是否可用
+	bool isGPUBVHReady() const;
+	QString getGPUBVHStatus() const;
+	double getLastGPUBVHMs() const; //上一次GPU构建耗时
+	double getLastCPUBVHMs() const; //上一次CPU构建耗时
+	int getGPUBVHTriangleCount() const;
+	bool rebuildBVHNow(); //按当前模式重新构建BVH(设置面板"重建并对比"用,需在GL线程调用)
+	void setPendingBVHRebuild(bool state);
+	void setAutoRebuildBVH(bool state); //数据变化时是否自动重建GPU BVH
+	bool getAutoRebuildBVH() const;
 
 signals:
 	void Info(const QString& info, bool needProcess);
@@ -114,6 +129,15 @@ private:
 
 	QVector<QVector3D> denoiserInputBuffer, denoiserOutputBuffer; //降噪使用的缓冲区
 
+	GPUBVHBuilder gpuBVHBuilder; //GPU动态构建BVH
+	bool useGPUBVH = false; //是否启用GPU构建BVH
+	bool gpuBVHReady = false; //GPU构建器是否已初始化
+	bool bvhTextureFromGPU = false; //BVHTexture是否指向GPU构建出的节点缓冲
+	bool pendingBVHRebuild = false; //下一帧是否重建BVH
+	bool autoRebuildBVH = true; //数据变化时是否自动重建GPU BVH
+	double lastGPUBVHMs = 0.0; //上一次GPU构建耗时
+	int gpuBVHTriangleCount = 0; //上一次GPU构建处理的三角形数量
+
 	bool isSavingSnapshot;
 	int snapShotquality; 
 	QString snapShotSavingPath; //快照相关参数
@@ -135,6 +159,8 @@ private:
 	void destoryFBOs();
 	void destoryVAO();
 	void destoryTexture(); //资源销毁
+
+	bool buildGPUBVHTexture(); //用GPU构建BVH并让BVHTexture指向结果,成功返回true
 
 	//渲染时使用的相机参数:独立模式下取快照,否则取Camera单例
 	QVector3D renderCameraPos();

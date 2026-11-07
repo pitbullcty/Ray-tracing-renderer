@@ -1,4 +1,6 @@
 ﻿#include "MainWindowManager.h"
+#include "src/Ui/SettingsDialog.h"
+#include <QDir>
 
 extern bool isBusy;
 
@@ -118,6 +120,16 @@ void MainWindowManager::bindSignals()
 		auto helpDialog = new HelpDialog();
 		helpDialog->exec();
 		delete helpDialog;
+	});
+
+	//系统设置: 新增"GPU动态构建BVH"等设置项(菜单在MainWindow.ui里,这里运行时追加动作)
+	QAction* actionSettings = new QAction(QString::fromUtf8("系统设置..."), ui->menu_5);
+	ui->menu_5->addAction(actionSettings);
+	connect(actionSettings, &QAction::triggered, [=]() {
+		auto settingsDialog = new SettingsDialog(ui->rayTracing->getRayTracingRenderer(), nullptr);
+		settingsDialog->exec();
+		delete settingsDialog;
+		readSettings(); //设置可能改变,刷新一次缓存
 	});
 
 	auto& seceneManager = SceneManager::GetInstance();

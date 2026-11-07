@@ -40,8 +40,11 @@ void DataBuilder::buildData(bool needTips, bool needRebuild, bool needSend) {
 	flattenAndBuildData(needRebuild);
 
 	if (needRebuild) {
+		QElapsedTimer bvhTimer;
+		bvhTimer.start();
 		int maxcount = int(log2(triangles.size())) + 1;
 		buildBVHHelp(0, triangles.size() - 1, maxcount, -2, MAXDIM);
+		lastBVHBuildMs = bvhTimer.nsecsElapsed() / 1000000.0; //单独记录CPU构建BVH的耗时,用于和GPU构建对比
 	}  //展平数据并且构建BVH
 
 	encodeData(needRebuild);

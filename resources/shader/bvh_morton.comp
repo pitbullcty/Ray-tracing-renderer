@@ -1,0 +1,53 @@
+﻿#version 430
+
+//为每个三角形计算30位Morton码(10位/轴),并写入键值对缓冲
+layout(local_size_x = 256) in;
+
+layout(std430, binding = 1) readonly buffer Triangles {
+    float tri[]; //每个三角形27个float
+};
+
+layout(std430, binding = 2) writeonly buffer Keys {
+    uvec2 keys[]; //x=Morton码, y=原始三角形下标
+};
+
+uniform int triCount;
+uniform int paddedCount; //补齐到2的幂之后的元素个数
+uniform vec3 sceneMin;
+uniform vec3 sceneMax;
+uniform int emptyKey; //补齐用的最大键(0xFFFFFFFF),排序后会落在末尾
+
+//把整数的低位展开到每3位一个(用于Morton编码)
+uint expandBits(uint v) {
+    v = (v * 0x00010001u) & 0xFF0000FFu;
+    v = (v * 0x00000101u) & 0x0F00F00Fu;
+    v = (v * 0x00000011u) & 0xC30C30C3u;
+    v = (v * 0x00000005u) & 0x49249249u;
+    return v;
+}
+
+uint morton3D(vec3 p) {
+    p = clamp(p, 0.0, 1.0);
+    uvec3 c = uvec3(p * 1023.0);
+    return expandBits(c.x) | (expandBits(c.y) << 1u) | (expandBits(c.z) << 2u);
+}
+
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    if (i >= uint(paddedCount)) return;
+
+    if (i >= uint(triCount)) {
+        keys[i] = uvec2(uint(emptyKey), i);
+        return;
+    }
+
+    int base = int(i) * 27;
+    vec3 a = vec3(tri[base + 0], tri[base + 1], tri[base + 2]);
+    vec3 b = vec3(tri[base + 3], tri[base + 4], tri[base + 5]);
+    vec3 c = vec3(tri[base + 6], tri[base + 7], tri[base + 8]);
+    vec3 center = (min(a, min(b, c)) + max(a, max(b, c))) * 0.5;
+
+    vec3 extent = max(sceneMax - sceneMin, vec3(1e-6));
+    vec3 normalizedPos = (center - sceneMin) / extent;
+    keys[i] = uvec2(morton3D(normalizedPos), i);
+}

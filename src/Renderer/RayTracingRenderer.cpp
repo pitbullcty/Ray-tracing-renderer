@@ -181,10 +181,138 @@ void RayTracingRenderer::destoryVAO()
 	outputVBO.destroy();
 }
 
+void RayTracingRenderer::setUseGPUBVH(bool state)
+{
+	useGPUBVH = state;
+}
+
+bool RayTracingRenderer::getUseGPUBVH() const
+{
+	return useGPUBVH;
+}
+
+bool RayTracingRenderer::initGPUBVH()
+{
+	if (!gpuBVHReady)
+		gpuBVHReady = gpuBVHBuilder.initialize(functions);
+	return gpuBVHReady;
+}
+
+bool RayTracingRenderer::isGPUBVHReady() const
+{
+	return gpuBVHReady;
+}
+
+QString RayTracingRenderer::getGPUBVHStatus() const
+{
+	return gpuBVHBuilder.statusText();
+}
+
+double RayTracingRenderer::getLastGPUBVHMs() const
+{
+	return lastGPUBVHMs;
+}
+
+double RayTracingRenderer::getLastCPUBVHMs() const
+{
+	return DataBuilder::GetInstance()->getLastBVHBuildMs();
+}
+
+int RayTracingRenderer::getGPUBVHTriangleCount() const
+{
+	return gpuBVHTriangleCount;
+}
+
+void RayTracingRenderer::setPendingBVHRebuild(bool state)
+{
+	pendingBVHRebuild = state;
+}
+
+void RayTracingRenderer::setAutoRebuildBVH(bool state)
+{
+	autoRebuildBVH = state;
+}
+
+bool RayTracingRenderer::getAutoRebuildBVH() const
+{
+	return autoRebuildBVH;
+}
+
+bool RayTracingRenderer::buildGPUBVHTexture()
+{
+	if (!initGPUBVH() || !gpuBVHBuilder.isSupported()) {
+		emit Info("GPU构建BVH不可用:" + gpuBVHBuilder.statusText(), true);
+		return false;
+	}
+
+	const int triangleCount = DataBuilder::GetInstance()->getTriangleCount();
+	GPUBVHBuilder::BuildResult result = gpuBVHBuilder.build(triangleBuffer, triangleCount);
+	if (!result.ok) {
+		emit Info("GPU构建BVH失败:" + result.error, true);
+		return false;
+	}
+
+	lastGPUBVHMs = result.gpuMs;
+	gpuBVHTriangleCount = result.triangleCount;
+
+	//GPU构建的LBVH树在三角形数量较大时节点访问量增长明显, 单帧耗时可能超过显卡TDR阈值(约2秒),
+	//为避免驱动复位, 超过该上限时只保留GPU构建耗时数据, 遍历仍使用CPU构建的BVH
+	const int triangleLimit = 32768;
+	if (result.triangleCount > triangleLimit && !qEnvironmentVariableIsSet("RTR_BVH_FORCE")) {
+		emit Info(QString("GPU构建BVH完成: %1个三角形, GPU耗时%2ms (CPU耗时%3ms); 三角形数量超过%4, 遍历回退CPU BVH")
+			.arg(result.triangleCount).arg(result.gpuMs, 0, 'f', 2).arg(getLastCPUBVHMs(), 0, 'f', 2).arg(triangleLimit), true);
+		return false;
+	}
+
+	//把GPU建好的节点数据读回CPU, 再用与CPU BVH完全相同的上传方式(纹理缓冲)提供给遍历着色器
+	QVector<float> nodes;
+	if (!gpuBVHBuilder.readbackNodes(nodes)) {
+		emit Info("GPU构建BVH失败:节点数据读回失败", true);
+		return false;
+	}
+
+	functions->glGenBuffers(1, &BVHbuffer);
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, BVHbuffer);
+	functions->glBufferData(GL_TEXTURE_BUFFER, qint64(nodes.size()) * sizeof(float), nodes.constData(), GL_STATIC_DRAW);
+	functions->glGenTextures(1, &BVHTexture);
+	functions->glBindTexture(GL_TEXTURE_BUFFER, BVHTexture);
+	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, BVHbuffer); //节点数据由GPU构建
+	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
+	bvhTextureFromGPU = false;
+
+	emit Info(QString("GPU构建BVH完成: %1个三角形, GPU耗时%2ms (CPU耗时%3ms)")
+		.arg(result.triangleCount).arg(result.gpuMs, 0, 'f', 2).arg(getLastCPUBVHMs(), 0, 'f', 2), true);
+	return true;
+}
+
+bool RayTracingRenderer::rebuildBVHNow()
+{
+	if (!useGPUBVH)
+		return false;
+	if (triangleBuffer == 0) {
+		emit Info("还没有可用的三角形数据,请先加载模型", true);
+		return false;
+	}
+
+	functions->glDeleteTextures(1, &BVHTexture);
+	BVHTexture = -1;
+	BVHbuffer = -1;
+	bvhTextureFromGPU = false;
+
+	if (!buildGPUBVHTexture())
+		return false;
+	option.frameCounter = 0; //BVH变化后重新累积
+	return true;
+}
+
 void RayTracingRenderer::destoryTexture()
 {
 	functions->glDeleteTextures(1, &BVHTexture);
-	functions->glDeleteBuffers(1, &BVHbuffer);
+	if (bvhTextureFromGPU)
+		BVHbuffer = -1; //GPU构建的节点缓冲由GPUBVHBuilder持有,不能在这里删除
+	else
+		functions->glDeleteBuffers(1, &BVHbuffer);
+	bvhTextureFromGPU = false;
 
 	functions->glDeleteTextures(1, &triangleTexture);
 	functions->glDeleteBuffers(1, &triangleBuffer);
@@ -287,19 +415,19 @@ void RayTracingRenderer::uploadRenderData(const RenderData& data, const QImage& 
 {
 	hasData = !data.encodedTriangles.isEmpty();
 
+	//关闭"自动重建"时保留已有的GPU BVH,不重新构建
+	const bool keepGPUBVH = useGPUBVH && !autoRebuildBVH && bvhTextureFromGPU && BVHTexture != (unsigned int)-1;
+	unsigned int savedBVHTexture = 0;
+	if (keepGPUBVH) {
+		savedBVHTexture = BVHTexture;
+		BVHTexture = -1;
+		bvhTextureFromGPU = false;
+	}
+
 	destoryTexture();
 	option.frameCounter = 0;
 
 	backgroundTexture = generateAttachment(background);
-
-	functions->glGenBuffers(1, &BVHbuffer);
-	functions->glBindBuffer(GL_TEXTURE_BUFFER, BVHbuffer);
-	functions->glBufferData(GL_TEXTURE_BUFFER,sizeof(BVHNodeEncoded) * (unsigned int)data.encodedBVH.size(),data.encodedBVH.data(), GL_STATIC_DRAW);
-	functions->glGenTextures(1, &BVHTexture);
-	functions->glBindTexture(GL_TEXTURE_BUFFER, BVHTexture);
-	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, BVHbuffer); //发送BVH数据
-	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
-
 
 	functions->glGenBuffers(1, &triangleBuffer);
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, triangleBuffer);
@@ -308,6 +436,28 @@ void RayTracingRenderer::uploadRenderData(const RenderData& data, const QImage& 
 	functions->glBindTexture(GL_TEXTURE_BUFFER, triangleTexture);
 	functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, triangleBuffer); //发送三角形数据
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
+
+	//BVH: 启用GPU动态构建时由compute shader直接生成节点缓冲,否则上传CPU构建的结果
+	bool gpuBuildSucceeded = false;
+	if (keepGPUBVH) {
+		BVHTexture = savedBVHTexture;
+		bvhTextureFromGPU = true;
+		gpuBuildSucceeded = true;
+	}
+	else if (useGPUBVH) {
+		gpuBuildSucceeded = buildGPUBVHTexture();
+	}
+
+	if (!gpuBuildSucceeded) {
+		functions->glGenBuffers(1, &BVHbuffer);
+		functions->glBindBuffer(GL_TEXTURE_BUFFER, BVHbuffer);
+		functions->glBufferData(GL_TEXTURE_BUFFER, sizeof(BVHNodeEncoded) * (unsigned int)data.encodedBVH.size(), data.encodedBVH.data(), GL_STATIC_DRAW);
+		functions->glGenTextures(1, &BVHTexture);
+		functions->glBindTexture(GL_TEXTURE_BUFFER, BVHTexture);
+		functions->glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, BVHbuffer); //发送BVH数据
+		functions->glBindBuffer(GL_TEXTURE_BUFFER, 0);
+		bvhTextureFromGPU = false;
+	}
 
 	functions->glGenBuffers(1, &materialBuffer);
 	functions->glBindBuffer(GL_TEXTURE_BUFFER, materialBuffer);
@@ -421,6 +571,11 @@ void RayTracingRenderer::initFBOs()
 void RayTracingRenderer::render()
 {
 	
+	if (pendingBVHRebuild) {
+		pendingBVHRebuild = false;
+		rebuildBVHNow(); //设置面板请求的"按GPU重建BVH",此时正处于GL线程
+	}
+
 	resizeFBO(); //判断是否需要变换FBO大小
 	bindTexture();
 	functions->glViewport(0, 0, width, height);

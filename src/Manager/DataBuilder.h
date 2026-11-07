@@ -41,6 +41,9 @@ public:
 	void setModels(QMap<QString, Model>* models);
 	RenderData& getData(); //返回渲染数据的引用
 
+	double getLastBVHBuildMs() const { return lastBVHBuildMs; } //上一次CPU构建BVH的耗时(毫秒)
+	int getTriangleCount() const { return triangles.size(); }
+
 signals:
 	void Info(QString info, bool needProcess);
 	void sendDataDone(bool needSend); //数据准备好信号
@@ -55,6 +58,8 @@ private:
 	QVector<ModelMaterial> modelMaterialsFlatten; //展平后材质
 
 	RenderData data; //渲染数据
+
+	double lastBVHBuildMs = 0.0; //上一次CPU构建BVH的耗时(毫秒)
 
 	static QSharedPointer<DataBuilder> instance;
 	DataBuilder();

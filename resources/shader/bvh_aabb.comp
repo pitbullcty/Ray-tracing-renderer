@@ -1,0 +1,70 @@
+﻿#version 430
+
+//计算所有三角形的整体包围盒,用于后续Morton编码的归一化
+layout(local_size_x = 64) in;
+
+layout(std430, binding = 0) buffer SceneAabb {
+    uvec2 sceneAabb[3]; //每个轴向一个: x=最小值的可排序位,y=最大值的可排序位
+};
+
+layout(std430, binding = 1) readonly buffer Triangles {
+    float tri[]; //每个三角形27个float: p1,p2,p3, n1,n2,n3, t1,t2,t3
+};
+
+uniform int triCount;
+
+shared uint sMin[64][3];
+shared uint sMax[64][3];
+
+//把float转成可按无符号整数比较大小的位模式
+uint orderFloat(float f) {
+    uint i = floatBitsToUint(f);
+    return (i & 0x80000000u) != 0u ? ~i : (i | 0x80000000u);
+}
+
+void main() {
+    uint tid = gl_LocalInvocationID.x;
+    uint gid = gl_GlobalInvocationID.x;
+
+    if (gid < uint(triCount)) {
+        int base = int(gid) * 27;
+        vec3 a = vec3(tri[base + 0], tri[base + 1], tri[base + 2]);
+        vec3 b = vec3(tri[base + 3], tri[base + 4], tri[base + 5]);
+        vec3 c = vec3(tri[base + 6], tri[base + 7], tri[base + 8]);
+        vec3 lo = min(a, min(b, c));
+        vec3 hi = max(a, max(b, c));
+        sMin[tid][0] = orderFloat(lo.x);
+        sMin[tid][1] = orderFloat(lo.y);
+        sMin[tid][2] = orderFloat(lo.z);
+        sMax[tid][0] = orderFloat(hi.x);
+        sMax[tid][1] = orderFloat(hi.y);
+        sMax[tid][2] = orderFloat(hi.z);
+    }
+    else {
+        sMin[tid][0] = 0xFFFFFFFFu;
+        sMin[tid][1] = 0xFFFFFFFFu;
+        sMin[tid][2] = 0xFFFFFFFFu;
+        sMax[tid][0] = 0u;
+        sMax[tid][1] = 0u;
+        sMax[tid][2] = 0u;
+    }
+    barrier();
+
+    //共享内存归约
+    for (uint s = 32u; s > 0u; s >>= 1u) {
+        if (tid < s) {
+            for (int k = 0; k < 3; ++k) {
+                sMin[tid][k] = min(sMin[tid][k], sMin[tid + s][k]);
+                sMax[tid][k] = max(sMax[tid][k], sMax[tid + s][k]);
+            }
+        }
+        barrier();
+    }
+
+    if (tid == 0) {
+        for (int k = 0; k < 3; ++k) {
+            atomicMin(sceneAabb[k].x, sMin[0][k]);
+            atomicMax(sceneAabb[k].y, sMax[0][k]);
+        }
+    }
+}
