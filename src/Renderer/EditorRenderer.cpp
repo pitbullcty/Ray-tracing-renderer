@@ -1,5 +1,8 @@
 ﻿#include "EditorRenderer.h"
 
+#include <cmath> //std::tan: gizmo自适应尺寸
+#include <QVector4D>
+
 QSharedPointer<EditorRenderer> EditorRenderer::instance = nullptr;
 const float PI = 3.14159f;
 bool testing = true;	
@@ -118,9 +121,36 @@ void EditorRenderer::renderSkybox()
 	shaderProgram["skybox"]->release();
 }
 
+void EditorRenderer::updateGizmoScale()
+{
+	if (!selected) return;
+
+	//世界空间包围盒(局部bound经transform变换后的boundDetect)
+	AABB& worldBound = selected->getDectionBound();
+	QVector3D extent = worldBound.maxpos - worldBound.minpos;
+	if (extent.length() <= 1e-8f) return;
+	const QVector3D center = worldBound.getCenter();
+	const float radius = 0.5f * extent.length(); //包围球半径(用对角线近似,与朝向无关)
+
+	//物体中心在相机空间中的深度(透视投影的w就是相机空间-z)
+	const QVector4D centerView = camera->getView() * QVector4D(center, 1.0f);
+	const float depth = qMax(0.001f, -centerView.z());
+	const float tanHalf = std::tan(getCamera()->getZoom() * 0.5f * PI / 180.0f); //getZoom()返回fovy(度)
+	const float heightPx = qMax(1.0f, (float)height);
+	//物体半径在屏幕上的像素尺寸
+	const float radiusPx = radius / (depth * tanHalf) * heightPx * 0.5f;
+	//目标轴长: 略大于物体半径(方便抓取), 同时限制最小可抓取尺寸与最大占比, 避免小模型看不见/大模型糊屏
+	const float axisPx = qBound(45.0f, radiusPx * 1.6f, heightPx * 0.32f);
+
+	//库内 ComputeScreenFactor() = scale*0.15*depth, 换算到像素: axisPx ≈ 0.075*scale*height/tanHalf
+	const float scale = axisPx * tanHalf / (0.075f * heightPx);
+	gizmo->setScale(qBound(0.35f, scale, 8.0f));
+}
+
 void EditorRenderer::renderGizmo()
 {
 	if (!selected) return;
+	updateGizmoScale(); //gizmo尺寸跟随物体屏幕大小
 	auto view = camera->getView();
 	shaderProgram["gizmo"]->bind();
 	shaderProgram["gizmo"]->setUniformValue("projection", projection);

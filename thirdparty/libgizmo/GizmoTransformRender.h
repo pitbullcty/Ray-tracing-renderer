@@ -52,6 +52,10 @@ public:
 	void DrawCamem(const tvector3& orig,const tvector3& vtx,const tvector3& vty,float ng);
 	void DrawQuad(const tvector3& orig, float size, bool bSelected, const tvector3& axisU, const tvector3 &axisV);
 	void DrawTri(const tvector3& orig, float size, bool bSelected, const tvector3& axisU, const tvector3& axisV);
+	//缩放gizmo专用: 轴线+轴端立方体(移动gizmo用圆锥箭头, 靠形状区分)
+	void DrawAxisBox(const tvector3 &orig, const tvector3 &axis, const tvector3 &vtx, const tvector3 &vty, float fct, float fct2, const tvector4 &col);
+	//通用立方体: ax/ay/az为三个方向的半径向量
+	void DrawBox(const tvector3 &center, const tvector3 &ax, const tvector3 &ay, const tvector3 &az, const tvector4 &col);
 	
 
 protected:

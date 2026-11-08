@@ -202,6 +202,79 @@ void CGizmoTransformRender::DrawTri(const tvector3& orig, float size, bool bSele
 	Draw(data, GL_LINE_STRIP, 3, true);
 }
 
+void CGizmoTransformRender::DrawAxisBox(const tvector3 &orig, const tvector3 &axis, const tvector3 &vtx, const tvector3 &vty, float fct, float fct2, const tvector4 &col)
+{
+	//缩放手柄: 轴线 + 轴端立方体。移动gizmo的箭头是圆锥，这里用立方体，形状上一眼能区分
+	const float axisLen = axis.Length();
+	if (axisLen <= 1e-6f)
+		return;
+	tvector3 dir = axis;
+	dir *= (1.0f / axisLen); //轴单位方向
+
+	const float halfAlong = axisLen * 0.06f; //沿轴方向半长
+	const float halfCross = axisLen * 0.10f; //垂直轴方向半宽(略宽于沿轴长度, 保证任何视角下都是块状而不是细条)
+	const float cubeCenterFrac = (fct2 > 0.0f) ? fct2 : 0.9f; //立方体中心在轴上的位置比例
+	tvector3 cubeCenter = orig + axis * cubeCenterFrac;
+	float lineEnd = axisLen * cubeCenterFrac - halfAlong * 0.9f; //轴线到立方体边缘为止
+	if (lineEnd < 0.0f)
+		lineEnd = 0.0f;
+
+	QVector<float> data;
+	addVector3(data, orig);
+	addColor(data, col);
+	addVector3(data, orig + dir * lineEnd);
+	addColor(data, col);
+	Draw(data, GL_LINES, 2);
+
+	DrawBox(cubeCenter, dir * halfAlong, vtx * halfCross, vty * halfCross, col);
+	(void)fct; //保留签名参数(与DrawAxis一致)，立方体不再使用圆锥半径
+}
+
+void CGizmoTransformRender::DrawBox(const tvector3 &center, const tvector3 &ax, const tvector3 &ay, const tvector3 &az, const tvector4 &col)
+{
+	tvector3 pts[8];
+	for (int i = 0; i < 8; i++)
+	{
+		pts[i] = center;
+		pts[i] += ax * ((i & 1) ? 1.0f : -1.0f);
+		pts[i] += ay * ((i & 2) ? 1.0f : -1.0f);
+		pts[i] += az * ((i & 4) ? 1.0f : -1.0f);
+	}
+
+	//6个面(半透明填充)
+	static const int faces[6][4] = {
+		{0, 1, 3, 2}, {4, 6, 7, 5}, {0, 4, 5, 1},
+		{2, 3, 7, 6}, {0, 2, 6, 4}, {1, 5, 7, 3}
+	};
+	tvector4 fill = col;
+	fill.w = 0.45f;
+	QVector<float> data;
+	for (int f = 0; f < 6; f++)
+	{
+		for (int k = 0; k < 4; k++)
+		{
+			addVector3(data, pts[faces[f][k]]);
+			addColor(data, fill);
+		}
+	}
+	Draw(data, GL_QUADS, 24, true);
+
+	//边框
+	static const int edges[12][2] = {
+		{0, 1}, {2, 3}, {4, 5}, {6, 7}, {0, 2}, {1, 3}, {4, 6}, {5, 7},
+		{0, 4}, {1, 5}, {2, 6}, {3, 7}
+	};
+	data.clear();
+	for (int e = 0; e < 12; e++)
+	{
+		addVector3(data, pts[edges[e][0]]);
+		addColor(data, col);
+		addVector3(data, pts[edges[e][1]]);
+		addColor(data, col);
+	}
+	Draw(data, GL_LINES, 24);
+}
+
 void CGizmoTransformRender::Draw(const QVector<float>& data, GLenum mode, int count, bool isBlend)
 {
 	program->bind();

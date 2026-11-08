@@ -44,6 +44,9 @@ private:
 	Model* selected; //被选中的物体
 	QMap<QString, Model>* models; //模型
 
+	//按选中物体的屏幕投影尺寸自适应设置gizmo大小(避免小模型被大gizmo盖住/抢拾取)
+	void updateGizmoScale();
+
 	EditorRenderer(QMap<QString, QOpenGLShaderProgram*> _shaderProgram, QOpenGLExtraFunctions* _functions, int width, int height);
 	~EditorRenderer() = default;
 };

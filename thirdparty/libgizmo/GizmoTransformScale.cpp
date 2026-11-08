@@ -261,23 +261,28 @@ void CGizmoTransformScale::Draw()
 		axeZ *= GetScreenFactor();
 
 
-		// plan1
+		// 缩放gizmo的轴端用手柄立方体(移动gizmo是圆锥箭头), 形状不同便于区分
+		//plan1
 		if (m_ScaleTypePredict != SCALE_X)
-			DrawAxis(orig, axeX, axeY, axeZ, 0.05f, 0.83f, vector4(1, 0, 0, 1));
+			DrawAxisBox(orig, axeX, axeY, axeZ, 0.05f, 0.88f, vector4(1, 0, 0, 1));
 		else
-			DrawAxis(orig, axeX, axeY, axeZ, 0.05f, 0.83f, vector4(1.0f, 0.92f, 0.25f, 1));
+			DrawAxisBox(orig, axeX, axeY, axeZ, 0.05f, 0.88f, vector4(1.0f, 0.92f, 0.25f, 1));
 
 		//plan2
 		if (m_ScaleTypePredict != SCALE_Y)
-			DrawAxis(orig, axeY, axeX, axeZ, 0.05f, 0.83f, vector4(0, 1, 0, 1));
+			DrawAxisBox(orig, axeY, axeX, axeZ, 0.05f, 0.88f, vector4(0, 1, 0, 1));
 		else
-			DrawAxis(orig, axeY, axeX, axeZ, 0.05f, 0.83f, vector4(1.0f, 0.92f, 0.25f, 1));
+			DrawAxisBox(orig, axeY, axeX, axeZ, 0.05f, 0.88f, vector4(1.0f, 0.92f, 0.25f, 1));
 
 		//plan3
 		if (m_ScaleTypePredict != SCALE_Z)
-			DrawAxis(orig, axeZ, axeX, axeY, 0.05f, 0.83f, vector4(0, 0, 1, 1));
+			DrawAxisBox(orig, axeZ, axeX, axeY, 0.05f, 0.88f, vector4(0, 0, 1, 1));
 		else
-			DrawAxis(orig, axeZ, axeX, axeY, 0.05f, 0.83f, vector4(1.0f, 0.92f, 0.25f, 1));
+			DrawAxisBox(orig, axeZ, axeX, axeY, 0.05f, 0.88f, vector4(1.0f, 0.92f, 0.25f, 1));
+
+		//中心立方体: 悬停到XYZ等比缩放区域时给出反馈(原来这里没有任何视觉提示)
+		if (m_ScaleTypePredict == SCALE_XYZ)
+			DrawBox(orig, axeX * 0.10f, axeY * 0.10f, axeZ * 0.10f, vector4(1.0f, 0.92f, 0.25f, 1));
 
 	}
 

@@ -1,5 +1,7 @@
 #include "SceneManager.h"
 
+#include <cmath> //std::sqrt: 屏幕空间兜底拾取
+
 
 QSharedPointer<SceneManager> SceneManager::instance = nullptr;
 
@@ -346,6 +348,27 @@ Model* SceneManager::getSelected(int posx, int posy)
 				name = it.key();
 			}
 		} //寻找最近交点
+	}
+
+	//兜底拾取: 小模型在屏幕上只有几个像素时射线几乎不可能命中AABB, 改用屏幕空间最近距离(容差内)
+	if (!selected) {
+		const float pickTolerance = 18.0f; //像素
+		float bestDist = pickTolerance;
+		for (auto it = models.begin(); it != models.end(); it++) {
+			auto& model = it.value();
+			QVector4D clip = projection * view * QVector4D(model.getDectionBound().getCenter(), 1.0f);
+			if (clip.w() <= 0.01f) continue; //在相机背后
+			const float ndcX = clip.x() / clip.w();
+			const float ndcY = clip.y() / clip.w();
+			const float screenX = (ndcX * 0.5f + 0.5f) * width;
+			const float screenY = (1.0f - (ndcY * 0.5f + 0.5f)) * height;
+			const float dist = std::sqrt((screenX - posx) * (screenX - posx) + (screenY - posy) * (screenY - posy));
+			if (dist < bestDist) {
+				bestDist = dist;
+				selected = &model;
+				name = it.key();
+			}
+		}
 	}
 	emit updateList(&models, selected);
 	emit sendInspectorModel(selected);
