@@ -211,8 +211,8 @@ void CGizmoTransformRender::DrawAxisBox(const tvector3 &orig, const tvector3 &ax
 	tvector3 dir = axis;
 	dir *= (1.0f / axisLen); //轴单位方向
 
-	const float halfAlong = axisLen * 0.06f; //沿轴方向半长
-	const float halfCross = axisLen * 0.10f; //垂直轴方向半宽(略宽于沿轴长度, 保证任何视角下都是块状而不是细条)
+	const float halfAlong = axisLen * 0.06f; //沿轴方向半长(绝对长度, 乘单位方向dir)
+	const float halfCrossFrac = 0.10f;       //垂直方向半宽(按轴长比例, 与DrawAxis里fct的语义一致: vtx/vty本身就是轴长向量)
 	const float cubeCenterFrac = (fct2 > 0.0f) ? fct2 : 0.9f; //立方体中心在轴上的位置比例
 	tvector3 cubeCenter = orig + axis * cubeCenterFrac;
 	float lineEnd = axisLen * cubeCenterFrac - halfAlong * 0.9f; //轴线到立方体边缘为止
@@ -226,7 +226,8 @@ void CGizmoTransformRender::DrawAxisBox(const tvector3 &orig, const tvector3 &ax
 	addColor(data, col);
 	Draw(data, GL_LINES, 2);
 
-	DrawBox(cubeCenter, dir * halfAlong, vtx * halfCross, vty * halfCross, col);
+	//注意: vtx/vty 与 DrawAxis 一致, 传入的是长度为轴长(GetScreenFactor)的轴向量, 因此这里乘的是比例而不是绝对长度
+	DrawBox(cubeCenter, dir * halfAlong, vtx * halfCrossFrac, vty * halfCrossFrac, col);
 	(void)fct; //保留签名参数(与DrawAxis一致)，立方体不再使用圆锥半径
 }
 

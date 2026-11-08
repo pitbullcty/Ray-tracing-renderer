@@ -132,19 +132,20 @@ void EditorRenderer::updateGizmoScale()
 	const QVector3D center = worldBound.getCenter();
 	const float radius = 0.5f * extent.length(); //包围球半径(用对角线近似,与朝向无关)
 
-	//物体中心在相机空间中的深度(透视投影的w就是相机空间-z)
-	const QVector4D centerView = camera->getView() * QVector4D(center, 1.0f);
-	const float depth = qMax(0.001f, -centerView.z());
+	//libgizmo的ComputeScreenFactor()实际返回 mDisplayScale*0.15*1(trf.w恒被改成1), 即轴长是**世界单位**,
+	//和物体大小、相机距离都无关 => 大模型(如dragon)的轴只有0.17个世界单位, 屏幕上几乎看不见。
+	//这里按物体半径换算世界轴长, 并给一个"屏幕最小尺寸"的兜底, 保证小模型也拿得住。
+	const float dist = qMax(1e-3f, (center - camera->getPos()).length());
 	const float tanHalf = std::tan(getCamera()->getZoom() * 0.5f * PI / 180.0f); //getZoom()返回fovy(度)
 	const float heightPx = qMax(1.0f, (float)height);
-	//物体半径在屏幕上的像素尺寸
-	const float radiusPx = radius / (depth * tanHalf) * heightPx * 0.5f;
-	//目标轴长: 略大于物体半径(方便抓取), 同时限制最小可抓取尺寸与最大占比, 避免小模型看不见/大模型糊屏
-	const float axisPx = qBound(45.0f, radiusPx * 1.6f, heightPx * 0.32f);
+	const float worldPerPixel = 2.0f * dist * tanHalf / heightPx; //该深度下1像素对应的世界长度
+	const float minAxisWorld = 60.0f * worldPerPixel;             //屏幕最短60像素, 便于抓取
+	const float maxAxisWorld = 0.70f * dist * tanHalf;            //屏幕最长约占视口高35%, 避免大物体(如地板)糊屏
+	float axisWorld = std::max(0.9f * radius, minAxisWorld);
+	axisWorld = std::min(axisWorld, maxAxisWorld);
 
-	//库内 ComputeScreenFactor() = scale*0.15*depth, 换算到像素: axisPx ≈ 0.075*scale*height/tanHalf
-	const float scale = axisPx * tanHalf / (0.075f * heightPx);
-	gizmo->setScale(qBound(0.35f, scale, 8.0f));
+	const float scale = axisWorld / 0.15f;
+	gizmo->setScale(qBound(0.01f, scale, 4000.0f));
 }
 
 void EditorRenderer::renderGizmo()

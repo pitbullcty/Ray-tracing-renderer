@@ -22,6 +22,22 @@ QVector3D Color2Emissive(const QColor& color, int factor) {
 	return colorV / 255 * factor;
 }
 
+namespace {
+	//批量设置控件数值时必须屏蔽子控件信号: 否则setValue会触发valueChanged -> 反复调度buildData,
+	//而每次buildData都会发出sendDataDone, 光追预览据此把累积帧清零 => 点一下模型列表画面就从头重新渲染
+	class ChildSignalBlocker {
+	public:
+		explicit ChildSignalBlocker(QWidget* root) : children(root->findChildren<QWidget*>()) {
+			for (QWidget* w : children) w->blockSignals(true);
+		}
+		~ChildSignalBlocker() {
+			for (QWidget* w : children) w->blockSignals(false);
+		}
+	private:
+		QList<QWidget*> children;
+	};
+}
+
 MaterialInspector::MaterialInspector(QWidget* parent):
 	QWidget(parent),
 	ui(new Ui::MaterialInspector),
@@ -301,6 +317,7 @@ void MaterialInspector::setEdittable(bool edittable)
 
 void MaterialInspector::clearData()
 {
+	ChildSignalBlocker blocker(this); //程序化清零不算用户编辑, 不触发重建
 	ui->brdf->show();
 	ui->baseColorWidget->show();
 	ui->horizontalSliderAnisotropic->setValue(0);
@@ -333,6 +350,7 @@ void MaterialInspector::bindModel(Model* model)
 
 void MaterialInspector::setData()
 {
+	ChildSignalBlocker blocker(this); //把模型数据显示到控件上不算用户编辑, 不触发重建/光追累积清零
 	auto modelMaterial = model->modelMaterial;
 	auto lightMaterial = model->lightMaterial;
 	QVector3D emissive;

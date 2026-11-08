@@ -3,6 +3,21 @@
 extern int changeCount;
 extern int locationCount;
 
+namespace {
+	//程序化填充控件数值时屏蔽子控件信号: 避免setValue引发编辑事件, 连带触发数据重建与光追累积清零
+	class ChildSignalBlocker {
+	public:
+		explicit ChildSignalBlocker(QWidget* root) : children(root->findChildren<QWidget*>()) {
+			for (QWidget* w : children) w->blockSignals(true);
+		}
+		~ChildSignalBlocker() {
+			for (QWidget* w : children) w->blockSignals(false);
+		}
+	private:
+		QList<QWidget*> children;
+	};
+}
+
 TransformInspector::TransformInspector(QWidget* parent):
 	QWidget(parent),
 	ui(new Ui::TransformInspector),
@@ -45,6 +60,7 @@ void TransformInspector::bindModel(Model* model)
 
 void TransformInspector::clearData()
 {
+    ChildSignalBlocker blocker(this); //清空不算用户编辑
     ui->doubleSpinBoxPosX->clear();
     ui->doubleSpinBoxPosY->clear();
     ui->doubleSpinBoxPosZ->clear();
@@ -187,6 +203,7 @@ void TransformInspector::getCheckedLocationType()
 
 void TransformInspector::setData()
 {
+    ChildSignalBlocker blocker(this); //绑定模型时填数值不算用户编辑
     auto& transform = model->transform;
     ui->doubleSpinBoxPosX->setValue(transform.translationX);
     ui->doubleSpinBoxPosY->setValue(transform.translationY);

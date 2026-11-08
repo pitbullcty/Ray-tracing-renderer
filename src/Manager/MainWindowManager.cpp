@@ -235,7 +235,9 @@ void MainWindowManager::loadModel(const QString& path)
 	else {
 		isShow = !sceneManager->getModels()->size();
 		isBusy = true;
-		sceneManager->addModel(fileName);
+		const QString addedName = sceneManager->addModel(fileName);
+		//单独打开(或第一个)模型时把相机自动摆到能看全模型的位置, 否则相机停在原点/模型内部, 视图退化
+		if (isShow && !addedName.isEmpty()) sceneManager->lookAtModel(addedName);
 		isBusy = false;
 	}
 	if (currentIndex) {

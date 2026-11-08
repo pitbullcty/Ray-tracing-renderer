@@ -1,10 +1,6 @@
 ﻿#include "RayTracingOpenGLWidget.h"
 #include <QThreadPool>
 #include <QSettings>
-#include <QFile>
-#include <QDir>
-#include <QDateTime>
-#include <QTextStream>
 
 RayTracingOpenGLWidget::RayTracingOpenGLWidget(QWidget* parent) :
     BaseOpenGLWidget(parent),
@@ -193,31 +189,17 @@ void RayTracingOpenGLWidget::wheelEvent(QWheelEvent* event)
     rayTracingRenderer->clearFrameCounter();
 }
 
-//临时诊断(验证完成后删除)
-static void zzTraceW(const QString& msg)
-{
-	if (!qEnvironmentVariableIsSet("RTR_TRACE")) return;
-	QFile f(QDir::currentPath() + "/zz_trace.log");
-	if (f.open(QIODevice::Append | QIODevice::Text)) {
-		QTextStream ts(&f);
-		ts << QDateTime::currentDateTime().toString("hh:mm:ss.zzz") << " [widget] " << msg << "\n";
-	}
-}
 void RayTracingOpenGLWidget::initShaders()
 {
-    zzTraceW("initShaders enter");
     compileShader(&pathTracingProgram, "pathTracing");
     compileShader(&accumProgram, "accum", "pathTracing");
     compileShader(&outputProgram, "output", "pathTracing");
-    zzTraceW("base shaders compiled");
     compileShader(&denoiseMomentsProgram, "denoise_moments", "pathTracing");
     compileShader(&denoiseAtrousProgram, "denoise_atrous", "pathTracing");
-    zzTraceW("initShaders done");
 }
 
 void RayTracingOpenGLWidget::initRenderer()
 {
-    zzTraceW("initRenderer enter");
     QMap<QString, QOpenGLShaderProgram*> rayTracingMap;
     rayTracingMap.insert("pathTracing", &pathTracingProgram);
     rayTracingMap.insert("accum", &accumProgram);
@@ -242,9 +224,7 @@ void RayTracingOpenGLWidget::initRenderer()
     connect(dataBuilder.data(), &DataBuilder::sendDataDone, rayTracingRenderer.data(), &RayTracingRenderer::sendDataToGPU);
 
     //rayTracingRenderer->initSkyboxTexture();
-    zzTraceW("before initFBOs");
     rayTracingRenderer->initFBOs();
-    zzTraceW("after initFBOs");
 
 }
 

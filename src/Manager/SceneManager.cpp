@@ -246,8 +246,21 @@ void SceneManager::copyModel(const QString& name)
 void SceneManager::lookAtModel(const QString& name)
 {
 	auto& model = models[name];
-	QVector3D trans = model.transform.getTranslation();
-	camera->setPos(trans + model.getCenter());
+	//把相机放到能完整看到模型的位置: 原来直接setPos到模型中心, 等于钻进模型内部,
+	//配合原来的零方向向量会让编辑器视图彻底退化(只剩天空, gizmo缩成一点)
+	AABB bound = model.getDectionBound();
+	const QVector3D center = bound.getCenter();
+	float radius = 0.5f * (bound.maxpos - bound.minpos).length();
+	if (!(radius > 1e-4f) || radius > 1e6f) radius = 1.0f; //空/异常包围盒兜底
+
+	QVector3D dir = camera->getDirection();
+	if (dir.lengthSquared() > 1e-8f) dir.normalize();
+	else dir = QVector3D(1.0f, 0.0f, 0.0f);
+
+	//纵向视场角是约束(横向更宽), 留一点余量
+	const float halfFovY = camera->getZoom() * 0.5f * 3.14159265f / 180.0f;
+	const float distance = radius / std::sin(std::max(0.05f, halfFovY)) * 1.15f;
+	camera->setPos(center - dir * distance);
 	emit sendEditModel(&model);
 }
 

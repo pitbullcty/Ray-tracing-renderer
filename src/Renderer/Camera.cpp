@@ -28,6 +28,9 @@ Camera::Camera(const QVector3D& pos, const QVector3D& up):pos(pos),
     sensitivity(0.1f),
     zoom(30.0f) //初始化值
 {
+    //direction由pos推导, 默认pos=(0,0,0)时是零向量, lookAt会退化(视图矩阵全零: 画面只剩天空、gizmo缩没)
+    //必须按yaw/pitch重算一次, 与reSet()/prase()保持一致
+    updateState();
 }
 
 QMatrix4x4 Camera::getView()
@@ -150,14 +153,12 @@ void Camera::reSet()
 {
     pos = { 0,0,0 };
     worldUP = { 0,1,0 };
-    direction = -pos.normalized();
-    up = { 0,1,0 };
-    right = QVector3D::crossProduct(direction, worldUP).normalized();
     yaw = -90.0f;
     pitch = 0.0f;
     speed = 10.0f;
     sensitivity = 0.1f;
     zoom = 30.0f;
+    updateState(); //用yaw/pitch重算方向(原来按pos推导, pos为原点得到零向量, 导致单独打开模型时视图退化)
 }
 
 QVector3D Camera::getDirection()
