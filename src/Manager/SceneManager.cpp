@@ -262,6 +262,11 @@ void SceneManager::lookAtModel(const QString& name)
 	const float distance = radius / std::sin(std::max(0.05f, halfFovY)) * 1.15f;
 	camera->setPos(center - dir * distance);
 	emit sendEditModel(&model);
+	//自动选中后同步检查器与列表: 否则检查器仍显示"未选中物体", 而gizmo已可见,
+	//此时悬停/拖动gizmo会让检查器在未绑定模型的情况下刷新而崩溃
+	emit sendInspectorModel(&model);
+	emit sendInspectorName(name);
+	emit updateList(&models, &model);
 }
 
 void SceneManager::addRevertModel(const ACITIONTYPE& action, const Model& model, const QString& name)

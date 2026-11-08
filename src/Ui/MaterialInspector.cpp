@@ -351,6 +351,7 @@ void MaterialInspector::bindModel(Model* model)
 void MaterialInspector::setData()
 {
 	ChildSignalBlocker blocker(this); //把模型数据显示到控件上不算用户编辑, 不触发重建/光追累积清零
+	if (!model) return; //没有绑定模型时不能解引用
 	auto modelMaterial = model->modelMaterial;
 	auto lightMaterial = model->lightMaterial;
 	QVector3D emissive;

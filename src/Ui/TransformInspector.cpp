@@ -204,6 +204,7 @@ void TransformInspector::getCheckedLocationType()
 void TransformInspector::setData()
 {
     ChildSignalBlocker blocker(this); //绑定模型时填数值不算用户编辑
+    if (!model) return; //没有绑定模型时不能解引用(单独打开模型只选中gizmo未绑定检查器, 拖动/悬停gizmo会走到这里)
     auto& transform = model->transform;
     ui->doubleSpinBoxPosX->setValue(transform.translationX);
     ui->doubleSpinBoxPosY->setValue(transform.translationY);
